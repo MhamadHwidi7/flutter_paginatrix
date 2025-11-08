@@ -1,0 +1,52 @@
+name: flutter_paginatrix
+description: A simple, backend-agnostic pagination engine with UI widgets for Flutter
+version: 1.0.0
+homepage: https://github.com/mhamadhwidi/flutter_paginatrix
+repository: https://github.com/mhamadhwidi/flutter_paginatrix
+issue_tracker: https://github.com/mhamadhwidi/flutter_paginatrix/issues
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+  flutter: '>=3.22.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Immutability & unions
+  freezed_annotation: ^2.4.1
+  equatable: ^2.0.7
+  
+  # HTTP client
+  dio: ^5.4.0
+  
+  # JSON serialization
+  json_annotation: ^4.8.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  # Code generation
+  build_runner: ^2.4.7
+  freezed: ^2.4.6
+  json_serializable: ^6.7.1
+  # injectable_generator removed
+  
+  # Testing
+  mockito: ^5.4.4
+  test: ^1.24.9
+  
+  # Linting
+  flutter_lints: ^3.0.1
+  
+  # Documentation
+  dartdoc: ^7.0.0
+
+flutter:
+  uses-material-design: true
+
+# Enable code generation
+dependency_overrides:
+  # Ensure compatibility
+  meta: ^1.11.0

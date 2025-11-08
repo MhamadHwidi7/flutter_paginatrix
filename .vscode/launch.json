@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "flutter_paginatrix",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flutter_paginatrix (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flutter_paginatrix (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "basic_usage",
+            "cwd": "examples/basic_usage",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "basic_usage (profile mode)",
+            "cwd": "examples/basic_usage",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "basic_usage (release mode)",
+            "cwd": "examples/basic_usage",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}

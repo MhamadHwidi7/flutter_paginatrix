@@ -1,0 +1,22 @@
+#!/bin/bash
+
+echo "🚀 Flutter Paginatrix Performance Test"
+echo "========================================"
+echo ""
+
+echo "1. Running in profile mode with performance overlay..."
+echo "   flutter run --profile --enable-performance-overlay"
+echo ""
+echo "2. Or enable in code:"
+echo "   MaterialApp(showPerformanceOverlay: true)"
+echo ""
+echo "3. To use DevTools:"
+echo "   flutter pub global activate devtools"
+echo "   flutter pub global run devtools"
+echo ""
+echo "📊 What to check:"
+echo "   ✅ Green bars = Good (< 16.67ms)"
+echo "   ⚠️  Yellow bars = Warning (16.67-33ms)"
+echo "   ❌ Red bars = Jank (> 33ms)"
+echo ""
+echo "🎯 Target: 60 FPS = < 16.67ms per frame"

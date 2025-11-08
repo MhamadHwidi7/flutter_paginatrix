@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flutter Paginatrix - Complete Usage Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2rem;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .card h3 {
+            color: #764ba2;
+            margin: 25px 0 15px 0;
+            font-size: 1.5rem;
+        }
+
+        .card h4 {
+            color: #555;
+            margin: 20px 0 10px 0;
+            font-size: 1.2rem;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .code-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+
+        .warning {
+            background: #f8d7da;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #dc3545;
+            margin: 15px 0;
+        }
+
+        .success {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin: 15px 0;
+        }
+
+        .info {
+            background: #d1ecf1;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #17a2b8;
+            margin: 15px 0;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .toc h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            margin: 8px 0;
+        }
+
+        .toc a {
+            color: #555;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+
+        .toc a:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .feature-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .feature-item h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .step {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .code-block {
+                font-size: 12px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Flutter Paginatrix</h1>
+            <p>Complete Usage Guide - Clean State Management & Built-in Widgets</p>
+        </div>
+
+        <div class="toc">
+            <h3>📋 Table of Contents</h3>
+            <ul>
+                <li><a href="#overview">🎯 Overview & Core Concepts</a></li>
+                <li><a href="#quick-start">⚡ Quick Start</a></li>
+                <li><a href="#approach-1">🎮 Approach 1: With State Management</a></li>
+                <li><a href="#approach-2">🎨 Approach 2: Without State Management</a></li>
+                <li><a href="#data-loading">📡 Data Loading & API Integration</a></li>
+                <li><a href="#error-handling">⚠️ Error Handling</a></li>
+                <li><a href="#customization">🎨 Customization</a></li>
+                <li><a href="#best-practices">🏆 Best Practices</a></li>
+                <li><a href="#examples">📚 Live Examples</a></li>
+            </ul>
+        </div>
+
+        <div class="card" id="overview">
+            <h2>🎯 Overview & Core Concepts</h2>
+            
+            <div class="info">
+                <strong>Flutter Paginatrix</strong> provides two main approaches for implementing pagination in your Flutter apps:
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h4>🎮 With State Management</h4>
+                    <p>Using <code>PaginatedController</code> + <code>StreamBuilder</code> for complete control over pagination state and UI.</p>
+                    <span class="badge badge-success">Best for Complex Apps</span>
+                </div>
+                <div class="feature-item">
+                    <h4>🎨 Without State Management</h4>
+                    <p>Using built-in widgets (<code>PaginatrixListView</code>, <code>PaginatrixGridView</code>) for quick implementation.</p>
+                    <span class="badge badge-info">Best for Simple Apps</span>
+                </div>
+            </div>
+
+            <h3>Key Features</h3>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h4>✅ Pull-to-Refresh</h4>
+                    <p>Native refresh gestures with customizable UI</p>
+                </div>
+                <div class="feature-item">
+                    <h4>✅ Load More</h4>
+                    <p>Automatic infinite scroll with loading indicators</p>
+                </div>
+                <div class="feature-item">
+                    <h4>✅ Error Handling</h4>
+                    <p>Comprehensive error types with retry mechanisms</p>
+                </div>
+                <div class="feature-item">
+                    <h4>✅ Caching</h4>
+                    <p>Memory cache with TTL and SWR strategies</p>
+                </div>
+                <div class="feature-item">
+                    <h4>✅ State Management</h4>
+                    <p>Reactive state updates with streams</p>
+                </div>
+                <div class="feature-item">
+                    <h4>✅ Customizable</h4>
+                    <p>Custom builders for all UI states</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="quick-start">
+            <h2>⚡ Quick Start</h2>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Add Dependencies</strong>
+                <div class="code-block">
+<pre>dependencies:
+  flutter_paginatrix: ^1.0.0
+  dio: ^5.4.0  # For HTTP requests</pre>
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Initialize DI (Optional but Recommended)</strong>
+                <div class="code-block">
+<pre>void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SimpleDI.configure();
+  runApp(MyApp());
+}</pre>
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Choose Your Approach</strong>
+                <div class="highlight">
+                    <strong>Simple Apps:</strong> Use Approach 2 (Built-in widgets)<br>
+                    <strong>Complex Apps:</strong> Use Approach 1 (State management)
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="approach-1">
+            <h2>🎮 Approach 1: With State Management</h2>
+            <div class="info">
+                <strong>Best for:</strong> Complex apps, custom UI, advanced state handling, production applications
+            </div>
+
+            <h3>Basic Setup</h3>
+            <div class="code-block">
+<pre>class MyPage extends StatefulWidget {
+  @override
+  _MyPageState createState() => _MyPageState();
+}
+
+class _MyPageState extends State<MyPage> {
+  late PaginatedController<User> _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = PaginatedController<User>(
+      loader: _loadUsers,
+      itemDecoder: User.fromJson,
+      metaParser: SimpleDI.get<MetaParser>(),
+      clock: SimpleDI.get<Clock>(),
+      cacheStore: MemoryCacheStore<String, PaginationState<User>>(),
+      options: SimpleDI.get<PaginationOptions>(),
+    );
+    _controller.loadFirstPage();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<Map<String, dynamic>> _loadUsers({
+    int? page,
+    int? perPage,
+    CancelToken? cancelToken,
+  }) async {
+    // Your API call here
+    final response = await dio.get('/users', queryParameters: {
+      'page': page ?? 1,
+      'per_page': perPage ?? 20,
+    });
+    return response.data;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Users')),
+      body: StreamBuilder<PaginationState<User>>(
+        stream: _controller.stream,
+        builder: (context, snapshot) {
+          final state = snapshot.data ?? _controller.state;
+          
+          return ListView.builder(
+            itemCount: state.items.length + (state.meta?.hasMore == true ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == state.items.length) {
+                // Load more trigger
+                _controller.loadNextPage();
+                return Center(child: CircularProgressIndicator());
+              }
+              
+              return ListTile(
+                title: Text(state.items[index].name),
+                subtitle: Text(state.items[index].email),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}</pre>
+            </div>
+
+            <h3>Advanced Features</h3>
+            <div class="code-block">
+<pre>@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Text('Users'),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.refresh),
+          onPressed: () => _controller.refresh(),
+        ),
+        IconButton(
+          icon: Icon(Icons.cancel),
+          onPressed: () => _controller.cancel(),
+        ),
+      ],
+    ),
+    body: StreamBuilder<PaginationState<User>>(
+      stream: _controller.stream,
+      builder: (context, snapshot) {
+        final state = snapshot.data ?? _controller.state;
+        
+        return RefreshIndicator(
+          onRefresh: () => _controller.refresh(),
+          child: _buildContent(state),
+        );
+      },
+    ),
+  );
+}
+
+Widget _buildContent(PaginationState<User> state) {
+  return state.status.when(
+    initial: () => Center(child: CircularProgressIndicator()),
+    loading: () => Center(child: CircularProgressIndicator()),
+    success: () => _buildList(state),
+    empty: () => Center(child: Text('No users found')),
+    error: () => _buildError(state.error!),
+    refreshing: () => _buildList(state),
+    appending: () => _buildList(state),
+    appendError: () => _buildList(state),
+  );
+}
+
+Widget _buildList(PaginationState<User> state) {
+  return ListView.builder(
+    itemCount: state.items.length + (state.meta?.hasMore == true ? 1 : 0),
+    itemBuilder: (context, index) {
+      if (index == state.items.length) {
+        _controller.loadNextPage();
+        return Center(child: CircularProgressIndicator());
+      }
+      
+      return UserCard(user: state.items[index]);
+    },
+  );
+}
+
+Widget _buildError(PaginationError error) {
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.error, size: 64, color: Colors.red),
+        SizedBox(height: 16),
+        Text('Error: ${error.message}'),
+        SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: () => _controller.loadFirstPage(),
+          child: Text('Retry'),
+        ),
+      ],
+    ),
+  );
+}</pre>
+            </div>
+
+            <div class="success">
+                <strong>✅ Advantages:</strong>
+                <ul>
+                    <li>Complete control over UI and state</li>
+                    <li>Custom error handling and loading states</li>
+                    <li>Advanced features like request cancellation</li>
+                    <li>Perfect for complex business logic</li>
+                    <li>Full integration with existing state management</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card" id="approach-2">
+            <h2>🎨 Approach 2: Without State Management</h2>
+            <div class="info">
+                <strong>Best for:</strong> Simple apps, quick prototypes, standard UI patterns, rapid development
+            </div>
+
+            <h3>List Example</h3>
+            <div class="code-block">
+<pre>class MyPage extends StatefulWidget {
+  @override
+  _MyPageState createState() => _MyPageState();
+}
+
+class _MyPageState extends State<MyPage> {
+  late PaginatedController<User> _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = PaginatedController<User>(
+      loader: _loadUsers,
+      itemDecoder: User.fromJson,
+      metaParser: SimpleDI.get<MetaParser>(),
+      clock: SimpleDI.get<Clock>(),
+      cacheStore: MemoryCacheStore<String, PaginationState<User>>(),
+      options: SimpleDI.get<PaginationOptions>(),
+    );
+    _controller.loadFirstPage();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<Map<String, dynamic>> _loadUsers({
+    int? page,
+    int? perPage,
+    CancelToken? cancelToken,
+  }) async {
+    // Your API call here
+    final response = await dio.get('/users', queryParameters: {
+      'page': page ?? 1,
+      'per_page': perPage ?? 20,
+    });
+    return response.data;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Users')),
+      body: PaginatrixListView<User>(
+        controller: _controller,
+        itemBuilder: (context, user, index) {
+          return ListTile(
+            title: Text(user.name),
+            subtitle: Text(user.email),
+          );
+        },
+        onPullToRefresh: () => _controller.refresh(),
+        emptyBuilder: (context) => Center(child: Text('No users found')),
+        errorBuilder: (context, error) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error, size: 64, color: Colors.red),
+              SizedBox(height: 16),
+              Text('Error: ${error.message}'),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => _controller.loadFirstPage(),
+                child: Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+        appendLoaderBuilder: (context) => Center(
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      ),
+    );
+  }
+}</pre>
+            </div>
+
+            <h3>Grid Example</h3>
+            <div class="code-block">
+<pre>@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(title: Text('Products')),
+    body: PaginatrixGridView<Product>(
+      controller: _controller,
+      itemBuilder: (context, product, index) {
+        return ProductCard(product: product);
+      },
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.75,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      onPullToRefresh: () => _controller.refresh(),
+      emptyBuilder: (context) => Center(child: Text('No products found')),
+      errorBuilder: (context, error) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error, size: 64, color: Colors.red),
+            SizedBox(height: 16),
+            Text('Error: ${error.message}'),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => _controller.loadFirstPage(),
+              child: Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+      appendLoaderBuilder: (context) => Center(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      padding: EdgeInsets.all(16),
+    ),
+  );
+}</pre>
+            </div>
+
+            <div class="success">
+                <strong>✅ Advantages:</strong>
+                <ul>
+                    <li>Quick implementation with minimal code</li>
+                    <li>Built-in UI components and behaviors</li>
+                    <li>Automatic pull-to-refresh and load-more</li>
+                    <li>Standard error handling and empty states</li>
+                    <li>Perfect for MVPs and prototypes</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card" id="data-loading">
+            <h2>📡 Data Loading & API Integration</h2>
+
+            <h3>API Response Format</h3>
+            <div class="code-block">
+<pre>{
+  "data": [
+    {"id": 1, "name": "User 1", "email": "user1@example.com"},
+    {"id": 2, "name": "User 2", "email": "user2@example.com"}
+  ],
+  "meta": {
+    "current_page": 1,
+    "per_page": 20,
+    "total": 100,
+    "last_page": 5,
+    "has_more": true
+  }
+}</pre>
+            </div>
+
+            <h3>Custom Meta Parser</h3>
+            <div class="code-block">
+<pre>// If your API uses different field names
+final metaParser = ConfigMetaParser(MetaConfig(
+  itemsPath: 'results',           // Instead of 'data'
+  pagePath: 'pagination.page',   // Instead of 'meta.current_page'
+  perPagePath: 'pagination.size', // Instead of 'meta.per_page'
+  totalPath: 'pagination.total',  // Instead of 'meta.total'
+  hasMorePath: 'pagination.has_more', // Instead of 'meta.has_more'
+));</pre>
+            </div>
+
+            <h3>Data Model</h3>
+            <div class="code-block">
+<pre>class User {
+  final int id;
+  final String name;
+  final String email;
+
+  User({required this.id, required this.name, required this.email});
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      email: json['email'] as String,
+    );
+  }
+}</pre>
+            </div>
+
+            <h3>Advanced Data Loading</h3>
+            <div class="code-block">
+<pre>Future<Map<String, dynamic>> _loadUsers({
+  int? page,
+  int? perPage,
+  CancelToken? cancelToken,
+}) async {
+  try {
+    final response = await dio.get('/users', 
+      queryParameters: {
+        'page': page ?? 1,
+        'per_page': perPage ?? 20,
+      },
+      cancelToken: cancelToken,
+    );
+    return response.data;
+  } on DioException catch (e) {
+    if (e.type == DioExceptionType.cancel) {
+      throw PaginationError.cancelled(message: 'Request cancelled');
+    } else if (e.type == DioExceptionType.connectionTimeout) {
+      throw PaginationError.network(message: 'Connection timeout');
+    } else {
+      throw PaginationError.network(message: e.message ?? 'Network error');
+    }
+  } catch (e) {
+    throw PaginationError.unknown(message: e.toString());
+  }
+}</pre>
+            </div>
+        </div>
+
+        <div class="card" id="error-handling">
+            <h2>⚠️ Error Handling</h2>
+
+            <h3>Built-in Error Types</h3>
+            <div class="code-block">
+<pre>// Network errors
+PaginationError.network(message: 'Connection failed')
+
+// Parse errors  
+PaginationError.parse(message: 'Invalid JSON format')
+
+// Cache errors
+PaginationError.cache(message: 'Cache operation failed')
+
+// Cancelled requests
+PaginationError.cancelled(message: 'Request was cancelled')
+
+// Rate limiting
+PaginationError.rateLimited(message: 'Too many requests', retryAfter: Duration(minutes: 1))
+
+// Circuit breaker
+PaginationError.circuitBreaker(message: 'Service unavailable', retryAfter: Duration(minutes: 5))
+
+// Unknown errors
+PaginationError.unknown(message: 'Unexpected error')</pre>
+            </div>
+
+            <h3>Custom Error Handling</h3>
+            <div class="code-block">
+<pre>Widget _buildError(PaginationError error) {
+  return error.when(
+    network: (message, statusCode, originalError) => NetworkErrorWidget(
+      message: message,
+      statusCode: statusCode,
+      onRetry: () => _controller.loadFirstPage(),
+    ),
+    parse: (message, expectedFormat, actualData) => ParseErrorWidget(
+      message: message,
+      onRetry: () => _controller.loadFirstPage(),
+    ),
+    cache: (message, operation, originalError) => CacheErrorWidget(
+      message: message,
+      onRetry: () => _controller.loadFirstPage(),
+    ),
+    cancelled: (message) => CancelledErrorWidget(message: message),
+    rateLimited: (message, retryAfter) => RateLimitedErrorWidget(
+      message: message,
+      retryAfter: retryAfter,
+    ),
+    circuitBreaker: (message, retryAfter) => CircuitBreakerErrorWidget(
+      message: message,
+      retryAfter: retryAfter,
+    ),
+    unknown: (message, originalError) => UnknownErrorWidget(
+      message: message,
+      onRetry: () => _controller.loadFirstPage(),
+    ),
+  );
+}</pre>
+            </div>
+        </div>
+
+        <div class="card" id="customization">
+            <h2>🎨 Customization</h2>
+
+            <h3>Custom Loading States</h3>
+            <div class="code-block">
+<pre>PaginatrixListView<User>(
+  controller: _controller,
+  itemBuilder: (context, user, index) => UserCard(user: user),
+  shimmerBuilder: (context, index) => UserCardShimmer(),
+  appendLoaderBuilder: (context) => CustomLoadMoreWidget(),
+  // ... other parameters
+)</pre>
+            </div>
+
+            <h3>Custom Empty States</h3>
+            <div class="code-block">
+<pre>PaginatrixListView<User>(
+  controller: _controller,
+  itemBuilder: (context, user, index) => UserCard(user: user),
+  emptyBuilder: (context) => CustomEmptyState(
+    icon: Icons.people_outline,
+    title: 'No Users Found',
+    subtitle: 'Try refreshing or check your connection',
+    action: ElevatedButton(
+      onPressed: () => _controller.loadFirstPage(),
+      child: Text('Refresh'),
+    ),
+  ),
+  // ... other parameters
+)</pre>
+            </div>
+
+            <h3>Custom Error States</h3>
+            <div class="code-block">
+<pre>PaginatrixListView<User>(
+  controller: _controller,
+  itemBuilder: (context, user, index) => UserCard(user: user),
+  errorBuilder: (context, error) => CustomErrorState(
+    error: error,
+    onRetry: () => _controller.loadFirstPage(),
+    onReport: () => _reportError(error),
+  ),
+  // ... other parameters
+)</pre>
+            </div>
+        </div>
+
+        <div class="card" id="best-practices">
+            <h2>🏆 Best Practices</h2>
+
+            <h3>1. Memory Management</h3>
+            <div class="code-block">
+<pre>class _MyPageState extends State<MyPage> {
+  late PaginatedController<User> _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = PaginatedController<User>(...);
+    _controller.loadFirstPage();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose(); // Always dispose!
+    super.dispose();
+  }
+}</pre>
+            </div>
+
+            <h3>2. Performance Optimization</h3>
+            <div class="code-block">
+<pre>// Use const constructors where possible
+const UserCard({required this.user});
+
+// Implement proper keys for list items
+PaginatrixListView<User>(
+  controller: _controller,
+  itemBuilder: (context, user, index) => UserCard(
+    key: ValueKey(user.id), // Important for performance
+    user: user,
+  ),
+  keyBuilder: (user, index) => user.id.toString(), // Optional but recommended
+)</pre>
+            </div>
+
+            <h3>3. State Management Patterns</h3>
+            <div class="code-block">
+<pre>// Use StreamBuilder for reactive UI
+StreamBuilder<PaginationState<User>>(
+  stream: _controller.stream,
+  builder: (context, snapshot) {
+    final state = snapshot.data ?? _controller.state;
+    return _buildContent(state);
+  },
+)
+
+// Handle all states explicitly
+Widget _buildContent(PaginationState<User> state) {
+  return state.status.when(
+    initial: () => _buildLoading(),
+    loading: () => _buildLoading(),
+    success: () => _buildList(state),
+    empty: () => _buildEmpty(),
+    error: () => _buildError(state.error!),
+    refreshing: () => _buildList(state),
+    appending: () => _buildList(state),
+    appendError: () => _buildList(state),
+  );
+}</pre>
+            </div>
+
+            <h3>4. Testing</h3>
+            <div class="code-block">
+<pre>testWidgets('should load users correctly', (tester) async {
+  final mockLoader = MockLoaderFn();
+  when(mockLoader(any)).thenAnswer((_) async => mockApiResponse);
+  
+  final controller = PaginatedController<User>(
+    loader: mockLoader,
+    itemDecoder: User.fromJson,
+    // ... other parameters
+  );
+  
+  await controller.loadFirstPage();
+  
+  expect(controller.state.items.length, 2);
+  expect(controller.state.status, PaginationStatus.success());
+});</pre>
+            </div>
+        </div>
+
+        <div class="card" id="examples">
+            <h2>📚 Live Examples</h2>
+            
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h4>📱 Basic Usage</h4>
+                    <p>Simple list pagination with pull-to-refresh and load-more functionality.</p>
+                    <span class="badge badge-info">Beginner</span>
+                </div>
+                <div class="feature-item">
+                    <h4>🎮 Comprehensive List</h4>
+                    <p>Complete list implementation showcasing ALL package features with advanced UI.</p>
+                    <span class="badge badge-success">Advanced</span>
+                </div>
+                <div class="feature-item">
+                    <h4>🛍️ Comprehensive Grid</h4>
+                    <p>Complete grid implementation with filtering, sorting, and e-commerce patterns.</p>
+                    <span class="badge badge-success">Advanced</span>
+                </div>
+            </div>
+
+            <h3>Running Examples</h3>
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Navigate to examples directory</strong>
+                <div class="code-block">
+<pre>cd examples/basic_usage          # Start here for beginners
+cd examples/comprehensive_list   # Complete list features
+cd examples/comprehensive_grid   # Complete grid features</pre>
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Install dependencies</strong>
+                <div class="code-block">
+<pre>flutter pub get</pre>
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Run the example</strong>
+                <div class="code-block">
+<pre>flutter run</pre>
+                </div>
+            </div>
+
+            <div class="success">
+                <strong>🎯 Learning Path:</strong>
+                <ol>
+                    <li>Start with <strong>Basic Usage</strong> to understand core concepts</li>
+                    <li>Move to <strong>Comprehensive List</strong> to see all list features</li>
+                    <li>Try <strong>Comprehensive Grid</strong> to see all grid features</li>
+                    <li>Use examples as templates for your own implementations</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🔄 Migration Guide</h2>
+
+            <h3>From Other Pagination Libraries</h3>
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Replace your pagination logic</strong> with <code>PaginatedController</code>
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Update your data loading</strong> to use the <code>LoaderFn</code> pattern
+            </div>
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Replace your UI widgets</strong> with <code>PaginatrixListView</code> or <code>PaginatrixGridView</code>
+            </div>
+            <div class="step">
+                <span class="step-number">4</span>
+                <strong>Update error handling</strong> to use <code>PaginationError</code> types
+            </div>
+            <div class="step">
+                <span class="step-number">5</span>
+                <strong>Test thoroughly</strong> with different network conditions
+            </div>
+
+            <h3>From Manual Implementation</h3>
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Extract your API calls</strong> into a <code>LoaderFn</code>
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Create your data models</strong> with <code>fromJson</code> methods
+            </div>
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Replace your state management</strong> with <code>PaginatedController</code>
+            </div>
+            <div class="step">
+                <span class="step-number">4</span>
+                <strong>Update your UI</strong> to use built-in widgets or <code>StreamBuilder</code>
+            </div>
+            <div class="step">
+                <span class="step-number">5</span>
+                <strong>Add proper error handling</strong> with retry mechanisms
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📖 Additional Resources</h2>
+            
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h4>📚 Examples</h4>
+                    <p>Check the <code>examples/</code> directory for complete implementations</p>
+                </div>
+                <div class="feature-item">
+                    <h4>📖 API Reference</h4>
+                    <p>Generated documentation available for all classes and methods</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🐙 GitHub</h4>
+                    <p>Source code, issues, and community discussions</p>
+                </div>
+                <div class="feature-item">
+                    <h4>💬 Community</h4>
+                    <p>Join discussions and get help from other developers</p>
+                </div>
+            </div>
+
+            <div class="highlight">
+                <strong>🎉 Happy Coding!</strong><br>
+                Flutter Paginatrix makes pagination simple, powerful, and maintainable. Choose the approach that fits your needs and start building amazing paginated experiences!
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add copy functionality to code blocks
+        document.addEventListener('DOMContentLoaded', function() {
+            const codeBlocks = document.querySelectorAll('.code-block');
+            codeBlocks.forEach(block => {
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.textContent = 'Copy';
+                copyBtn.onclick = function() {
+                    const text = block.querySelector('pre').textContent;
+                    navigator.clipboard.writeText(text).then(() => {
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => {
+                            copyBtn.textContent = 'Copy';
+                        }, 2000);
+                    });
+                };
+                block.appendChild(copyBtn);
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
