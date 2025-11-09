@@ -35,6 +35,7 @@ export 'src/core/models/pagination_options.dart';
 // Core typedefs
 export 'src/core/typedefs/typedefs.dart';
 // Core utilities
+export 'src/core/utils/error_utils.dart';
 export 'src/core/utils/generation_guard.dart';
 // Core helpers
 export 'src/core/helpers/paginatrix_helpers.dart';
