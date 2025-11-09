@@ -52,7 +52,7 @@ class _BouncingDotsLoaderState extends State<BouncingDotsLoader>
 
   @override
   void dispose() {
-    for (var controller in _controllers) {
+    for (final controller in _controllers) {
       controller.dispose();
     }
     super.dispose();
