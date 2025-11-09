@@ -28,17 +28,21 @@ export 'src/core/entities/pagination_error.dart';
 export 'src/core/entities/pagination_state.dart';
 export 'src/core/entities/pagination_status.dart';
 export 'src/core/entities/request_context.dart';
+// Core enums
+export 'src/core/enums/paginatrix_load_type.dart';
 // Core models
 export 'src/core/models/pagination_options.dart';
 // Core typedefs
 export 'src/core/typedefs/typedefs.dart';
 // Core utilities
 export 'src/core/utils/generation_guard.dart';
+// Core helpers
+export 'src/core/helpers/paginatrix_helpers.dart';
 // Data layer - Meta parsers
 export 'src/data/meta_parser/config_meta_parser.dart';
 export 'src/data/meta_parser/custom_meta_parser.dart';
 // Dependency injection
-export 'src/di/simple_di.dart';
+export 'src/di/paginatrix_dependency_injection.dart';
 // Presentation layer - Controllers
 export 'src/presentation/controllers/paginated_controller.dart';
 // Presentation layer - UI widgets

@@ -4,8 +4,12 @@ import '../core/contracts/meta_parser.dart';
 import '../core/models/pagination_options.dart';
 import '../data/meta_parser/config_meta_parser.dart';
 
-/// Simple dependency injection without external packages
-class SimpleDI {
+/// Paginatrix dependency injection container
+///
+/// Provides a simple dependency injection solution for pagination services
+/// without requiring external DI packages. Manages registration and retrieval
+/// of dependencies like MetaParser, Dio, and PaginationOptions.
+class PaginatrixDI {
   static final Map<Type, dynamic> _instances = {};
   static final Map<String, dynamic> _namedInstances = {};
 

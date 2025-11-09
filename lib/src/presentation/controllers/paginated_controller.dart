@@ -7,16 +7,10 @@ import '../../core/contracts/meta_parser.dart';
 import '../../core/entities/pagination_error.dart';
 import '../../core/entities/pagination_state.dart';
 import '../../core/entities/request_context.dart';
+import '../../core/enums/paginatrix_load_type.dart';
 import '../../core/models/pagination_options.dart';
 import '../../core/typedefs/typedefs.dart';
 import '../../core/utils/generation_guard.dart';
-
-/// Internal enum to distinguish between different load types
-enum _LoadType {
-  first,
-  next,
-  refresh,
-}
 
 /// Controller for managing paginated data
 ///
@@ -120,7 +114,7 @@ class PaginatedController<T> {
   /// Calls the loader function with page 1 and replaces all existing items
   /// with the new data. This is used for initial load or when resetting the list.
   Future<void> loadFirstPage() async {
-    await _loadData(_LoadType.first);
+    await _loadData(PaginatrixLoadType.first);
   }
 
   /// Loads the next page of data (appends new data to existing list)
@@ -128,7 +122,7 @@ class PaginatedController<T> {
   /// Calls the same loader function with the next page number and appends
   /// the returned data to the existing list. This is used for pagination.
   Future<void> loadNextPage() async {
-    await _loadData(_LoadType.next);
+    await _loadData(PaginatrixLoadType.next);
   }
 
   /// Refreshes the current data (reloads first page and replaces all items)
@@ -136,7 +130,7 @@ class PaginatedController<T> {
   /// Calls the loader function with page 1 to refresh the data,
   /// replacing all existing items with fresh data from the server.
   Future<void> refresh() async {
-    await _loadData(_LoadType.refresh);
+    await _loadData(PaginatrixLoadType.refresh);
   }
 
   /// Retries the last failed operation
@@ -170,10 +164,10 @@ class PaginatedController<T> {
   ///
   /// This method consolidates the common logic for loading data,
   /// reducing code duplication across loadFirstPage, loadNextPage, and refresh.
-  Future<void> _loadData(_LoadType type) async {
+  Future<void> _loadData(PaginatrixLoadType type) async {
     // 1. Guard Checks
     if (_currentState.isLoading) return;
-    if (type == _LoadType.next && !canLoadMore) return;
+    if (type == PaginatrixLoadType.next && !canLoadMore) return;
 
     // 2. Request Setup
     final generation = _generationGuard.incrementGeneration();
@@ -181,21 +175,21 @@ class PaginatedController<T> {
     final requestContext = RequestContext.create(
       generation: generation,
       cancelToken: cancelToken,
-      isAppend: type == _LoadType.next,
-      isRefresh: type == _LoadType.refresh,
+      isAppend: type == PaginatrixLoadType.next,
+      isRefresh: type == PaginatrixLoadType.refresh,
     );
 
     _currentCancelToken = cancelToken;
 
     // 3. Set Initial State
     switch (type) {
-      case _LoadType.first:
+      case PaginatrixLoadType.first:
         _updateState(PaginationState.loading(
           requestContext: requestContext,
         ));
         break;
 
-      case _LoadType.next:
+      case PaginatrixLoadType.next:
         _updateState(PaginationState.appending(
           requestContext: requestContext,
           currentItems: _currentState.items,
@@ -203,7 +197,7 @@ class PaginatedController<T> {
         ));
         break;
 
-      case _LoadType.refresh:
+      case PaginatrixLoadType.refresh:
         _updateState(PaginationState.refreshing(
           requestContext: requestContext,
           currentItems: _currentState.items,
@@ -215,7 +209,7 @@ class PaginatedController<T> {
     // 4. Execution Block
     try {
       // Determine page to fetch
-      final page = (type == _LoadType.next) ? _getNextPageNumber() : 1;
+      final page = (type == PaginatrixLoadType.next) ? _getNextPageNumber() : 1;
       final data = await _loader(
         page: page,
         perPage: _options.defaultPageSize,
@@ -231,7 +225,7 @@ class PaginatedController<T> {
       final meta = _metaParser.parseMeta(data);
 
       // Determine final list of items (append vs. replace)
-      final newItems = (type == _LoadType.next)
+      final newItems = (type == PaginatrixLoadType.next)
           ? [..._currentState.items, ...decodedItems]
           : decodedItems;
 
@@ -251,14 +245,14 @@ class PaginatedController<T> {
 
       // 5. Set Error State
       switch (type) {
-        case _LoadType.first:
+        case PaginatrixLoadType.first:
           _updateState(PaginationState.error(
             error: error,
             requestContext: requestContext,
           ));
           break;
 
-        case _LoadType.next:
+        case PaginatrixLoadType.next:
           _updateState(PaginationState.appendError(
             appendError: error,
             requestContext: requestContext,
@@ -267,7 +261,7 @@ class PaginatedController<T> {
           ));
           break;
 
-        case _LoadType.refresh:
+        case PaginatrixLoadType.refresh:
           _updateState(PaginationState.error(
             error: error,
             requestContext: requestContext,
