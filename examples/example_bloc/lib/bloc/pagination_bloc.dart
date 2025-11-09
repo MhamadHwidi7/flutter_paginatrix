@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
 
+import 'enums/paginatrix_bloc_action.dart';
 import 'pagination_event.dart';
 import 'pagination_state.dart';
 
@@ -14,6 +15,17 @@ import 'pagination_state.dart';
 /// The BLoC listens to controller state changes (including automatic pagination)
 /// and emits corresponding BLoC states, ensuring the UI always reflects
 /// the current state through BlocBuilder.
+///
+/// Architecture:
+/// - Follows the same consolidated pattern as PaginatedController
+/// - Uses enum-based action dispatching to reduce code duplication
+/// - All event handlers delegate to a single _executeAction method
+///
+/// Best Practices:
+/// - Uses emit.onEach for automatic stream subscription cleanup
+/// - No manual subscription management needed
+/// - Prevents memory leaks automatically
+/// - DRY principle: single execution path for all actions
 class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
   /// Creates a new PaginationBloc with the given controller
   ///
@@ -25,29 +37,47 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
         super(PaginationBlocState<T>(
           paginationState: controller.state,
         )) {
-    // Register event handlers
-    on<LoadFirstPage>(_onLoadFirstPage);
-    on<LoadNextPage>(_onLoadNextPage);
-    on<RefreshPage>(_onRefreshPage);
-    on<RetryPagination>(_onRetryPagination);
-    on<ClearPagination>(_onClearPagination);
-    on<ControllerStateChanged>(_onControllerStateChanged);
+    // Register event handlers - all delegate to _executeAction
+    on<LoadFirstPage>((event, emit) => _executeAction(
+          PaginatrixBlocAction.loadFirst,
+          emit,
+        ));
+    on<LoadNextPage>((event, emit) => _executeAction(
+          PaginatrixBlocAction.loadNext,
+          emit,
+        ));
+    on<RefreshPage>((event, emit) => _executeAction(
+          PaginatrixBlocAction.refresh,
+          emit,
+        ));
+    on<RetryPagination>((event, emit) => _executeAction(
+          PaginatrixBlocAction.retry,
+          emit,
+        ));
+    on<ClearPagination>((event, emit) => _executeAction(
+          PaginatrixBlocAction.clear,
+          emit,
+        ));
 
-    // Listen to controller state changes to sync with BLoC state
-    // This ensures automatic pagination (e.g., on scroll) updates BLoC state
-    _controllerSubscription = _controller.stream.listen(
-      (paginationState) {
-        // Dispatch internal event to sync controller state to BLoC
-        // This is safe because we're not calling emit directly
-        if (!isClosed) {
-          add(ControllerStateChanged(paginationState));
-        }
+    // Listen to controller state changes using emit.onEach (BEST PRACTICE)
+    // This is the recommended way by flutter_bloc team:
+    // - Automatic subscription management
+    // - Automatic cleanup when bloc closes
+    // - No manual cancel() needed
+    // - No risk of memory leaks
+    // - Clean and declarative code
+    on<ControllerStateChanged>(
+      _onControllerStateChanged,
+      transformer: (events, mapper) {
+        // Use emit.onEach pattern: listen to external stream and map to events
+        return _controller.stream
+            .map((state) => ControllerStateChanged(state))
+            .asyncExpand(mapper);
       },
     );
   }
 
   final PaginatedController<T> _controller;
-  StreamSubscription<PaginationState<T>>? _controllerSubscription;
 
   /// Get the underlying controller
   ///
@@ -58,49 +88,43 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
   /// Prefer using BLoC events and state instead of calling controller methods directly.
   PaginatedController<T> get controller => _controller;
 
-  Future<void> _onLoadFirstPage(
-    LoadFirstPage event,
+  /// Unified action execution method that handles all pagination actions
+  ///
+  /// This method consolidates the common logic for executing pagination actions,
+  /// following the same pattern as PaginatedController._loadData.
+  /// All event handlers delegate to this method with the appropriate action type.
+  ///
+  /// Benefits:
+  /// - DRY: No code duplication across event handlers
+  /// - Maintainability: Single place to modify action execution logic
+  /// - Consistency: Same pattern as PaginatedController
+  Future<void> _executeAction(
+    PaginatrixBlocAction action,
     Emitter<PaginationBlocState<T>> emit,
   ) async {
     // Controller will emit state changes through its stream,
     // which will be handled by _onControllerStateChanged
-    await _controller.loadFirstPage();
-  }
+    switch (action) {
+      case PaginatrixBlocAction.loadFirst:
+        await _controller.loadFirstPage();
+        break;
 
-  Future<void> _onLoadNextPage(
-    LoadNextPage event,
-    Emitter<PaginationBlocState<T>> emit,
-  ) async {
-    // Controller will emit state changes through its stream,
-    // which will be handled by _onControllerStateChanged
-    await _controller.loadNextPage();
-  }
+      case PaginatrixBlocAction.loadNext:
+        await _controller.loadNextPage();
+        break;
 
-  Future<void> _onRefreshPage(
-    RefreshPage event,
-    Emitter<PaginationBlocState<T>> emit,
-  ) async {
-    // Controller will emit state changes through its stream,
-    // which will be handled by _onControllerStateChanged
-    await _controller.refresh();
-  }
+      case PaginatrixBlocAction.refresh:
+        await _controller.refresh();
+        break;
 
-  Future<void> _onRetryPagination(
-    RetryPagination event,
-    Emitter<PaginationBlocState<T>> emit,
-  ) async {
-    // Controller will emit state changes through its stream,
-    // which will be handled by _onControllerStateChanged
-    await _controller.retry();
-  }
+      case PaginatrixBlocAction.retry:
+        await _controller.retry();
+        break;
 
-  void _onClearPagination(
-    ClearPagination event,
-    Emitter<PaginationBlocState<T>> emit,
-  ) {
-    // Controller will emit state changes through its stream,
-    // which will be handled by _onControllerStateChanged
-    _controller.clear();
+      case PaginatrixBlocAction.clear:
+        _controller.clear();
+        break;
+    }
   }
 
   /// Handles internal event when controller state changes
@@ -120,7 +144,8 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
 
   @override
   Future<void> close() {
-    _controllerSubscription?.cancel();
+    // No need to manually cancel subscription - bloc handles it automatically
+    // Just dispose the controller
     _controller.dispose();
     return super.close();
   }
