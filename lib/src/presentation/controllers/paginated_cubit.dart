@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/contracts/meta_parser.dart';
+import '../../core/entities/page_meta.dart';
 import '../../core/entities/pagination_error.dart';
 import '../../core/entities/pagination_state.dart';
 import '../../core/entities/request_context.dart';
@@ -257,9 +258,32 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
         return; // Stale response
       }
 
-      final items = _metaParser.extractItems(data);
-      final decodedItems = items.map(_itemDecoder).toList();
-      final meta = _metaParser.parseMeta(data);
+      // Parse data with enhanced error handling
+      final List<T> decodedItems;
+      final PageMeta meta;
+      
+      try {
+        // Extract and decode items
+        final items = _metaParser.extractItems(data);
+        decodedItems = items.map(_itemDecoder).toList();
+        
+        // Parse metadata
+        meta = _metaParser.parseMeta(data);
+      } on PaginationError {
+        // Already a PaginationError from meta parser, just rethrow
+        rethrow;
+      } catch (e) {
+        // Convert parsing/decoding errors to PaginationError.parse
+        final truncatedData = data.toString().length > 200 
+            ? '${data.toString().substring(0, 200)}...' 
+            : data.toString();
+        
+        throw PaginationError.parse(
+          message: 'Failed to process response data: ${e.toString()}',
+          expectedFormat: 'Expected valid items array and metadata structure',
+          actualData: truncatedData,
+        );
+      }
 
       // Determine final list of items (append vs. replace)
       // Using List.from + addAll is more efficient than spread operator for large lists
