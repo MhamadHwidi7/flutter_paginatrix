@@ -8,7 +8,7 @@ enum LoaderType {
   wave,
   rotatingSquares,
   pulse,
-  shimmer,
+  skeleton,
   traditional,
 }
 
@@ -122,8 +122,8 @@ class _AppendLoaderState extends State<AppendLoader>
           message: widget.message,
           padding: widget.padding,
         );
-      case LoaderType.shimmer:
-        return ShimmerLoader(
+      case LoaderType.skeleton:
+        return SkeletonLoader(
           color: widget.color,
           message: widget.message,
           padding: widget.padding,

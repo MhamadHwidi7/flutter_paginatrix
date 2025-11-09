@@ -113,7 +113,7 @@ class _ProductsPageState extends State<ProductsPage> {
         },
         // Custom loading indicator - choose any LoaderType
         appendLoaderBuilder: (context) => AppendLoader(
-          loaderType: LoaderType.pulse, // Options: bouncingDots, wave, rotatingSquares, pulse, shimmer, traditional
+          loaderType: LoaderType.pulse, // Options: bouncingDots, wave, rotatingSquares, pulse, skeleton, traditional
           message: 'Loading more products...',
           color: Theme.of(context).colorScheme.primary,
           size: 28,

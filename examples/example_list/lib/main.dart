@@ -114,7 +114,7 @@ class _UsersPageState extends State<UsersPage> {
         separatorBuilder: (context, index) => const Divider(height: 1),
         // Custom loading indicator - choose any LoaderType
         appendLoaderBuilder: (context) => AppendLoader(
-          loaderType: LoaderType.wave, // Options: bouncingDots, wave, rotatingSquares, pulse, shimmer, traditional
+          loaderType: LoaderType.wave, // Options: bouncingDots, wave, rotatingSquares, pulse, skeleton, traditional
           message: 'Loading more users...',
           color: Theme.of(context).colorScheme.primary,
           size: 24,

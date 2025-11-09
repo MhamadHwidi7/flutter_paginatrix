@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'pagination_shimmer.dart';
+
 /// Modern bouncing dots loader
 class BouncingDotsLoader extends StatefulWidget {
   const BouncingDotsLoader({
@@ -473,113 +475,54 @@ class _PulseLoaderState extends State<PulseLoader>
   }
 }
 
-/// Modern shimmer loader for list items
-class ShimmerLoader extends StatefulWidget {
-  const ShimmerLoader({
+/// Modern skeleton loader using Skeletonizer
+/// 
+/// This loader uses the skeletonizer package to create a skeleton loading effect.
+/// It's more efficient and provides a better user experience than shimmer.
+class SkeletonLoader extends StatelessWidget {
+  const SkeletonLoader({
     super.key,
     this.color,
-    this.baseColor,
-    this.highlightColor,
-    this.duration = const Duration(milliseconds: 1500),
     this.message,
     this.padding,
+    this.itemCount = 3,
   });
   
   final Color? color;
-  final Color? baseColor;
-  final Color? highlightColor;
-  final Duration duration;
   final String? message;
   final EdgeInsetsGeometry? padding;
-
-  @override
-  State<ShimmerLoader> createState() => _ShimmerLoaderState();
-}
-
-class _ShimmerLoaderState extends State<ShimmerLoader>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
-
-    _animation = Tween<double>(
-      begin: -1.0,
-      end: 2.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
-
-    _controller.repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  final int itemCount;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    
-    final baseColor = widget.baseColor ?? colorScheme.surfaceContainerHighest;
-    final highlightColor = widget.highlightColor ?? colorScheme.surfaceContainer;
 
     return Container(
-      padding: widget.padding ?? const EdgeInsets.all(16),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedBuilder(
-              animation: _animation,
-              builder: (context, child) {
-                return Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        baseColor,
-                        highlightColor,
-                        baseColor,
-                      ],
-                      stops: [
-                        _animation.value - 0.3,
-                        _animation.value,
-                        _animation.value + 0.3,
-                      ].map((stop) => stop.clamp(0.0, 1.0)).toList(),
-                    ),
-                  ),
-                );
-              },
+      padding: padding ?? const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Use PaginationShimmer for skeleton effect
+          SizedBox(
+            height: 200,
+            child: PaginationShimmer(
+              itemCount: itemCount,
+              shrinkWrap: true,
             ),
-            if (widget.message != null) ...[
-              const SizedBox(height: 16),
-              Text(
-                widget.message!,
-                style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.7),
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
+          ),
+          if (message != null) ...[
+            const SizedBox(height: 16),
+            Text(
+              message!,
+              style: textTheme.bodySmall?.copyWith(
+                color: color ?? theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
               ),
-            ],
+              textAlign: TextAlign.center,
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
