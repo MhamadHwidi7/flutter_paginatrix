@@ -39,7 +39,7 @@ class PageMeta with _$PageMeta {
       _$PageMetaFromJson(json);
 
   /// Creates a PageMeta for page-based pagination
-  static PageMeta pageBased({
+  factory PageMeta.pageBased({
     required int page,
     required int perPage,
     int? total,
@@ -56,7 +56,7 @@ class PageMeta with _$PageMeta {
   }
 
   /// Creates a PageMeta for cursor-based pagination
-  static PageMeta cursorBased({
+  factory PageMeta.cursorBased({
     String? nextCursor,
     String? previousCursor,
     bool? hasMore,
@@ -69,7 +69,7 @@ class PageMeta with _$PageMeta {
   }
 
   /// Creates a PageMeta for offset/limit pagination
-  static PageMeta offsetBased({
+  factory PageMeta.offsetBased({
     required int offset,
     required int limit,
     int? total,
