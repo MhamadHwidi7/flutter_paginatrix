@@ -1,7 +1,6 @@
-import 'dart:async';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/contracts/meta_parser.dart';
 import '../../core/entities/pagination_error.dart';
@@ -12,21 +11,44 @@ import '../../core/models/pagination_options.dart';
 import '../../core/typedefs/typedefs.dart';
 import '../../core/utils/generation_guard.dart';
 
-/// Controller for managing paginated data
+/// Cubit-based controller for managing paginated data
 ///
-/// This controller uses a single loader function that handles both initial load
-/// and pagination. The loader function is called with the appropriate page number,
-/// and the returned data is either set (first page) or appended (next page) to the list.
-class PaginatedController<T> {
-  /// Creates a new PaginatedController
+/// This is the recommended way to use flutter_paginatrix with flutter_bloc.
+/// It provides automatic state management, stream handling, and lifecycle management.
+///
+/// **Advantages over PaginatedController:**
+/// - ✅ No manual StreamController management
+/// - ✅ Automatic disposal and cleanup
+/// - ✅ Built-in safety checks (no isClosed checks needed)
+/// - ✅ Better testability with blocTest
+/// - ✅ Consistent with flutter_bloc patterns
+///
+/// ## Usage
+///
+/// ```dart
+/// final cubit = PaginatedCubit<Pokemon>(
+///   loader: repository.loadPokemonPage,
+///   itemDecoder: Pokemon.fromJson,
+///   metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
+/// );
+///
+/// // In widget:
+/// BlocBuilder<PaginatedCubit<Pokemon>, PaginationState<Pokemon>>(
+///   bloc: cubit,
+///   builder: (context, state) {
+///     // Use state directly
+///   },
+/// )
+/// ```
+class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
+  /// Creates a new PaginatedCubit
   ///
   /// [loader] - Single function that loads a page of data. Called for both
   ///            initial load (page 1) and pagination (page 2, 3, etc.).
-  ///            The returned data will be added to the list.
   /// [itemDecoder] - Function to decode individual items from raw data
   /// [metaParser] - Parser to extract pagination metadata
   /// [options] - Optional pagination options
-  PaginatedController({
+  PaginatedCubit({
     required LoaderFn<T> loader,
     required ItemDecoder<T> itemDecoder,
     required MetaParser metaParser,
@@ -34,41 +56,33 @@ class PaginatedController<T> {
   })  : _loader = loader,
         _itemDecoder = itemDecoder,
         _metaParser = metaParser,
-        _options = options ?? PaginationOptions.defaultOptions;
+        _options = options ?? PaginationOptions.defaultOptions,
+        super(PaginationState.initial());
+
   final LoaderFn<T> _loader;
   final ItemDecoder<T> _itemDecoder;
   final MetaParser _metaParser;
   final PaginationOptions _options;
-
-  final StreamController<PaginationState<T>> _stateController =
-      StreamController.broadcast();
   final GenerationGuard _generationGuard = GenerationGuard();
 
-  PaginationState<T> _currentState = PaginationState.initial();
   CancelToken? _currentCancelToken;
 
-  /// Stream of pagination states
-  Stream<PaginationState<T>> get stream => _stateController.stream;
-
-  /// Current pagination state
-  PaginationState<T> get state => _currentState;
-
   /// Whether more data can be loaded
-  bool get canLoadMore => _currentState.canLoadMore;
+  bool get canLoadMore => state.canLoadMore;
 
-  /// Whether the controller is currently loading
-  bool get isLoading => _currentState.isLoading;
+  /// Whether the cubit is currently loading
+  bool get isLoading => state.isLoading;
 
-  /// Whether the controller has data
-  bool get hasData => _currentState.hasData;
+  /// Whether the cubit has data
+  bool get hasData => state.hasData;
 
-  /// Whether the controller has an error
-  bool get hasError => _currentState.hasError;
+  /// Whether the cubit has an error
+  bool get hasError => state.hasError;
 
   /// Checks if scroll position is near the end and triggers load if needed
   ///
   /// This method encapsulates the scroll detection logic, moving it from UI
-  /// widgets to the controller for better separation of concerns and performance.
+  /// widgets to the cubit for better separation of concerns and performance.
   ///
   /// [metrics] - Scroll metrics from ScrollNotification
   /// [prefetchThreshold] - Optional threshold override (number of items from end)
@@ -135,9 +149,9 @@ class PaginatedController<T> {
 
   /// Retries the last failed operation
   Future<void> retry() async {
-    if (_currentState.hasError) {
+    if (state.hasError) {
       await loadFirstPage();
-    } else if (_currentState.hasAppendError) {
+    } else if (state.hasAppendError) {
       await loadNextPage();
     }
   }
@@ -151,13 +165,7 @@ class PaginatedController<T> {
   /// Clears all data and resets to initial state
   void clear() {
     cancel();
-    _updateState(PaginationState.initial());
-  }
-
-  /// Disposes the controller
-  void dispose() {
-    cancel();
-    _stateController.close();
+    emit(PaginationState.initial());
   }
 
   /// Unified data loading method that handles all load types
@@ -166,8 +174,21 @@ class PaginatedController<T> {
   /// reducing code duplication across loadFirstPage, loadNextPage, and refresh.
   Future<void> _loadData(PaginatrixLoadType type) async {
     // 1. Guard Checks
-    if (_currentState.isLoading) return;
+    if (state.isLoading) return;
     if (type == PaginatrixLoadType.next && !canLoadMore) return;
+
+    // Meta validation for operations requiring existing data
+    // This prevents null pointer exceptions when trying to append or refresh
+    final currentMeta = state.meta;
+    if ((type == PaginatrixLoadType.next || type == PaginatrixLoadType.refresh)) {
+      if (currentMeta == null) {
+        debugPrint(
+          'PaginatedCubit: Cannot ${type == PaginatrixLoadType.next ? "append" : "refresh"} '
+          'without existing metadata. Load first page first.',
+        );
+        return;
+      }
+    }
 
     // 2. Request Setup
     final generation = _generationGuard.incrementGeneration();
@@ -184,24 +205,26 @@ class PaginatedController<T> {
     // 3. Set Initial State
     switch (type) {
       case PaginatrixLoadType.first:
-        _updateState(PaginationState.loading(
+        emit(PaginationState.loading(
           requestContext: requestContext,
         ));
         break;
 
       case PaginatrixLoadType.next:
-        _updateState(PaginationState.appending(
+        // Safe to use currentMeta here because of the guard check above
+        emit(PaginationState.appending(
           requestContext: requestContext,
-          currentItems: _currentState.items,
-          currentMeta: _currentState.meta!,
+          currentItems: state.items,
+          currentMeta: currentMeta!,
         ));
         break;
 
       case PaginatrixLoadType.refresh:
-        _updateState(PaginationState.refreshing(
+        // Safe to use currentMeta here because of the guard check above
+        emit(PaginationState.refreshing(
           requestContext: requestContext,
-          currentItems: _currentState.items,
-          currentMeta: _currentState.meta!,
+          currentItems: state.items,
+          currentMeta: currentMeta!,
         ));
         break;
     }
@@ -226,7 +249,7 @@ class PaginatedController<T> {
 
       // Determine final list of items (append vs. replace)
       final newItems = (type == PaginatrixLoadType.next)
-          ? [..._currentState.items, ...decodedItems]
+          ? [...state.items, ...decodedItems]
           : decodedItems;
 
       final newState = PaginationState.success(
@@ -235,7 +258,7 @@ class PaginatedController<T> {
         requestContext: requestContext,
       );
 
-      _updateState(newState);
+      emit(newState);
     } catch (e) {
       if (!_generationGuard.isValid(requestContext)) {
         return; // Stale response
@@ -246,27 +269,28 @@ class PaginatedController<T> {
       // 5. Set Error State
       switch (type) {
         case PaginatrixLoadType.first:
-          _updateState(PaginationState.error(
+          emit(PaginationState.error(
             error: error,
             requestContext: requestContext,
           ));
           break;
 
         case PaginatrixLoadType.next:
-          _updateState(PaginationState.appendError(
+          // Safe to use currentMeta here because of the guard check above
+          emit(PaginationState.appendError(
             appendError: error,
             requestContext: requestContext,
-            currentItems: _currentState.items,
-            currentMeta: _currentState.meta!,
+            currentItems: state.items,
+            currentMeta: currentMeta!,
           ));
           break;
 
         case PaginatrixLoadType.refresh:
-          _updateState(PaginationState.error(
+          emit(PaginationState.error(
             error: error,
             requestContext: requestContext,
-            previousItems: _currentState.items,
-            previousMeta: _currentState.meta,
+            previousItems: state.items,
+            previousMeta: currentMeta,
           ));
           break;
       }
@@ -275,13 +299,8 @@ class PaginatedController<T> {
     }
   }
 
-  void _updateState(PaginationState<T> newState) {
-    _currentState = newState;
-    _stateController.add(newState);
-  }
-
   int _getNextPageNumber() {
-    final meta = _currentState.meta;
+    final meta = state.meta;
     if (meta?.page != null) {
       return meta!.page! + 1;
     }
@@ -302,4 +321,11 @@ class PaginatedController<T> {
       originalError: error.toString(),
     );
   }
+
+  @override
+  Future<void> close() {
+    cancel();
+    return super.close();
+  }
 }
+

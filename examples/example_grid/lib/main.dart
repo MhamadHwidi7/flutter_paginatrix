@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
@@ -30,22 +31,22 @@ class ProductsPage extends StatefulWidget {
 }
 
 class _ProductsPageState extends State<ProductsPage> {
-  late final PaginatedController<Product> _controller;
+  late final PaginatedCubit<Product> _cubit;
 
   @override
   void initState() {
     super.initState();
-    _controller = PaginatedController<Product>(
+    _cubit = PaginatedCubit<Product>(
       loader: _loadProducts,
       itemDecoder: Product.fromJson,
       metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
     );
-    _controller.loadFirstPage();
+    _cubit.loadFirstPage();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _cubit.close();
     super.dispose();
   }
 
@@ -98,7 +99,7 @@ class _ProductsPageState extends State<ProductsPage> {
         elevation: 0,
       ),
       body: PaginatrixGridView<Product>(
-        controller: _controller,
+        cubit: _cubit,
         padding: const EdgeInsets.all(8),
         cacheExtent: 250,
         prefetchThreshold: 1, // More aggressive threshold for grid (load when 100px from end)
@@ -148,39 +149,36 @@ class _ProductCard extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Image.network(
-                  product.image,
+                CachedNetworkImage(
+                  imageUrl: product.image,
                   fit: BoxFit.cover,
-                  // Scale down images to reduce memory usage and jank frames
-                  // For 2-column grid with 0.75 aspect ratio:
-                  // Typical display size: ~200px width, ~267px height
-                  // Cache at 400x533 (2x for retina displays)
-                  cacheWidth: 400,
-                  cacheHeight: 533,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
+                  memCacheWidth: 400,
+                  memCacheHeight: 533,
+                  maxWidthDiskCache: 800,
+                  maxHeightDiskCache: 1066,
+                  progressIndicatorBuilder: (context, url, downloadProgress) {
                     return ColoredBox(
                       color: theme.colorScheme.surfaceContainerHighest,
                       child: Center(
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                              : null,
+                          value: downloadProgress.progress,
+                          color: theme.colorScheme.primary,
                         ),
                       ),
                     );
                   },
-                  errorBuilder: (context, error, stackTrace) {
+                  errorWidget: (context, url, error) {
                     return ColoredBox(
                       color: theme.colorScheme.surfaceContainerHighest,
                       child: Icon(
                         Icons.image_not_supported,
                         color: theme.colorScheme.onSurfaceVariant,
+                        size: 48,
                       ),
                     );
                   },
+                  fadeInDuration: const Duration(milliseconds: 300),
                 ),
                 Positioned(
                   top: 8,

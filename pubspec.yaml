@@ -27,7 +27,7 @@ dependencies:
   flutter_bloc: ^8.1.6
   
   # Skeleton loading effect
-  skeletonizer: ^1.4.2
+  skeletonizer: ^2.1.0
 
 dev_dependencies:
   flutter_test:

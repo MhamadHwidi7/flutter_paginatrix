@@ -44,14 +44,14 @@ export 'src/data/meta_parser/custom_meta_parser.dart';
 // Dependency injection
 export 'src/di/paginatrix_dependency_injection.dart';
 // Presentation layer - Controllers
-export 'src/presentation/controllers/paginated_controller.dart';
+export 'src/presentation/controllers/paginated_cubit.dart';
 // Presentation layer - UI widgets
 export 'src/presentation/widgets/append_loader.dart';
 export 'src/presentation/widgets/modern_loaders.dart';
 export 'src/presentation/widgets/page_selector.dart';
 export 'src/presentation/widgets/pagination_empty_view.dart';
 export 'src/presentation/widgets/pagination_error_view.dart';
-export 'src/presentation/widgets/pagination_shimmer.dart';
+export 'src/presentation/widgets/pagination_skeletonizer.dart';
 export 'src/presentation/widgets/pagination_type.dart';
 export 'src/presentation/widgets/paginatrix_grid_view.dart';
 export 'src/presentation/widgets/paginatrix_list_view.dart';

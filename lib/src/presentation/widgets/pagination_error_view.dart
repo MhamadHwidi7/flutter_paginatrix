@@ -48,7 +48,7 @@ class PaginationErrorView extends StatelessWidget {
           Text(
             customTitle ?? _getErrorTitle(),
             style: textTheme.headlineSmall?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.8),
+              color: colorScheme.onSurface.withValues(alpha: 0.8),
               fontWeight: FontWeight.w600,
             ),
             textAlign: TextAlign.center,
@@ -57,7 +57,7 @@ class PaginationErrorView extends StatelessWidget {
           Text(
             customDescription ?? _getErrorDescription(),
             style: textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.6),
+              color: colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             textAlign: TextAlign.center,
           ),
@@ -83,7 +83,7 @@ class PaginationErrorView extends StatelessWidget {
       cancelled: (_) => Icon(
         Icons.cancel_outlined,
         size: 64,
-        color: colorScheme.onSurface.withOpacity(0.4),
+        color: colorScheme.onSurface.withValues(alpha: 0.4),
       ),
       rateLimited: (_, __) => Icon(
         Icons.speed_outlined,
@@ -206,10 +206,10 @@ class AppendErrorView extends StatelessWidget {
       padding: padding ?? const EdgeInsets.all(16),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: colorScheme.errorContainer.withOpacity(0.1),
+        color: colorScheme.errorContainer.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: colorScheme.error.withOpacity(0.3),
+          color: colorScheme.error.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -237,7 +237,7 @@ class AppendErrorView extends StatelessWidget {
                   Text(
                     error.userMessage,
                     style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurface.withOpacity(0.6),
+                      color: colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ],

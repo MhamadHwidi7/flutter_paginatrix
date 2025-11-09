@@ -1,0 +1,30 @@
+name: example_cubit
+description: Example demonstrating PaginatedCubit usage with BlocBuilder
+version: 1.0.0
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+  flutter: '>=3.22.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Pagination package
+  flutter_paginatrix:
+    path: ../../
+
+  # HTTP client
+  dio: ^5.4.0
+  
+  # Image caching
+  cached_network_image: ^3.3.1
+  
+  # State management
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.7
+
+flutter:
+  uses-material-design: true
+

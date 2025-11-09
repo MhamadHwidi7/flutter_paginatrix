@@ -38,9 +38,9 @@ class PokemonPage extends StatelessWidget {
     // Create repository
     final repository = PokemonRepository();
 
-    // Create the PaginatedController with repository
+    // Create the PaginatedCubit with repository
     // The loader function will be called for both initial load and pagination
-    final controller = PaginatedController<Pokemon>(
+    final controller = PaginatedCubit<Pokemon>(
       loader: repository.loadPokemonPage,
       itemDecoder: Pokemon.fromJson,
       metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
@@ -48,7 +48,7 @@ class PokemonPage extends StatelessWidget {
 
     // Create and provide the BLoC
     return BlocProvider(
-      create: (context) => PaginationBloc<Pokemon>(controller: controller)
+      create: (context) => PaginationBloc<Pokemon>(cubit: controller)
         ..add(const LoadFirstPage()),
       child: const _PokemonView(),
     );
@@ -151,7 +151,7 @@ class _PokemonView extends StatelessWidget {
     final controller = context.read<PaginationBloc<Pokemon>>().controller;
 
     return PaginatrixGridView<Pokemon>(
-      controller: controller,
+      cubit: controller,
       padding: const EdgeInsets.all(8),
       cacheExtent: 250,
       prefetchThreshold: 1,

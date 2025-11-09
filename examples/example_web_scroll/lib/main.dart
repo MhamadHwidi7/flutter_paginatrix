@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
 
 void main() {
@@ -31,22 +32,22 @@ class ProductsPage extends StatefulWidget {
 }
 
 class _ProductsPageState extends State<ProductsPage> {
-  late final PaginatedController<Product> _controller;
+  late final PaginatedCubit<Product> _cubit;
 
   @override
   void initState() {
     super.initState();
-    _controller = PaginatedController<Product>(
+    _cubit = PaginatedCubit<Product>(
       loader: _loadProducts,
       itemDecoder: Product.fromJson,
       metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
     );
-    _controller.loadFirstPage();
+    _cubit.loadFirstPage();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _cubit.close();
     super.dispose();
   }
 
@@ -102,11 +103,9 @@ class _ProductsPageState extends State<ProductsPage> {
         title: const Text('Scroll-Based Pagination'),
         elevation: 0,
         actions: [
-          StreamBuilder<PaginationState<Product>>(
-            stream: _controller.stream,
-            initialData: _controller.state,
-            builder: (context, snapshot) {
-              final state = snapshot.data!;
+          BlocBuilder<PaginatedCubit<Product>, PaginationState<Product>>(
+            bloc: _cubit,
+            builder: (context, state) {
               final isRefreshing = state.status.maybeWhen(
                 refreshing: () => true,
                 orElse: () => false,
@@ -122,7 +121,7 @@ class _ProductsPageState extends State<ProductsPage> {
                 onPressed: isRefreshing
                     ? null
                     : () {
-                        _controller.refresh();
+                        _cubit.refresh();
                       },
                 tooltip: 'Refresh',
               );
@@ -141,7 +140,7 @@ class _ProductsPageState extends State<ProductsPage> {
                       : 1;
 
           return PaginatrixGridView<Product>(
-            controller: _controller,
+            cubit: _cubit,
             padding: const EdgeInsets.all(16),
             cacheExtent: 500,
             prefetchThreshold: 1, // Load next page when 1 item away from end
@@ -162,13 +161,13 @@ class _ProductsPageState extends State<ProductsPage> {
               padding: const EdgeInsets.all(20),
             ),
             onPullToRefresh: () {
-              _controller.refresh();
+              _cubit.refresh();
             },
             onRetryInitial: () {
-              _controller.retry();
+              _cubit.retry();
             },
             onRetryAppend: () {
-              _controller.loadNextPage();
+              _cubit.loadNextPage();
             },
           );
         },

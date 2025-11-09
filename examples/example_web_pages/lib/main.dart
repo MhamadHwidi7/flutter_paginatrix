@@ -31,24 +31,24 @@ class ProductsPage extends StatefulWidget {
 }
 
 class _ProductsPageState extends State<ProductsPage> {
-  late final PaginatedController<Product> _controller;
+  late final PaginatedCubit<Product> _cubit;
   int _targetPage = 1;
   PageSelectorStyle _selectorStyle = PageSelectorStyle.buttons;
 
   @override
   void initState() {
     super.initState();
-    _controller = PaginatedController<Product>(
+    _cubit = PaginatedCubit<Product>(
       loader: _loadProductsWithTarget,
       itemDecoder: Product.fromJson,
       metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
     );
-    _controller.loadFirstPage();
+    _cubit.loadFirstPage();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _cubit.close();
     super.dispose();
   }
 
@@ -102,7 +102,7 @@ class _ProductsPageState extends State<ProductsPage> {
   }
 
   void _goToPage(int page) {
-    final currentPage = _controller.state.meta?.page ?? 1;
+    final currentPage = _cubit.state.meta?.page ?? 1;
 
     if (page == currentPage) {
       return; // Already on this page
@@ -110,8 +110,8 @@ class _ProductsPageState extends State<ProductsPage> {
 
     // Set target page and load directly
     _targetPage = page;
-    _controller.clear();
-    _controller.loadFirstPage(); // Will use _targetPage in loader
+    _cubit.clear();
+    _cubit.loadFirstPage(); // Will use _targetPage in loader
   }
 
   @override
@@ -147,8 +147,8 @@ class _ProductsPageState extends State<ProductsPage> {
           ),
           // Refresh button
           StreamBuilder<PaginationState<Product>>(
-            stream: _controller.stream,
-            initialData: _controller.state,
+            stream: _cubit.stream,
+            initialData: _cubit.state,
             builder: (context, snapshot) {
               final state = snapshot.data!;
               final isRefreshing = state.status.maybeWhen(
@@ -166,7 +166,7 @@ class _ProductsPageState extends State<ProductsPage> {
                 onPressed: isRefreshing
                     ? null
                     : () {
-                        _controller.refresh();
+                        _cubit.refresh();
                       },
                 tooltip: 'Refresh',
               );
@@ -175,8 +175,8 @@ class _ProductsPageState extends State<ProductsPage> {
         ],
       ),
       body: StreamBuilder<PaginationState<Product>>(
-        stream: _controller.stream,
-        initialData: _controller.state,
+        stream: _cubit.stream,
+        initialData: _cubit.state,
         builder: (context, snapshot) {
           final state = snapshot.data!;
           final meta = state.meta;
@@ -204,7 +204,7 @@ class _ProductsPageState extends State<ProductsPage> {
                       return PaginationErrorView(
                         error: state.error!,
                         onRetry: () {
-                          _controller.retry();
+                          _cubit.retry();
                         },
                       );
                     }
@@ -218,7 +218,7 @@ class _ProductsPageState extends State<ProductsPage> {
                         description: 'Try refreshing to load products',
                         action: ElevatedButton(
                           onPressed: () {
-                            _controller.loadFirstPage();
+                            _cubit.loadFirstPage();
                           },
                           child: const Text('Retry'),
                         ),

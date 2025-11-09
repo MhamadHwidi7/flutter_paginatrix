@@ -102,14 +102,14 @@ LoaderFn<T> createFailingLoader<T>({
 }
 
 /// Test helper: Creates a controller with mock data
-PaginatedController<T> createTestController<T>({
+PaginatedCubit<T> createTestController<T>({
   required List<Map<String, dynamic>> mockData,
   ItemDecoder<T>? itemDecoder,
   MetaParser? metaParser,
   int itemsPerPage = 20,
   Duration loaderDelay = Duration.zero,
 }) {
-  return PaginatedController<T>(
+  return PaginatedCubit<T>(
     loader: createMockLoader<T>(
       mockData: mockData,
       itemsPerPage: itemsPerPage,
@@ -122,7 +122,7 @@ PaginatedController<T> createTestController<T>({
 
 /// Test helper: Waits for a specific state condition
 Future<void> waitForState<T>(
-  PaginatedController<T> controller,
+  PaginatedCubit<T> controller,
   bool Function(PaginationState<T>) condition, {
   Duration timeout = const Duration(seconds: 5),
   Duration pollInterval = const Duration(milliseconds: 50),
@@ -144,7 +144,7 @@ Future<void> waitForState<T>(
 
 /// Test helper: Collects all states from stream
 Future<List<PaginationState<T>>> collectStates<T>(
-  PaginatedController<T> controller,
+  PaginatedCubit<T> controller,
   Duration duration,
 ) async {
   final states = <PaginationState<T>>[];

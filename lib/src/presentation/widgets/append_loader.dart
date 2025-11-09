@@ -81,7 +81,7 @@ class _AppendLoaderState extends State<AppendLoader>
                 Text(
                   widget.message!,
                   style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.6),
+                    color: colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -156,7 +156,7 @@ class _AppendLoaderState extends State<AppendLoader>
                   Text(
                     widget.message!,
                     style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurface.withOpacity(0.6),
+                      color: colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -295,7 +295,7 @@ class _PulsingAppendLoaderState extends State<PulsingAppendLoader>
               Text(
                 widget.message!,
                 style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.6),
+                  color: colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
                 textAlign: TextAlign.center,
               ),

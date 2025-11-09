@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'pagination_shimmer.dart';
+import 'pagination_skeletonizer.dart';
 
 /// Modern bouncing dots loader
 class BouncingDotsLoader extends StatefulWidget {
@@ -100,7 +100,7 @@ class _BouncingDotsLoaderState extends State<BouncingDotsLoader>
               Text(
                 widget.message!,
                 style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.7),
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
@@ -210,7 +210,7 @@ class _WaveLoaderState extends State<WaveLoader>
               Text(
                 widget.message!,
                 style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.7),
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
@@ -298,9 +298,9 @@ class _RotatingSquaresLoaderState extends State<RotatingSquaresLoader>
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          color.withOpacity(0.3),
+                          color.withValues(alpha: 0.3),
                           color,
-                          color.withOpacity(0.3),
+                          color.withValues(alpha: 0.3),
                         ],
                         stops: const [0.0, 0.5, 1.0],
                       ),
@@ -313,7 +313,7 @@ class _RotatingSquaresLoaderState extends State<RotatingSquaresLoader>
                           height: widget.size * 0.6,
                           margin: EdgeInsets.all(widget.size * 0.2),
                           decoration: BoxDecoration(
-                            color: color.withOpacity(0.2),
+                            color: color.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -328,7 +328,7 @@ class _RotatingSquaresLoaderState extends State<RotatingSquaresLoader>
               Text(
                 widget.message!,
                 style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.7),
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
@@ -427,8 +427,8 @@ class _PulseLoaderState extends State<PulseLoader>
                       decoration: BoxDecoration(
                         gradient: RadialGradient(
                           colors: [
-                            color.withOpacity(0.1),
-                            color.withOpacity(0.3),
+                            color.withValues(alpha: 0.1),
+                            color.withValues(alpha: 0.3),
                             color,
                           ],
                           stops: const [0.0, 0.7, 1.0],
@@ -436,7 +436,7 @@ class _PulseLoaderState extends State<PulseLoader>
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: color.withOpacity(0.3),
+                            color: color.withValues(alpha: 0.3),
                             blurRadius: 20,
                             spreadRadius: 5,
                           ),
@@ -447,7 +447,7 @@ class _PulseLoaderState extends State<PulseLoader>
                           width: widget.size * 0.4,
                           height: widget.size * 0.4,
                           decoration: BoxDecoration(
-                            color: color.withOpacity(0.8),
+                            color: color.withValues(alpha: 0.8),
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -462,7 +462,7 @@ class _PulseLoaderState extends State<PulseLoader>
               Text(
                 widget.message!,
                 style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.7),
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
@@ -503,10 +503,10 @@ class SkeletonLoader extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Use PaginationShimmer for skeleton effect
+          // Use PaginationSkeletonizer for skeleton effect
           SizedBox(
             height: 200,
-            child: PaginationShimmer(
+            child: PaginationSkeletonizer(
               itemCount: itemCount,
               shrinkWrap: true,
             ),

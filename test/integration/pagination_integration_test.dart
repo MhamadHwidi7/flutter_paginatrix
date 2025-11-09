@@ -6,7 +6,7 @@ import '../helpers/test_helpers.dart';
 
 void main() {
   group('Pagination Integration Tests', () {
-    late PaginatedController<Map<String, dynamic>> controller;
+    late PaginatedCubit<Map<String, dynamic>> controller;
     late List<Map<String, dynamic>> mockData;
 
     setUp(() {
@@ -14,7 +14,7 @@ void main() {
     });
 
     tearDown(() {
-      controller.dispose();
+      controller.close();
     });
 
     test('complete pagination flow: initial load -> pagination -> refresh', () async {
@@ -49,7 +49,7 @@ void main() {
 
     test('error recovery flow: error -> retry -> success', () async {
       var shouldFail = true;
-      controller = PaginatedController<Map<String, dynamic>>(
+      controller = PaginatedCubit<Map<String, dynamic>>(
         loader: ({
           int? page,
           int? perPage,
@@ -86,7 +86,7 @@ void main() {
 
     test('append error recovery: append fails -> retry -> success', () async {
       var failCount = 0;
-      controller = PaginatedController<Map<String, dynamic>>(
+      controller = PaginatedCubit<Map<String, dynamic>>(
         loader: ({
           int? page,
           int? perPage,

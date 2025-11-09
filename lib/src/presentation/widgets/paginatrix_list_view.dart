@@ -1,18 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/entities/pagination_error.dart';
 import '../../core/entities/pagination_state.dart';
-import '../../presentation/controllers/paginated_controller.dart';
+import '../controllers/paginated_cubit.dart';
 import 'append_loader.dart';
 import 'pagination_empty_view.dart';
 import 'pagination_error_view.dart';
-import 'pagination_shimmer.dart';
+import 'pagination_skeletonizer.dart';
 
-/// ListView adapter for Paginatrix
+/// ListView adapter for Paginatrix using BlocBuilder
+///
+/// This widget uses [PaginatedCubit] with [BlocBuilder] for reactive UI updates.
+///
+/// ## Example
+///
+/// ```dart
+/// final cubit = PaginatedCubit<Pokemon>(
+///   loader: repository.loadPokemon,
+///   itemDecoder: Pokemon.fromJson,
+///   metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
+/// );
+///
+/// PaginatrixListView<Pokemon>(
+///   cubit: cubit,
+///   itemBuilder: (context, pokemon, index) {
+///     return PokemonCard(pokemon: pokemon);
+///   },
+/// )
+/// ```
 class PaginatrixListView<T> extends StatelessWidget {
   const PaginatrixListView({
     super.key,
-    required this.controller,
+    required this.cubit,
     required this.itemBuilder,
     this.keyBuilder,
     this.prefetchThreshold,
@@ -35,7 +55,8 @@ class PaginatrixListView<T> extends StatelessWidget {
     this.addSemanticIndexes = true,
     this.cacheExtent,
   });
-  final PaginatedController<T> controller;
+
+  final PaginatedCubit<T> cubit;
   final Widget Function(BuildContext context, T item, int index) itemBuilder;
   final String Function(T item, int index)? keyBuilder;
   final int? prefetchThreshold;
@@ -62,13 +83,9 @@ class PaginatrixListView<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<PaginationState<T>>(
-      stream: controller.stream,
-      builder: (context, snapshot) {
-        final state = snapshot.data ?? controller.state;
-
-        return _buildContent(context, state);
-      },
+    return BlocBuilder<PaginatedCubit<T>, PaginationState<T>>(
+      bloc: cubit,
+      builder: _buildContent,
     );
   }
 
@@ -112,8 +129,8 @@ class PaginatrixListView<T> extends StatelessWidget {
       );
     }
 
-    // Use PaginationShimmer which handles its own CustomScrollView
-    return PaginationShimmer(
+    // Use PaginationSkeletonizer which handles its own CustomScrollView
+    return PaginationSkeletonizer(
       padding: padding,
       physics: physics,
       shrinkWrap: shrinkWrap,
@@ -133,7 +150,7 @@ class PaginatrixListView<T> extends StatelessWidget {
   Widget _buildRefreshableContent(BuildContext context, PaginationState<T> state) {
     return RefreshIndicator(
       onRefresh: () async {
-        controller.refresh();
+        cubit.refresh();
         if (onPullToRefresh != null) {
           onPullToRefresh!();
         }
@@ -152,7 +169,7 @@ class PaginatrixListView<T> extends StatelessWidget {
     }
 
     return GenericEmptyView(
-      onRefresh: onRetryInitial ?? controller.loadFirstPage,
+      onRefresh: onRetryInitial ?? cubit.loadFirstPage,
     );
   }
 
@@ -163,7 +180,7 @@ class PaginatrixListView<T> extends StatelessWidget {
 
     return PaginationErrorView(
       error: state.error!,
-      onRetry: onRetryInitial ?? controller.loadFirstPage,
+      onRetry: onRetryInitial ?? cubit.loadFirstPage,
     );
   }
 
@@ -187,7 +204,7 @@ class PaginatrixListView<T> extends StatelessWidget {
       onNotification: (notification) {
         if (notification is ScrollUpdateNotification ||
             notification is ScrollEndNotification) {
-          controller.checkAndLoadIfNearEnd(
+          cubit.checkAndLoadIfNearEnd(
             metrics: notification.metrics,
             prefetchThreshold: prefetchThreshold,
             reverse: reverse,
@@ -260,7 +277,7 @@ class PaginatrixListView<T> extends StatelessWidget {
 
       return AppendErrorView(
         error: state.appendError!,
-        onRetry: onRetryAppend ?? controller.loadNextPage,
+        onRetry: onRetryAppend ?? cubit.loadNextPage,
       );
     } else if (isAppending) {
       if (appendLoaderBuilder != null) {

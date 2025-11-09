@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 /// Skeleton loading effect for pagination loading states using Skeletonizer
-class PaginationShimmer extends StatelessWidget {
-  const PaginationShimmer({
+class PaginationSkeletonizer extends StatelessWidget {
+  const PaginationSkeletonizer({
     super.key,
     this.itemCount = 10,
     this.itemBuilder,
@@ -35,16 +35,14 @@ class PaginationShimmer extends StatelessWidget {
         reverse: reverse,
         slivers: [
           if (padding != null) SliverPadding(padding: padding!),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                if (itemBuilder != null) {
-                  return itemBuilder!(context, index);
-                }
-                return _DefaultSkeletonItem();
-              },
-              childCount: itemCount,
-            ),
+          SliverList.builder(
+            itemCount: itemCount,
+            itemBuilder: (context, index) {
+              if (itemBuilder != null) {
+                return itemBuilder!(context, index);
+              }
+              return const _DefaultSkeletonItem();
+            },
           ),
         ],
       ),
@@ -60,13 +58,13 @@ class _DefaultSkeletonItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
+      child: const Row(
         children: [
           // Avatar placeholder
           Bone.circle(
             size: 48,
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16),
           // Content placeholder
           Expanded(
             child: Column(
@@ -76,11 +74,10 @@ class _DefaultSkeletonItem extends StatelessWidget {
                   words: 3,
                   fontSize: 16,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Bone.text(
                   words: 5,
                   fontSize: 14,
-                  width: 0.6,
                 ),
               ],
             ),
@@ -92,8 +89,8 @@ class _DefaultSkeletonItem extends StatelessWidget {
 }
 
 /// Skeleton loading effect for grid items using Skeletonizer
-class PaginationGridShimmer extends StatelessWidget {
-  const PaginationGridShimmer({
+class PaginationGridSkeletonizer extends StatelessWidget {
+  const PaginationGridSkeletonizer({
     super.key,
     this.itemCount = 10,
     this.itemBuilder,
@@ -127,17 +124,15 @@ class PaginationGridShimmer extends StatelessWidget {
         reverse: reverse,
         slivers: [
           if (padding != null) SliverPadding(padding: padding!),
-          SliverGrid(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                if (itemBuilder != null) {
-                  return itemBuilder!(context, index);
-                }
-                return _DefaultGridSkeletonItem();
-              },
-              childCount: itemCount,
-            ),
+          SliverGrid.builder(
             gridDelegate: gridDelegate,
+            itemCount: itemCount,
+            itemBuilder: (context, index) {
+              if (itemBuilder != null) {
+                return itemBuilder!(context, index);
+              }
+              return const _DefaultGridSkeletonItem();
+            },
           ),
         ],
       ),
@@ -157,18 +152,18 @@ class _DefaultGridSkeletonItem extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Column(
+      child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Bone.circle(
             size: 60,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Bone.text(
             words: 2,
             fontSize: 16,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Bone.text(
             words: 1,
             fontSize: 14,

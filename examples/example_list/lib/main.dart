@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
@@ -36,22 +37,22 @@ class UsersPage extends StatefulWidget {
 }
 
 class _UsersPageState extends State<UsersPage> {
-  late final PaginatedController<User> _controller;
+  late final PaginatedCubit<User> _cubit;
 
   @override
   void initState() {
     super.initState();
-    _controller = PaginatedController<User>(
+    _cubit = PaginatedCubit<User>(
       loader: _loadUsers,
       itemDecoder: User.fromJson,
       metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
     );
-    _controller.loadFirstPage();
+    _cubit.loadFirstPage();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _cubit.close();
     super.dispose();
   }
 
@@ -103,7 +104,7 @@ class _UsersPageState extends State<UsersPage> {
         elevation: 0,
       ),
       body: PaginatrixListView<User>(
-        controller: _controller,
+        cubit: _cubit,
         padding: const EdgeInsets.symmetric(vertical: 8),
         // Performance optimizations
         cacheExtent: 250, // Limit off-screen items for better memory usage
@@ -139,16 +140,16 @@ class _UserListItem extends StatelessWidget {
 
     return ListTile(
       leading: ClipOval(
-        child: Image.network(
-          user.avatar,
+        child: CachedNetworkImage(
+          imageUrl: user.avatar,
           width: 40,
           height: 40,
           fit: BoxFit.cover,
-          // Scale down image to reduce memory and jank frames
-          // CircleAvatar is typically 40-56px, cache at 100px (2x for retina)
-          cacheWidth: 100,
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
+          memCacheWidth: 100,
+          memCacheHeight: 100,
+          maxWidthDiskCache: 200,
+          maxHeightDiskCache: 200,
+          progressIndicatorBuilder: (context, url, downloadProgress) {
             return Container(
               width: 40,
               height: 40,
@@ -156,15 +157,13 @@ class _UserListItem extends StatelessWidget {
               child: Center(
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  value: loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes!
-                      : null,
+                  value: downloadProgress.progress,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             );
           },
-          errorBuilder: (context, error, stackTrace) {
+          errorWidget: (context, url, error) {
             return Container(
               width: 40,
               height: 40,
@@ -179,6 +178,7 @@ class _UserListItem extends StatelessWidget {
               ),
             );
           },
+          fadeInDuration: const Duration(milliseconds: 300),
         ),
       ),
       title: Text(

@@ -2,15 +2,6 @@ import 'package:flutter/material.dart';
 
 /// Empty state view for when no data is available
 class PaginationEmptyView extends StatelessWidget {
-  final Widget? icon;
-  final String? title;
-  final String? description;
-  final Widget? action;
-  final VoidCallback? onActionTap;
-  final EdgeInsetsGeometry? padding;
-  final MainAxisAlignment mainAxisAlignment;
-  final CrossAxisAlignment crossAxisAlignment;
-  
   const PaginationEmptyView({
     super.key,
     this.icon,
@@ -22,6 +13,15 @@ class PaginationEmptyView extends StatelessWidget {
     this.mainAxisAlignment = MainAxisAlignment.center,
     this.crossAxisAlignment = CrossAxisAlignment.center,
   });
+  final Widget? icon;
+  final String? title;
+  final String? description;
+  final Widget? action;
+  final VoidCallback? onActionTap;
+  final EdgeInsetsGeometry? padding;
+  final MainAxisAlignment mainAxisAlignment;
+  final CrossAxisAlignment crossAxisAlignment;
+  
   
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,7 @@ class PaginationEmptyView extends StatelessWidget {
             Icon(
               Icons.inbox_outlined,
               size: 64,
-              color: colorScheme.onSurface.withOpacity(0.4),
+              color: colorScheme.onSurface.withValues(alpha: 0.4),
             ),
             const SizedBox(height: 24),
           ],
@@ -51,7 +51,7 @@ class PaginationEmptyView extends StatelessWidget {
             Text(
               title!,
               style: textTheme.headlineSmall?.copyWith(
-                color: colorScheme.onSurface.withOpacity(0.8),
+                color: colorScheme.onSurface.withValues(alpha: 0.8),
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,
@@ -63,7 +63,7 @@ class PaginationEmptyView extends StatelessWidget {
             Text(
               description!,
               style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface.withOpacity(0.6),
+                color: colorScheme.onSurface.withValues(alpha: 0.6),
               ),
               textAlign: TextAlign.center,
             ),
@@ -102,7 +102,7 @@ class SearchEmptyView extends StatelessWidget {
       icon: Icon(
         Icons.search_off,
         size: 64,
-        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
       ),
       title: 'No results found',
       description: query != null 
@@ -133,7 +133,7 @@ class NetworkEmptyView extends StatelessWidget {
       icon: Icon(
         Icons.wifi_off,
         size: 64,
-        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
       ),
       title: 'No connection',
       description: 'Check your internet connection and try again',
@@ -164,7 +164,7 @@ class GenericEmptyView extends StatelessWidget {
       icon: Icon(
         Icons.inbox_outlined,
         size: 64,
-        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
       ),
       title: 'No data available',
       description: message ?? 'There\'s nothing to show here yet',
