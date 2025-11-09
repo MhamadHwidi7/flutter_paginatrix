@@ -46,7 +46,7 @@ class PaginatrixGridView<T> extends StatelessWidget
     this.shrinkWrap = false,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
-    this.shimmerBuilder,
+    this.skeletonizerBuilder,
     this.emptyBuilder,
     this.errorBuilder,
     this.appendErrorBuilder,
@@ -74,7 +74,7 @@ class PaginatrixGridView<T> extends StatelessWidget
   final bool shrinkWrap;
   final Axis scrollDirection;
   final bool reverse;
-  final Widget Function(BuildContext context, int index)? shimmerBuilder;
+  final Widget Function(BuildContext context, int index)? skeletonizerBuilder;
 
   // Mixin-required callbacks
   @override
@@ -110,7 +110,7 @@ class PaginatrixGridView<T> extends StatelessWidget
 
   @override
   Widget buildLoadingState(BuildContext context) {
-    if (shimmerBuilder != null) {
+    if (skeletonizerBuilder != null) {
       return CustomScrollView(
         physics: physics,
         shrinkWrap: shrinkWrap,
@@ -121,8 +121,8 @@ class PaginatrixGridView<T> extends StatelessWidget
           if (padding != null) SliverPadding(padding: padding!),
           SliverGrid(
             delegate: SliverChildBuilderDelegate(
-              shimmerBuilder!,
-              childCount: 10, // Default shimmer count
+              skeletonizerBuilder!,
+              childCount: 10, // Default skeletonizer count
               addAutomaticKeepAlives: addAutomaticKeepAlives,
               addRepaintBoundaries: addRepaintBoundaries,
               addSemanticIndexes: addSemanticIndexes,

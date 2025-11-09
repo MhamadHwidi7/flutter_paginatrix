@@ -41,7 +41,7 @@ class PaginatrixListView<T> extends StatelessWidget
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
     this.separatorBuilder,
-    this.shimmerBuilder,
+    this.skeletonizerBuilder,
     this.emptyBuilder,
     this.errorBuilder,
     this.appendErrorBuilder,
@@ -69,7 +69,7 @@ class PaginatrixListView<T> extends StatelessWidget
   final Axis scrollDirection;
   final bool reverse;
   final Widget Function(BuildContext context, int index)? separatorBuilder;
-  final Widget Function(BuildContext context, int index)? shimmerBuilder;
+  final Widget Function(BuildContext context, int index)? skeletonizerBuilder;
 
   // Mixin-required callbacks
   @override
@@ -105,7 +105,7 @@ class PaginatrixListView<T> extends StatelessWidget
 
   @override
   Widget buildLoadingState(BuildContext context) {
-    if (shimmerBuilder != null) {
+    if (skeletonizerBuilder != null) {
       return CustomScrollView(
         physics: physics,
         shrinkWrap: shrinkWrap,
@@ -116,7 +116,7 @@ class PaginatrixListView<T> extends StatelessWidget
           if (padding != null) SliverPadding(padding: padding!),
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              shimmerBuilder!,
+              skeletonizerBuilder!,
               childCount: 10,
               addAutomaticKeepAlives: addAutomaticKeepAlives,
               addRepaintBoundaries: addRepaintBoundaries,
