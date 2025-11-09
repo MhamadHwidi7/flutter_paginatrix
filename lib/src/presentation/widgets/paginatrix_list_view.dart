@@ -4,10 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/entities/pagination_error.dart';
 import '../../core/entities/pagination_state.dart';
 import '../controllers/paginated_cubit.dart';
-import 'append_loader.dart';
-import 'pagination_empty_view.dart';
-import 'pagination_error_view.dart';
 import 'pagination_skeletonizer.dart';
+import 'paginatrix_state_builder_mixin.dart';
 
 /// ListView adapter for Paginatrix using BlocBuilder
 ///
@@ -29,7 +27,8 @@ import 'pagination_skeletonizer.dart';
 ///   },
 /// )
 /// ```
-class PaginatrixListView<T> extends StatelessWidget {
+class PaginatrixListView<T> extends StatelessWidget
+    with PaginatrixStateBuilderMixin<T> {
   const PaginatrixListView({
     super.key,
     required this.cubit,
@@ -56,7 +55,11 @@ class PaginatrixListView<T> extends StatelessWidget {
     this.cacheExtent,
   });
 
+  // Required by mixin
+  @override
   final PaginatedCubit<T> cubit;
+
+  // Widget-specific fields
   final Widget Function(BuildContext context, T item, int index) itemBuilder;
   final String Function(T item, int index)? keyBuilder;
   final int? prefetchThreshold;
@@ -67,15 +70,26 @@ class PaginatrixListView<T> extends StatelessWidget {
   final bool reverse;
   final Widget Function(BuildContext context, int index)? separatorBuilder;
   final Widget Function(BuildContext context, int index)? shimmerBuilder;
+
+  // Mixin-required callbacks
+  @override
   final Widget Function(BuildContext context)? emptyBuilder;
+  @override
   final Widget Function(BuildContext context, PaginationError error)?
       errorBuilder;
+  @override
   final Widget Function(BuildContext context, PaginationError error)?
       appendErrorBuilder;
+  @override
   final Widget Function(BuildContext context)? appendLoaderBuilder;
+  @override
   final VoidCallback? onPullToRefresh;
+  @override
   final VoidCallback? onRetryInitial;
+  @override
   final VoidCallback? onRetryAppend;
+
+  // ListView performance options
   final bool addAutomaticKeepAlives;
   final bool addRepaintBoundaries;
   final bool addSemanticIndexes;
@@ -85,28 +99,12 @@ class PaginatrixListView<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<PaginatedCubit<T>, PaginationState<T>>(
       bloc: cubit,
-      builder: _buildContent,
+      builder: buildContent,
     );
   }
 
-  Widget _buildContent(BuildContext context, PaginationState<T> state) {
-    return state.status.when(
-      initial: () => _buildInitialState(context),
-      loading: () => _buildLoadingState(context),
-      success: () => _buildSuccessState(context, state),
-      empty: () => _buildEmptyState(context),
-      refreshing: () => _buildRefreshingState(context, state),
-      appending: () => _buildAppendingState(context, state),
-      error: () => _buildErrorState(context, state),
-      appendError: () => _buildAppendErrorState(context, state),
-    );
-  }
-
-  Widget _buildInitialState(BuildContext context) {
-    return _buildLoadingState(context);
-  }
-
-  Widget _buildLoadingState(BuildContext context) {
+  @override
+  Widget buildLoadingState(BuildContext context) {
     if (shimmerBuilder != null) {
       return CustomScrollView(
         physics: physics,
@@ -139,57 +137,8 @@ class PaginatrixListView<T> extends StatelessWidget {
     );
   }
 
-  Widget _buildSuccessState(BuildContext context, PaginationState<T> state) {
-    return _buildRefreshableContent(context, state);
-  }
-
-  Widget _buildRefreshingState(BuildContext context, PaginationState<T> state) {
-    return _buildRefreshableContent(context, state);
-  }
-
-  Widget _buildRefreshableContent(BuildContext context, PaginationState<T> state) {
-    return RefreshIndicator(
-      onRefresh: () async {
-        cubit.refresh();
-        if (onPullToRefresh != null) {
-          onPullToRefresh!();
-        }
-      },
-      child: _buildListWithItems(context, state),
-    );
-  }
-
-  Widget _buildAppendingState(BuildContext context, PaginationState<T> state) {
-    return _buildRefreshableContent(context, state);
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
-    if (emptyBuilder != null) {
-      return emptyBuilder!(context);
-    }
-
-    return GenericEmptyView(
-      onRefresh: onRetryInitial ?? cubit.loadFirstPage,
-    );
-  }
-
-  Widget _buildErrorState(BuildContext context, PaginationState<T> state) {
-    if (errorBuilder != null) {
-      return errorBuilder!(context, state.error!);
-    }
-
-    return PaginationErrorView(
-      error: state.error!,
-      onRetry: onRetryInitial ?? cubit.loadFirstPage,
-    );
-  }
-
-  Widget _buildAppendErrorState(
-      BuildContext context, PaginationState<T> state) {
-    return _buildListWithItems(context, state);
-  }
-
-  Widget _buildListWithItems(BuildContext context, PaginationState<T> state) {
+  @override
+  Widget buildScrollableContent(BuildContext context, PaginationState<T> state) {
     final items = state.items;
     final itemCount = items.length;
     final hasMore = state.canLoadMore;
@@ -200,18 +149,9 @@ class PaginatrixListView<T> extends StatelessWidget {
     final hasAppendError = state.hasAppendError;
     final hasSeparator = separatorBuilder != null;
 
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification is ScrollUpdateNotification ||
-            notification is ScrollEndNotification) {
-          cubit.checkAndLoadIfNearEnd(
-            metrics: notification.metrics,
-            prefetchThreshold: prefetchThreshold,
-            reverse: reverse,
-          );
-        }
-        return false;
-      },
+    return createScrollListener(
+      prefetchThreshold: prefetchThreshold,
+      reverse: reverse,
       child: CustomScrollView(
         physics: physics,
         shrinkWrap: shrinkWrap,
@@ -229,11 +169,11 @@ class PaginatrixListView<T> extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       separatorBuilder!(context, index - 1),
-                      _buildItem(context, items[index], index),
+                      buildItem(context, items[index], index, itemBuilder, keyBuilder),
                     ],
                   );
                 }
-                return _buildItem(context, items[index], index);
+                return buildItem(context, items[index], index, itemBuilder, keyBuilder);
               },
               childCount: itemCount,
               addAutomaticKeepAlives: addAutomaticKeepAlives,
@@ -244,49 +184,16 @@ class PaginatrixListView<T> extends StatelessWidget {
           // Always show footer when appending or has error, even if no more items
           if (isAppending || hasAppendError)
             SliverToBoxAdapter(
-              child: _buildFooterItem(
-                  context, hasMore, isAppending, hasAppendError, state),
+              child: buildFooterItem(
+                context,
+                hasMore: hasMore,
+                isAppending: isAppending,
+                hasAppendError: hasAppendError,
+                state: state,
+              ),
             ),
         ],
       ),
     );
-  }
-
-  Widget _buildItem(BuildContext context, T item, int index) {
-    final key = keyBuilder != null ? keyBuilder!(item, index) : null;
-
-    return RepaintBoundary(
-      child: KeyedSubtree(
-        key: key != null ? ValueKey(key) : null,
-        child: itemBuilder(context, item, index),
-      ),
-    );
-  }
-
-  Widget _buildFooterItem(
-    BuildContext context,
-    bool hasMore,
-    bool isAppending,
-    bool hasAppendError,
-    PaginationState<T> state,
-  ) {
-    if (hasAppendError) {
-      if (appendErrorBuilder != null) {
-        return appendErrorBuilder!(context, state.appendError!);
-      }
-
-      return AppendErrorView(
-        error: state.appendError!,
-        onRetry: onRetryAppend ?? cubit.loadNextPage,
-      );
-    } else if (isAppending) {
-      if (appendLoaderBuilder != null) {
-        return appendLoaderBuilder!(context);
-      }
-
-      return const AppendLoader();
-    }
-
-    return const SizedBox.shrink();
   }
 }
