@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../core/contracts/meta_parser.dart';
 import '../../core/entities/page_meta.dart';
 import '../../core/entities/pagination_error.dart';
+import '../../core/utils/error_utils.dart';
 
 part 'config_meta_parser.freezed.dart';
 part 'config_meta_parser.g.dart';
@@ -170,7 +171,7 @@ class ConfigMetaParser implements MetaParser {
       throw PaginationError.parse(
         message: 'Failed to parse pagination metadata: $e',
         expectedFormat: 'Expected paths: ${_config.toString()}',
-        actualData: data.toString(),
+        actualData: ErrorUtils.truncateData(data),
       );
     }
   }
@@ -194,7 +195,7 @@ class ConfigMetaParser implements MetaParser {
       throw PaginationError.parse(
         message: 'Failed to extract items: $e',
         expectedFormat: 'Expected items at path: ${_config.itemsPath}',
-        actualData: data.toString(),
+        actualData: ErrorUtils.truncateData(data),
       );
     }
   }
