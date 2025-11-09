@@ -21,3 +21,6 @@ dev_dependencies:
   flutter_lints: ^3.0.1
   build_runner: ^2.10.1
 
+flutter:
+  uses-material-design: true
+
