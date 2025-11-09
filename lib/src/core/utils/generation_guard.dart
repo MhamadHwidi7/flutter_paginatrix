@@ -1,4 +1,4 @@
-import '../entities/request_context.dart';
+import 'package:flutter_paginatrix/src/core/entities/request_context.dart';
 
 /// Utility for preventing stale responses using generation numbers
 class GenerationGuard {

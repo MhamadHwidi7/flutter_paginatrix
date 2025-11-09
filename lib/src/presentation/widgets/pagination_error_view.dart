@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../core/entities/pagination_error.dart';
+import 'package:flutter_paginatrix/src/core/entities/pagination_error.dart';
 
 /// Error view for pagination failures
 class PaginationErrorView extends StatelessWidget {

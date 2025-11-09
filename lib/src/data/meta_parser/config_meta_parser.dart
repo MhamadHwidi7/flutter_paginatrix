@@ -1,9 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-
-import '../../core/contracts/meta_parser.dart';
-import '../../core/entities/page_meta.dart';
-import '../../core/entities/pagination_error.dart';
-import '../../core/utils/error_utils.dart';
+import 'package:flutter_paginatrix/src/core/contracts/meta_parser.dart';
+import 'package:flutter_paginatrix/src/core/entities/page_meta.dart';
+import 'package:flutter_paginatrix/src/core/entities/pagination_error.dart';
+import 'package:flutter_paginatrix/src/core/utils/error_utils.dart';
 
 part 'config_meta_parser.freezed.dart';
 part 'config_meta_parser.g.dart';
@@ -99,10 +98,27 @@ class MetaConfig with _$MetaConfig {
 class ConfigMetaParser implements MetaParser {
   ConfigMetaParser(this._config);
   final MetaConfig _config;
+  
+  // Cache for parsed path segments to avoid repeated splitting
+  final Map<String, List<String>> _pathCache = {};
+  
+  // Cache for parsed metadata to avoid re-parsing same data structures
+  // Uses a simple hash of the data structure as key
+  final Map<int, PageMeta> _metaCache = {};
+  
+  // Maximum cache size to prevent memory issues
+  static const int _maxCacheSize = 100;
 
   @override
   PageMeta parseMeta(Map<String, dynamic> data) {
     try {
+      // Try to get from cache first (simple hash-based caching)
+      // Only cache if data structure is reasonably small to avoid memory issues
+      final dataHash = _computeSimpleHash(data);
+      if (_metaCache.containsKey(dataHash) && data.length < 50) {
+        return _metaCache[dataHash]!;
+      }
+      
       // Safe type extraction with runtime checks
       final pageValue = _extractValue(data, _config.pagePath);
       final page = pageValue is int ? pageValue : null;
@@ -132,8 +148,9 @@ class ConfigMetaParser implements MetaParser {
       final limit = limitValue is int ? limitValue : null;
 
       // Determine pagination type and create appropriate PageMeta
+      final PageMeta result;
       if (page != null && perPage != null) {
-        return PageMeta.pageBased(
+        result = PageMeta.pageBased(
           page: page,
           perPage: perPage,
           total: total,
@@ -141,13 +158,13 @@ class ConfigMetaParser implements MetaParser {
           hasMore: hasMore ?? (lastPage != null ? page < lastPage : null),
         );
       } else if (nextCursor != null || hasMore != null) {
-        return PageMeta.cursorBased(
+        result = PageMeta.cursorBased(
           nextCursor: nextCursor,
           previousCursor: previousCursor,
           hasMore: hasMore,
         );
       } else if (offset != null && limit != null) {
-        return PageMeta.offsetBased(
+        result = PageMeta.offsetBased(
           offset: offset,
           limit: limit,
           total: total,
@@ -155,7 +172,7 @@ class ConfigMetaParser implements MetaParser {
         );
       } else {
         // Fallback to basic meta
-        return PageMeta(
+        result = PageMeta(
           page: page,
           perPage: perPage,
           total: total,
@@ -167,6 +184,13 @@ class ConfigMetaParser implements MetaParser {
           limit: limit,
         );
       }
+      
+      // Cache the parsed metadata if cache is not too large
+      if (_metaCache.length < _maxCacheSize && data.length < 50) {
+        _metaCache[dataHash] = result;
+      }
+      
+      return result;
     } catch (e) {
       throw PaginationError.parse(
         message: 'Failed to parse pagination metadata: $e',
@@ -175,6 +199,32 @@ class ConfigMetaParser implements MetaParser {
       );
     }
   }
+  
+  /// Computes a simple hash for caching purposes
+  /// Uses a combination of relevant pagination fields
+  int _computeSimpleHash(Map<String, dynamic> data) {
+    final buffer = StringBuffer();
+    
+    // Include relevant pagination fields in hash
+    final pageValue = _extractValue(data, _config.pagePath);
+    final perPageValue = _extractValue(data, _config.perPagePath);
+    final totalValue = _extractValue(data, _config.totalPath);
+    final hasMoreValue = _extractValue(data, _config.hasMorePath);
+    
+    buffer.write('${pageValue ?? ''}_');
+    buffer.write('${perPageValue ?? ''}_');
+    buffer.write('${totalValue ?? ''}_');
+    buffer.write('${hasMoreValue ?? ''}');
+    
+    return buffer.toString().hashCode;
+  }
+  
+  /// Clears the metadata cache
+  /// Useful for memory management or when data structures change significantly
+  void clearCache() {
+    _metaCache.clear();
+    _pathCache.clear();
+  }
 
   @override
   List<Map<String, dynamic>> extractItems(Map<String, dynamic> data) {
@@ -182,7 +232,16 @@ class ConfigMetaParser implements MetaParser {
       final items = _extractValue(data, _config.itemsPath);
 
       if (items is List) {
-        return items.cast<Map<String, dynamic>>();
+        // Validate that all items are Maps before casting
+        if (items.every((item) => item is Map<String, dynamic>)) {
+          return items.cast<Map<String, dynamic>>();
+        } else {
+          throw PaginationError.parse(
+            message: 'Items path "${_config.itemsPath}" contains non-map items',
+            expectedFormat: 'Expected a list of map objects',
+            actualData: ErrorUtils.truncateData(items),
+          );
+        }
       } else {
         throw PaginationError.parse(
           message: 'Items path "${_config.itemsPath}" does not contain a list',
@@ -227,11 +286,45 @@ class ConfigMetaParser implements MetaParser {
     }
   }
 
+  /// Validates that a path is well-formed
+  bool _isValidPath(String? path) {
+    if (path == null || path.isEmpty) return false;
+    
+    // Check for empty segments (e.g., "a..b" or ".a" or "a.")
+    final segments = path.split('.');
+    if (segments.any((segment) => segment.isEmpty)) {
+      return false;
+    }
+    
+    // Check for valid characters (alphanumeric, underscore, hyphen)
+    for (final segment in segments) {
+      if (segment.isEmpty || !RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(segment)) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+
   /// Extracts a value from nested data using dot notation
+  /// Uses caching to avoid repeated path parsing
   dynamic _extractValue(Map<String, dynamic> data, String? path) {
     if (path == null || path.isEmpty) return null;
+    
+    // Validate path format
+    if (!_isValidPath(path)) {
+      return null;
+    }
 
-    final parts = path.split('.');
+    // Get or cache path segments
+    List<String> parts;
+    if (_pathCache.containsKey(path)) {
+      parts = _pathCache[path]!;
+    } else {
+      parts = path.split('.');
+      _pathCache[path] = parts;
+    }
+    
     dynamic current = data;
 
     for (final part in parts) {

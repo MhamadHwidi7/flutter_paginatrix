@@ -30,6 +30,8 @@ export 'src/core/entities/pagination_status.dart';
 export 'src/core/entities/request_context.dart';
 // Core enums
 export 'src/core/enums/paginatrix_load_type.dart';
+// Core extensions
+export 'src/core/extensions/pagination_state_extension.dart';
 // Core models
 export 'src/core/models/pagination_options.dart';
 // Core typedefs

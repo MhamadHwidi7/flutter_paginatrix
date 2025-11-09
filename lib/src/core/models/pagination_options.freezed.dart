@@ -39,6 +39,18 @@ mixin _$PaginationOptions {
   double get defaultPrefetchThresholdPixels =>
       throw _privateConstructorUsedError;
 
+  /// Maximum number of retry attempts
+  int get maxRetries => throw _privateConstructorUsedError;
+
+  /// Initial backoff duration for retry attempts
+  Duration get initialBackoff => throw _privateConstructorUsedError;
+
+  /// Retry reset timeout (resets retry count after this duration)
+  Duration get retryResetTimeout => throw _privateConstructorUsedError;
+
+  /// Debounce duration for refresh calls to prevent rapid successive refreshes
+  Duration get refreshDebounceDuration => throw _privateConstructorUsedError;
+
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $PaginationOptionsCopyWith<PaginationOptions> get copyWith =>
@@ -57,7 +69,11 @@ abstract class $PaginationOptionsCopyWith<$Res> {
       Duration requestTimeout,
       bool enableDebugLogging,
       int defaultPrefetchThreshold,
-      double defaultPrefetchThresholdPixels});
+      double defaultPrefetchThresholdPixels,
+      int maxRetries,
+      Duration initialBackoff,
+      Duration retryResetTimeout,
+      Duration refreshDebounceDuration});
 }
 
 /// @nodoc
@@ -79,6 +95,10 @@ class _$PaginationOptionsCopyWithImpl<$Res, $Val extends PaginationOptions>
     Object? enableDebugLogging = null,
     Object? defaultPrefetchThreshold = null,
     Object? defaultPrefetchThresholdPixels = null,
+    Object? maxRetries = null,
+    Object? initialBackoff = null,
+    Object? retryResetTimeout = null,
+    Object? refreshDebounceDuration = null,
   }) {
     return _then(_value.copyWith(
       defaultPageSize: null == defaultPageSize
@@ -105,6 +125,22 @@ class _$PaginationOptionsCopyWithImpl<$Res, $Val extends PaginationOptions>
           ? _value.defaultPrefetchThresholdPixels
           : defaultPrefetchThresholdPixels // ignore: cast_nullable_to_non_nullable
               as double,
+      maxRetries: null == maxRetries
+          ? _value.maxRetries
+          : maxRetries // ignore: cast_nullable_to_non_nullable
+              as int,
+      initialBackoff: null == initialBackoff
+          ? _value.initialBackoff
+          : initialBackoff // ignore: cast_nullable_to_non_nullable
+              as Duration,
+      retryResetTimeout: null == retryResetTimeout
+          ? _value.retryResetTimeout
+          : retryResetTimeout // ignore: cast_nullable_to_non_nullable
+              as Duration,
+      refreshDebounceDuration: null == refreshDebounceDuration
+          ? _value.refreshDebounceDuration
+          : refreshDebounceDuration // ignore: cast_nullable_to_non_nullable
+              as Duration,
     ) as $Val);
   }
 }
@@ -123,7 +159,11 @@ abstract class _$$PaginationOptionsImplCopyWith<$Res>
       Duration requestTimeout,
       bool enableDebugLogging,
       int defaultPrefetchThreshold,
-      double defaultPrefetchThresholdPixels});
+      double defaultPrefetchThresholdPixels,
+      int maxRetries,
+      Duration initialBackoff,
+      Duration retryResetTimeout,
+      Duration refreshDebounceDuration});
 }
 
 /// @nodoc
@@ -143,6 +183,10 @@ class __$$PaginationOptionsImplCopyWithImpl<$Res>
     Object? enableDebugLogging = null,
     Object? defaultPrefetchThreshold = null,
     Object? defaultPrefetchThresholdPixels = null,
+    Object? maxRetries = null,
+    Object? initialBackoff = null,
+    Object? retryResetTimeout = null,
+    Object? refreshDebounceDuration = null,
   }) {
     return _then(_$PaginationOptionsImpl(
       defaultPageSize: null == defaultPageSize
@@ -169,6 +213,22 @@ class __$$PaginationOptionsImplCopyWithImpl<$Res>
           ? _value.defaultPrefetchThresholdPixels
           : defaultPrefetchThresholdPixels // ignore: cast_nullable_to_non_nullable
               as double,
+      maxRetries: null == maxRetries
+          ? _value.maxRetries
+          : maxRetries // ignore: cast_nullable_to_non_nullable
+              as int,
+      initialBackoff: null == initialBackoff
+          ? _value.initialBackoff
+          : initialBackoff // ignore: cast_nullable_to_non_nullable
+              as Duration,
+      retryResetTimeout: null == retryResetTimeout
+          ? _value.retryResetTimeout
+          : retryResetTimeout // ignore: cast_nullable_to_non_nullable
+              as Duration,
+      refreshDebounceDuration: null == refreshDebounceDuration
+          ? _value.refreshDebounceDuration
+          : refreshDebounceDuration // ignore: cast_nullable_to_non_nullable
+              as Duration,
     ));
   }
 }
@@ -182,7 +242,11 @@ class _$PaginationOptionsImpl implements _PaginationOptions {
       this.requestTimeout = const Duration(seconds: 30),
       this.enableDebugLogging = false,
       this.defaultPrefetchThreshold = 3,
-      this.defaultPrefetchThresholdPixels = 300.0});
+      this.defaultPrefetchThresholdPixels = 300.0,
+      this.maxRetries = 5,
+      this.initialBackoff = const Duration(milliseconds: 500),
+      this.retryResetTimeout = const Duration(seconds: 60),
+      this.refreshDebounceDuration = const Duration(milliseconds: 300)});
 
   factory _$PaginationOptionsImpl.fromJson(Map<String, dynamic> json) =>
       _$$PaginationOptionsImplFromJson(json);
@@ -217,9 +281,29 @@ class _$PaginationOptionsImpl implements _PaginationOptions {
   @JsonKey()
   final double defaultPrefetchThresholdPixels;
 
+  /// Maximum number of retry attempts
+  @override
+  @JsonKey()
+  final int maxRetries;
+
+  /// Initial backoff duration for retry attempts
+  @override
+  @JsonKey()
+  final Duration initialBackoff;
+
+  /// Retry reset timeout (resets retry count after this duration)
+  @override
+  @JsonKey()
+  final Duration retryResetTimeout;
+
+  /// Debounce duration for refresh calls to prevent rapid successive refreshes
+  @override
+  @JsonKey()
+  final Duration refreshDebounceDuration;
+
   @override
   String toString() {
-    return 'PaginationOptions(defaultPageSize: $defaultPageSize, maxPageSize: $maxPageSize, requestTimeout: $requestTimeout, enableDebugLogging: $enableDebugLogging, defaultPrefetchThreshold: $defaultPrefetchThreshold, defaultPrefetchThresholdPixels: $defaultPrefetchThresholdPixels)';
+    return 'PaginationOptions(defaultPageSize: $defaultPageSize, maxPageSize: $maxPageSize, requestTimeout: $requestTimeout, enableDebugLogging: $enableDebugLogging, defaultPrefetchThreshold: $defaultPrefetchThreshold, defaultPrefetchThresholdPixels: $defaultPrefetchThresholdPixels, maxRetries: $maxRetries, initialBackoff: $initialBackoff, retryResetTimeout: $retryResetTimeout, refreshDebounceDuration: $refreshDebounceDuration)';
   }
 
   @override
@@ -241,7 +325,16 @@ class _$PaginationOptionsImpl implements _PaginationOptions {
             (identical(other.defaultPrefetchThresholdPixels,
                     defaultPrefetchThresholdPixels) ||
                 other.defaultPrefetchThresholdPixels ==
-                    defaultPrefetchThresholdPixels));
+                    defaultPrefetchThresholdPixels) &&
+            (identical(other.maxRetries, maxRetries) ||
+                other.maxRetries == maxRetries) &&
+            (identical(other.initialBackoff, initialBackoff) ||
+                other.initialBackoff == initialBackoff) &&
+            (identical(other.retryResetTimeout, retryResetTimeout) ||
+                other.retryResetTimeout == retryResetTimeout) &&
+            (identical(
+                    other.refreshDebounceDuration, refreshDebounceDuration) ||
+                other.refreshDebounceDuration == refreshDebounceDuration));
   }
 
   @JsonKey(ignore: true)
@@ -253,7 +346,11 @@ class _$PaginationOptionsImpl implements _PaginationOptions {
       requestTimeout,
       enableDebugLogging,
       defaultPrefetchThreshold,
-      defaultPrefetchThresholdPixels);
+      defaultPrefetchThresholdPixels,
+      maxRetries,
+      initialBackoff,
+      retryResetTimeout,
+      refreshDebounceDuration);
 
   @JsonKey(ignore: true)
   @override
@@ -277,7 +374,11 @@ abstract class _PaginationOptions implements PaginationOptions {
       final Duration requestTimeout,
       final bool enableDebugLogging,
       final int defaultPrefetchThreshold,
-      final double defaultPrefetchThresholdPixels}) = _$PaginationOptionsImpl;
+      final double defaultPrefetchThresholdPixels,
+      final int maxRetries,
+      final Duration initialBackoff,
+      final Duration retryResetTimeout,
+      final Duration refreshDebounceDuration}) = _$PaginationOptionsImpl;
 
   factory _PaginationOptions.fromJson(Map<String, dynamic> json) =
       _$PaginationOptionsImpl.fromJson;
@@ -306,6 +407,22 @@ abstract class _PaginationOptions implements PaginationOptions {
 
   /// Default prefetch threshold in pixels (if threshold is not set)
   double get defaultPrefetchThresholdPixels;
+  @override
+
+  /// Maximum number of retry attempts
+  int get maxRetries;
+  @override
+
+  /// Initial backoff duration for retry attempts
+  Duration get initialBackoff;
+  @override
+
+  /// Retry reset timeout (resets retry count after this duration)
+  Duration get retryResetTimeout;
+  @override
+
+  /// Debounce duration for refresh calls to prevent rapid successive refreshes
+  Duration get refreshDebounceDuration;
   @override
   @JsonKey(ignore: true)
   _$$PaginationOptionsImplCopyWith<_$PaginationOptionsImpl> get copyWith =>

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-
-import '../../core/entities/pagination_error.dart';
-import '../../core/entities/pagination_state.dart';
-import '../controllers/paginated_cubit.dart';
-import 'append_loader.dart';
-import 'pagination_empty_view.dart';
-import 'pagination_error_view.dart';
+import 'package:flutter_paginatrix/src/core/entities/pagination_error.dart';
+import 'package:flutter_paginatrix/src/core/entities/pagination_state.dart';
+import 'package:flutter_paginatrix/src/presentation/controllers/paginated_cubit.dart';
+import 'package:flutter_paginatrix/src/presentation/widgets/append_loader.dart';
+import 'package:flutter_paginatrix/src/presentation/widgets/pagination_empty_view.dart';
+import 'package:flutter_paginatrix/src/presentation/widgets/pagination_error_view.dart';
 
 /// Mixin that provides shared pagination state building logic
 /// for PaginatrixListView and PaginatrixGridView.

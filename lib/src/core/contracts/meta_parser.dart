@@ -1,4 +1,4 @@
-import '../entities/page_meta.dart';
+import 'package:flutter_paginatrix/src/core/entities/page_meta.dart';
 
 /// Contract for parsing pagination metadata from API responses
 abstract class MetaParser {

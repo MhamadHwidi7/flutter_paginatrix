@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../core/entities/pagination_error.dart';
-import '../../core/entities/pagination_state.dart';
-import '../controllers/paginated_cubit.dart';
-import 'pagination_skeletonizer.dart';
-import 'paginatrix_state_builder_mixin.dart';
+import 'package:flutter_paginatrix/src/core/extensions/pagination_state_extension.dart';
+import 'package:flutter_paginatrix/src/core/entities/pagination_error.dart';
+import 'package:flutter_paginatrix/src/core/entities/pagination_state.dart';
+import 'package:flutter_paginatrix/src/presentation/controllers/paginated_cubit.dart';
+import 'package:flutter_paginatrix/src/presentation/widgets/pagination_skeletonizer.dart';
+import 'package:flutter_paginatrix/src/presentation/widgets/paginatrix_state_builder_mixin.dart';
 
 /// ListView adapter for Paginatrix using BlocBuilder
 ///
@@ -61,7 +61,8 @@ class PaginatrixListView<T> extends StatelessWidget
     this.addSemanticIndexes = true,
     this.cacheExtent,
   }) : assert(
-          scrollDirection == Axis.vertical || scrollDirection == Axis.horizontal,
+          scrollDirection == Axis.vertical ||
+              scrollDirection == Axis.horizontal,
           'scrollDirection must be either Axis.vertical or Axis.horizontal',
         );
 
@@ -148,7 +149,8 @@ class PaginatrixListView<T> extends StatelessWidget
   }
 
   @override
-  Widget buildScrollableContent(BuildContext context, PaginationState<T> state) {
+  Widget buildScrollableContent(
+      BuildContext context, PaginationState<T> state) {
     final items = state.items;
     final itemCount = items.length;
     final hasMore = state.canLoadMore;
@@ -179,11 +181,13 @@ class PaginatrixListView<T> extends StatelessWidget
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       separatorBuilder!(context, index - 1),
-                      buildItem(context, items[index], index, itemBuilder, keyBuilder),
+                      buildItem(context, items[index], index, itemBuilder,
+                          keyBuilder),
                     ],
                   );
                 }
-                return buildItem(context, items[index], index, itemBuilder, keyBuilder);
+                return buildItem(
+                    context, items[index], index, itemBuilder, keyBuilder);
               },
               childCount: itemCount,
               addAutomaticKeepAlives: addAutomaticKeepAlives,

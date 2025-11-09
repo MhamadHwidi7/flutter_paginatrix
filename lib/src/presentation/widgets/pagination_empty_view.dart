@@ -92,14 +92,13 @@ class PaginationEmptyView extends StatelessWidget {
 
 /// Predefined empty view for search results
 class SearchEmptyView extends StatelessWidget {
-  final String? query;
-  final VoidCallback? onClearSearch;
-  
   const SearchEmptyView({
     super.key,
     this.query,
     this.onClearSearch,
   });
+  final String? query;
+  final VoidCallback? onClearSearch;
   
   @override
   Widget build(BuildContext context) {

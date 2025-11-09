@@ -1,7 +1,7 @@
-import '../../core/contracts/meta_parser.dart';
-import '../../core/entities/page_meta.dart';
-import '../../core/entities/pagination_error.dart';
-import '../../core/typedefs/typedefs.dart';
+import 'package:flutter_paginatrix/src/core/contracts/meta_parser.dart';
+import 'package:flutter_paginatrix/src/core/entities/page_meta.dart';
+import 'package:flutter_paginatrix/src/core/entities/pagination_error.dart';
+import 'package:flutter_paginatrix/src/core/typedefs/typedefs.dart';
 
 /// Meta parser that uses custom transform functions
 class CustomMetaParser implements MetaParser {

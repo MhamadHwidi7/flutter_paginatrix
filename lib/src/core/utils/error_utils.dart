@@ -2,6 +2,20 @@ import 'dart:convert';
 
 /// Utility class for safe error logging / formatting
 class ErrorUtils {
+  // Compile regex patterns once, reuse for all calls
+  static final _secretPatterns = <RegExp>[
+    // Authorization: Bearer <token>
+    RegExp(
+      r'(Authorization\s*:\s*)(Bearer\s+)?[A-Za-z0-9\-\._~\+\/]+=*',
+      caseSensitive: false,
+    ),
+    // apiKey / token / password in JSON or query-like strings
+    RegExp(
+      r'("?(api[_\- ]?key|token|password|secret|access[_\- ]?token)"?\s*[:=]\s*)"[^"\r\n]+"',
+      caseSensitive: false,
+    ),
+  ];
+
   /// Formats and (optionally) truncates data for error messages.
   ///
   /// - Pretty prints JSON/Map/List when possible.
@@ -18,6 +32,25 @@ class ErrorUtils {
     bool redactSecrets = true,
     String ellipsis = '…',
   }) {
+    // Validate input parameters
+    if (maxChars < 1) {
+      throw ArgumentError('maxChars must be positive, got: $maxChars');
+    }
+    if (maxBytes != null && maxBytes < 1) {
+      throw ArgumentError('maxBytes must be positive, got: $maxBytes');
+    }
+    if (headChars < 0) {
+      throw ArgumentError('headChars must be non-negative, got: $headChars');
+    }
+    if (tailChars < 0) {
+      throw ArgumentError('tailChars must be non-negative, got: $tailChars');
+    }
+    if (headChars + tailChars > maxChars && maxBytes == null) {
+      throw ArgumentError(
+        'headChars ($headChars) + tailChars ($tailChars) cannot exceed maxChars ($maxChars)',
+      );
+    }
+    
     String s = _safeStringify(data, prettyJson: prettyJson);
     if (redactSecrets) {
       s = _redactSecrets(s);
@@ -83,17 +116,12 @@ class ErrorUtils {
 
   /// Redacts common secret patterns.
   static String _redactSecrets(String input) {
-    final patterns = <RegExp>[
-      // Authorization: Bearer <token>
-      RegExp(r'(Authorization\s*:\s*)(Bearer\s+)?[A-Za-z0-9\-\._~\+\/]+=*', caseSensitive: false),
-      // apiKey / token / password in JSON or query-like strings
-      RegExp(r'("?(api[_\- ]?key|token|password|secret|access[_\- ]?token)"?\s*[:=]\s*)"[^"\r\n]+"', caseSensitive: false),
-    ];
     var redacted = input;
-    for (final p in patterns) {
+    for (final p in _secretPatterns) {
       redacted = redacted.replaceAllMapped(p, (m) {
-        // Keep the key part (group 1 if present), replace the value
-        if (m.groupCount >= 2 && (m.group(1) != null)) {
+        // Check if we have a capture group (the key part)
+        // Pattern 1 has group 1 (required), Pattern 2 has group 1 (required)
+        if (m.groupCount >= 1 && m.group(1) != null) {
           return '${m.group(1)}[REDACTED]';
         }
         return '[REDACTED]';
@@ -129,41 +157,82 @@ class ErrorUtils {
     required int tailChars,
     required String ellipsis,
   }) {
+    // Cache UTF-8 encoding to avoid repeated encoding
+    final utf8Bytes = utf8.encode(s);
+    final utf8ByteLength = utf8Bytes.length;
+    
+    // Pre-calculate ellipsis byte length
+    final ellipsisBytes = utf8.encode(ellipsis);
+    final ellipsisByteLength = ellipsisBytes.length;
+    
     // Quick path: already within limit
-    if (utf8.encode(s).length <= maxBytes) return s;
+    if (utf8ByteLength <= maxBytes) return s;
+    
+    // If maxBytes is smaller than ellipsis, return just ellipsis
+    if (maxBytes < ellipsisByteLength) {
+      return ellipsis;
+    }
+    
     if (!middle) {
       // End truncation by bytes
       final buf = StringBuffer();
       var bytes = 0;
       for (final cp in s.runes) {
         final chunk = utf8.encode(String.fromCharCode(cp));
-        if (bytes + chunk.length + utf8.encode(ellipsis).length > maxBytes) break;
+        if (bytes + chunk.length + ellipsisByteLength > maxBytes) break;
         buf.writeCharCode(cp);
         bytes += chunk.length;
       }
       buf.write(ellipsis);
       return buf.toString();
     }
+    
     // Middle truncation by bytes: build head, tail under the ceiling.
     String takeHead(int nChars) => String.fromCharCodes(s.runes.take(nChars));
     String takeTail(int nChars) =>
         String.fromCharCodes(s.runes.skip(s.runes.length - nChars));
+    
     String head = takeHead(headChars);
     String tail = takeTail(tailChars);
+    
     // Adjust head/tail to fit byte ceiling
-    while (true) {
+    // Add safety counter to prevent infinite loops
+    int iterations = 0;
+    const maxIterations = 1000; // Safety limit
+    
+    while (iterations < maxIterations) {
       final candidate = '$head$ellipsis$tail';
       final size = utf8.encode(candidate).length;
       if (size <= maxBytes) return candidate;
+      
       // Shrink head first, then tail
       if (head.isNotEmpty) {
-        head = String.fromCharCodes(head.runes.take(head.runes.length - 1));
+        // More efficient: use rune list manipulation
+        final headRunes = head.runes.toList();
+        if (headRunes.isNotEmpty) {
+          headRunes.removeLast();
+          head = String.fromCharCodes(headRunes);
+        } else {
+          head = '';
+        }
       } else if (tail.isNotEmpty) {
-        tail = String.fromCharCodes(tail.runes.skip(1));
+        // More efficient: use rune list manipulation
+        final tailRunes = tail.runes.toList();
+        if (tailRunes.isNotEmpty) {
+          tailRunes.removeAt(0);
+          tail = String.fromCharCodes(tailRunes);
+        } else {
+          tail = '';
+        }
       } else {
         // As a last resort, return just the ellipsis
         return ellipsis;
       }
+      
+      iterations++;
     }
+    
+    // Safety fallback: if we've exceeded max iterations, return ellipsis
+    return ellipsis;
   }
 }

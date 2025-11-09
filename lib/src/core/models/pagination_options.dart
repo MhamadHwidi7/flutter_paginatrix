@@ -24,6 +24,18 @@ class PaginationOptions with _$PaginationOptions {
 
     /// Default prefetch threshold in pixels (if threshold is not set)
     @Default(300.0) double defaultPrefetchThresholdPixels,
+
+    /// Maximum number of retry attempts
+    @Default(5) int maxRetries,
+
+    /// Initial backoff duration for retry attempts
+    @Default(Duration(milliseconds: 500)) Duration initialBackoff,
+
+    /// Retry reset timeout (resets retry count after this duration)
+    @Default(Duration(seconds: 60)) Duration retryResetTimeout,
+
+    /// Debounce duration for refresh calls to prevent rapid successive refreshes
+    @Default(Duration(milliseconds: 300)) Duration refreshDebounceDuration,
   }) = _PaginationOptions;
 
   factory PaginationOptions.fromJson(Map<String, dynamic> json) =>

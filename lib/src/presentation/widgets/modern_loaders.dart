@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'pagination_skeletonizer.dart';
+import 'package:flutter_paginatrix/src/presentation/widgets/pagination_skeletonizer.dart';
 
 /// Modern bouncing dots loader
 class BouncingDotsLoader extends StatefulWidget {

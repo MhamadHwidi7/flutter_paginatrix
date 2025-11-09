@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'modern_loaders.dart';
+import 'package:flutter_paginatrix/src/presentation/widgets/modern_loaders.dart';
 
 /// Types of modern loaders available
 enum LoaderType {
