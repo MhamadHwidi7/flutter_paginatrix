@@ -11,6 +11,13 @@ import 'paginatrix_state_builder_mixin.dart';
 ///
 /// This widget uses [PaginatedCubit] with [BlocBuilder] for reactive UI updates.
 ///
+/// ## Scroll Direction & Reverse
+///
+/// When using [reverse] with [scrollDirection]:
+/// - **Vertical + reverse**: List scrolls from bottom to top (chat-like)
+/// - **Horizontal + reverse**: List scrolls from right to left (RTL-like)
+/// - Both combinations are valid but have different UX implications
+///
 /// ## Example
 ///
 /// ```dart
@@ -53,7 +60,10 @@ class PaginatrixListView<T> extends StatelessWidget
     this.addRepaintBoundaries = true,
     this.addSemanticIndexes = true,
     this.cacheExtent,
-  });
+  }) : assert(
+          scrollDirection == Axis.vertical || scrollDirection == Axis.horizontal,
+          'scrollDirection must be either Axis.vertical or Axis.horizontal',
+        );
 
   // Required by mixin
   @override

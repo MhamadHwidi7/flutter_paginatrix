@@ -11,6 +11,13 @@ import 'paginatrix_state_builder_mixin.dart';
 ///
 /// This widget uses [PaginatedCubit] with [BlocBuilder] for reactive UI updates.
 ///
+/// ## Scroll Direction & Reverse
+///
+/// When using [reverse] with [scrollDirection]:
+/// - **Vertical + reverse**: Grid scrolls from bottom to top
+/// - **Horizontal + reverse**: Grid scrolls from right to left
+/// - Both combinations are valid but have different UX implications
+///
 /// ## Example
 ///
 /// ```dart
@@ -58,7 +65,10 @@ class PaginatrixGridView<T> extends StatelessWidget
     this.addRepaintBoundaries = true,
     this.addSemanticIndexes = true,
     this.cacheExtent,
-  });
+  }) : assert(
+          scrollDirection == Axis.vertical || scrollDirection == Axis.horizontal,
+          'scrollDirection must be either Axis.vertical or Axis.horizontal',
+        );
 
   // Required by mixin
   @override
