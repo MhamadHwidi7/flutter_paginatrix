@@ -15,6 +15,10 @@ _$PaginationOptionsImpl _$$PaginationOptionsImplFromJson(
           ? const Duration(seconds: 30)
           : Duration(microseconds: (json['requestTimeout'] as num).toInt()),
       enableDebugLogging: json['enableDebugLogging'] as bool? ?? false,
+      defaultPrefetchThreshold:
+          (json['defaultPrefetchThreshold'] as num?)?.toInt() ?? 3,
+      defaultPrefetchThresholdPixels:
+          (json['defaultPrefetchThresholdPixels'] as num?)?.toDouble() ?? 300.0,
     );
 
 Map<String, dynamic> _$$PaginationOptionsImplToJson(
@@ -24,4 +28,6 @@ Map<String, dynamic> _$$PaginationOptionsImplToJson(
       'maxPageSize': instance.maxPageSize,
       'requestTimeout': instance.requestTimeout.inMicroseconds,
       'enableDebugLogging': instance.enableDebugLogging,
+      'defaultPrefetchThreshold': instance.defaultPrefetchThreshold,
+      'defaultPrefetchThresholdPixels': instance.defaultPrefetchThresholdPixels,
     };

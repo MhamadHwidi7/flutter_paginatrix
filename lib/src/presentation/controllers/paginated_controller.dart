@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/contracts/meta_parser.dart';
 import '../../core/entities/pagination_error.dart';
@@ -9,6 +10,13 @@ import '../../core/entities/request_context.dart';
 import '../../core/models/pagination_options.dart';
 import '../../core/typedefs/typedefs.dart';
 import '../../core/utils/generation_guard.dart';
+
+/// Internal enum to distinguish between different load types
+enum _LoadType {
+  first,
+  next,
+  refresh,
+}
 
 /// Controller for managing paginated data
 ///
@@ -63,63 +71,56 @@ class PaginatedController<T> {
   /// Whether the controller has an error
   bool get hasError => _currentState.hasError;
 
+  /// Checks if scroll position is near the end and triggers load if needed
+  ///
+  /// This method encapsulates the scroll detection logic, moving it from UI
+  /// widgets to the controller for better separation of concerns and performance.
+  ///
+  /// [metrics] - Scroll metrics from ScrollNotification
+  /// [prefetchThreshold] - Optional threshold override (number of items from end)
+  /// [reverse] - Whether scrolling is reversed (default: false)
+  ///
+  /// Returns true if load was triggered, false otherwise
+  bool checkAndLoadIfNearEnd({
+    required ScrollMetrics metrics,
+    int? prefetchThreshold,
+    bool reverse = false,
+  }) {
+    // Don't trigger if already loading or no more items available
+    if (!canLoadMore || isLoading) return false;
+
+    // Only check if we have valid scroll dimensions
+    if (!metrics.hasContentDimensions || metrics.maxScrollExtent == 0) {
+      return false;
+    }
+
+    // Use provided threshold or default from options
+    final threshold = prefetchThreshold ?? _options.defaultPrefetchThreshold;
+    final thresholdPixels = threshold * 100.0;
+
+    // Calculate remaining scroll distance
+    final remainingScroll = metrics.maxScrollExtent - metrics.pixels;
+
+    // Check if we're near the end (within threshold pixels from bottom)
+    // For reverse scrolling, check distance from top
+    final isNearEnd = reverse
+        ? metrics.pixels <= metrics.minScrollExtent + thresholdPixels
+        : remainingScroll <= thresholdPixels;
+
+    if (isNearEnd) {
+      loadNextPage();
+      return true;
+    }
+
+    return false;
+  }
+
   /// Loads the first page of data (resets the list and starts fresh)
   ///
   /// Calls the loader function with page 1 and replaces all existing items
   /// with the new data. This is used for initial load or when resetting the list.
   Future<void> loadFirstPage() async {
-    if (_currentState.isLoading) return;
-
-    final generation = _generationGuard.incrementGeneration();
-    final cancelToken = CancelToken();
-    final requestContext = RequestContext.create(
-      generation: generation,
-      cancelToken: cancelToken,
-    );
-
-    _currentCancelToken = cancelToken;
-
-    _updateState(PaginationState.loading(
-      requestContext: requestContext,
-    ));
-
-    try {
-      // Call the single loader function with page 1
-      final data = await _loader(
-        page: 1,
-        perPage: _options.defaultPageSize,
-        cancelToken: cancelToken,
-      );
-
-      if (!_generationGuard.isValid(requestContext)) {
-        return; // Stale response
-      }
-
-      final items = _metaParser.extractItems(data);
-      final decodedItems = items.map(_itemDecoder).toList();
-      final meta = _metaParser.parseMeta(data);
-
-      // Replace all items with the new data (first page)
-      final newState = PaginationState.success(
-        items: decodedItems,
-        meta: meta,
-        requestContext: requestContext,
-      );
-
-      _updateState(newState);
-    } catch (e) {
-      if (!_generationGuard.isValid(requestContext)) {
-        return; // Stale response
-      }
-
-      final error = _convertToPaginationError(e);
-      _updateState(PaginationState.error(
-        error: error,
-        requestContext: requestContext,
-      ));
-    } finally {
-      _currentCancelToken = null;
-    }
+    await _loadData(_LoadType.first);
   }
 
   /// Loads the next page of data (appends new data to existing list)
@@ -127,65 +128,7 @@ class PaginatedController<T> {
   /// Calls the same loader function with the next page number and appends
   /// the returned data to the existing list. This is used for pagination.
   Future<void> loadNextPage() async {
-    if (!canLoadMore || isLoading) return;
-
-    final generation = _generationGuard.incrementGeneration();
-    final cancelToken = CancelToken();
-    final requestContext = RequestContext.create(
-      generation: generation,
-      cancelToken: cancelToken,
-      isAppend: true,
-    );
-
-    _currentCancelToken = cancelToken;
-
-    _updateState(PaginationState.appending(
-      requestContext: requestContext,
-      currentItems: _currentState.items,
-      currentMeta: _currentState.meta!,
-    ));
-
-    try {
-      // Call the same loader function with the next page number
-      final nextPage = _getNextPageNumber();
-      final data = await _loader(
-        page: nextPage,
-        perPage: _options.defaultPageSize,
-        cancelToken: cancelToken,
-      );
-
-      if (!_generationGuard.isValid(requestContext)) {
-        return; // Stale response
-      }
-
-      final items = _metaParser.extractItems(data);
-      final decodedItems = items.map(_itemDecoder).toList();
-      final meta = _metaParser.parseMeta(data);
-
-      // Append new items to the existing list
-      final newItems = [..._currentState.items, ...decodedItems];
-      final newState = PaginationState.success(
-        items: newItems,
-        meta: meta,
-        requestContext: requestContext,
-      );
-
-      _updateState(newState);
-    } catch (e) {
-      if (!_generationGuard.isValid(requestContext)) {
-        return; // Stale response
-      }
-
-      final error = _convertToPaginationError(e);
-      _updateState(PaginationState.appendError(
-        appendError: error,
-        requestContext: requestContext,
-        currentItems: _currentState.items,
-        currentMeta: _currentState.meta!,
-      ));
-    } finally {
-      _currentCancelToken = null;
-    }
+    await _loadData(_LoadType.next);
   }
 
   /// Refreshes the current data (reloads first page and replaces all items)
@@ -193,63 +136,7 @@ class PaginatedController<T> {
   /// Calls the loader function with page 1 to refresh the data,
   /// replacing all existing items with fresh data from the server.
   Future<void> refresh() async {
-    if (_currentState.isLoading) return;
-
-    final generation = _generationGuard.incrementGeneration();
-    final cancelToken = CancelToken();
-    final requestContext = RequestContext.create(
-      generation: generation,
-      cancelToken: cancelToken,
-      isRefresh: true,
-    );
-
-    _currentCancelToken = cancelToken;
-
-    _updateState(PaginationState.refreshing(
-      requestContext: requestContext,
-      currentItems: _currentState.items,
-      currentMeta: _currentState.meta!,
-    ));
-
-    try {
-      // Call the loader function with page 1 to refresh
-      final data = await _loader(
-        page: 1,
-        perPage: _options.defaultPageSize,
-        cancelToken: cancelToken,
-      );
-
-      if (!_generationGuard.isValid(requestContext)) {
-        return; // Stale response
-      }
-
-      final items = _metaParser.extractItems(data);
-      final decodedItems = items.map(_itemDecoder).toList();
-      final meta = _metaParser.parseMeta(data);
-
-      // Replace all items with refreshed data
-      final newState = PaginationState.success(
-        items: decodedItems,
-        meta: meta,
-        requestContext: requestContext,
-      );
-
-      _updateState(newState);
-    } catch (e) {
-      if (!_generationGuard.isValid(requestContext)) {
-        return; // Stale response
-      }
-
-      final error = _convertToPaginationError(e);
-      _updateState(PaginationState.error(
-        error: error,
-        requestContext: requestContext,
-        previousItems: _currentState.items,
-        previousMeta: _currentState.meta,
-      ));
-    } finally {
-      _currentCancelToken = null;
-    }
+    await _loadData(_LoadType.refresh);
   }
 
   /// Retries the last failed operation
@@ -277,6 +164,121 @@ class PaginatedController<T> {
   void dispose() {
     cancel();
     _stateController.close();
+  }
+
+  /// Unified data loading method that handles all load types
+  ///
+  /// This method consolidates the common logic for loading data,
+  /// reducing code duplication across loadFirstPage, loadNextPage, and refresh.
+  Future<void> _loadData(_LoadType type) async {
+    // 1. Guard Checks
+    if (_currentState.isLoading) return;
+    if (type == _LoadType.next && !canLoadMore) return;
+
+    // 2. Request Setup
+    final generation = _generationGuard.incrementGeneration();
+    final cancelToken = CancelToken();
+    final requestContext = RequestContext.create(
+      generation: generation,
+      cancelToken: cancelToken,
+      isAppend: type == _LoadType.next,
+      isRefresh: type == _LoadType.refresh,
+    );
+
+    _currentCancelToken = cancelToken;
+
+    // 3. Set Initial State
+    switch (type) {
+      case _LoadType.first:
+        _updateState(PaginationState.loading(
+          requestContext: requestContext,
+        ));
+        break;
+
+      case _LoadType.next:
+        _updateState(PaginationState.appending(
+          requestContext: requestContext,
+          currentItems: _currentState.items,
+          currentMeta: _currentState.meta!,
+        ));
+        break;
+
+      case _LoadType.refresh:
+        _updateState(PaginationState.refreshing(
+          requestContext: requestContext,
+          currentItems: _currentState.items,
+          currentMeta: _currentState.meta!,
+        ));
+        break;
+    }
+
+    // 4. Execution Block
+    try {
+      // Determine page to fetch
+      final page = (type == _LoadType.next) ? _getNextPageNumber() : 1;
+      final data = await _loader(
+        page: page,
+        perPage: _options.defaultPageSize,
+        cancelToken: cancelToken,
+      );
+
+      if (!_generationGuard.isValid(requestContext)) {
+        return; // Stale response
+      }
+
+      final items = _metaParser.extractItems(data);
+      final decodedItems = items.map(_itemDecoder).toList();
+      final meta = _metaParser.parseMeta(data);
+
+      // Determine final list of items (append vs. replace)
+      final newItems = (type == _LoadType.next)
+          ? [..._currentState.items, ...decodedItems]
+          : decodedItems;
+
+      final newState = PaginationState.success(
+        items: newItems,
+        meta: meta,
+        requestContext: requestContext,
+      );
+
+      _updateState(newState);
+    } catch (e) {
+      if (!_generationGuard.isValid(requestContext)) {
+        return; // Stale response
+      }
+
+      final error = _convertToPaginationError(e);
+
+      // 5. Set Error State
+      switch (type) {
+        case _LoadType.first:
+          _updateState(PaginationState.error(
+            error: error,
+            requestContext: requestContext,
+          ));
+          break;
+
+        case _LoadType.next:
+          _updateState(PaginationState.appendError(
+            appendError: error,
+            requestContext: requestContext,
+            currentItems: _currentState.items,
+            currentMeta: _currentState.meta!,
+          ));
+          break;
+
+        case _LoadType.refresh:
+          _updateState(PaginationState.error(
+            error: error,
+            requestContext: requestContext,
+            previousItems: _currentState.items,
+            previousMeta: _currentState.meta,
+          ));
+          break;
+      }
+    } finally {
+      _currentCancelToken = null;
+    }
   }
 
   void _updateState(PaginationState<T> newState) {

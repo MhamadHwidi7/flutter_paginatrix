@@ -32,6 +32,13 @@ mixin _$PaginationOptions {
   /// Whether to enable debug logging
   bool get enableDebugLogging => throw _privateConstructorUsedError;
 
+  /// Default prefetch threshold (number of items from end to trigger load)
+  int get defaultPrefetchThreshold => throw _privateConstructorUsedError;
+
+  /// Default prefetch threshold in pixels (if threshold is not set)
+  double get defaultPrefetchThresholdPixels =>
+      throw _privateConstructorUsedError;
+
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $PaginationOptionsCopyWith<PaginationOptions> get copyWith =>
@@ -48,7 +55,9 @@ abstract class $PaginationOptionsCopyWith<$Res> {
       {int defaultPageSize,
       int maxPageSize,
       Duration requestTimeout,
-      bool enableDebugLogging});
+      bool enableDebugLogging,
+      int defaultPrefetchThreshold,
+      double defaultPrefetchThresholdPixels});
 }
 
 /// @nodoc
@@ -68,6 +77,8 @@ class _$PaginationOptionsCopyWithImpl<$Res, $Val extends PaginationOptions>
     Object? maxPageSize = null,
     Object? requestTimeout = null,
     Object? enableDebugLogging = null,
+    Object? defaultPrefetchThreshold = null,
+    Object? defaultPrefetchThresholdPixels = null,
   }) {
     return _then(_value.copyWith(
       defaultPageSize: null == defaultPageSize
@@ -86,6 +97,14 @@ class _$PaginationOptionsCopyWithImpl<$Res, $Val extends PaginationOptions>
           ? _value.enableDebugLogging
           : enableDebugLogging // ignore: cast_nullable_to_non_nullable
               as bool,
+      defaultPrefetchThreshold: null == defaultPrefetchThreshold
+          ? _value.defaultPrefetchThreshold
+          : defaultPrefetchThreshold // ignore: cast_nullable_to_non_nullable
+              as int,
+      defaultPrefetchThresholdPixels: null == defaultPrefetchThresholdPixels
+          ? _value.defaultPrefetchThresholdPixels
+          : defaultPrefetchThresholdPixels // ignore: cast_nullable_to_non_nullable
+              as double,
     ) as $Val);
   }
 }
@@ -102,7 +121,9 @@ abstract class _$$PaginationOptionsImplCopyWith<$Res>
       {int defaultPageSize,
       int maxPageSize,
       Duration requestTimeout,
-      bool enableDebugLogging});
+      bool enableDebugLogging,
+      int defaultPrefetchThreshold,
+      double defaultPrefetchThresholdPixels});
 }
 
 /// @nodoc
@@ -120,6 +141,8 @@ class __$$PaginationOptionsImplCopyWithImpl<$Res>
     Object? maxPageSize = null,
     Object? requestTimeout = null,
     Object? enableDebugLogging = null,
+    Object? defaultPrefetchThreshold = null,
+    Object? defaultPrefetchThresholdPixels = null,
   }) {
     return _then(_$PaginationOptionsImpl(
       defaultPageSize: null == defaultPageSize
@@ -138,6 +161,14 @@ class __$$PaginationOptionsImplCopyWithImpl<$Res>
           ? _value.enableDebugLogging
           : enableDebugLogging // ignore: cast_nullable_to_non_nullable
               as bool,
+      defaultPrefetchThreshold: null == defaultPrefetchThreshold
+          ? _value.defaultPrefetchThreshold
+          : defaultPrefetchThreshold // ignore: cast_nullable_to_non_nullable
+              as int,
+      defaultPrefetchThresholdPixels: null == defaultPrefetchThresholdPixels
+          ? _value.defaultPrefetchThresholdPixels
+          : defaultPrefetchThresholdPixels // ignore: cast_nullable_to_non_nullable
+              as double,
     ));
   }
 }
@@ -149,7 +180,9 @@ class _$PaginationOptionsImpl implements _PaginationOptions {
       {this.defaultPageSize = 20,
       this.maxPageSize = 100,
       this.requestTimeout = const Duration(seconds: 30),
-      this.enableDebugLogging = false});
+      this.enableDebugLogging = false,
+      this.defaultPrefetchThreshold = 3,
+      this.defaultPrefetchThresholdPixels = 300.0});
 
   factory _$PaginationOptionsImpl.fromJson(Map<String, dynamic> json) =>
       _$$PaginationOptionsImplFromJson(json);
@@ -174,9 +207,19 @@ class _$PaginationOptionsImpl implements _PaginationOptions {
   @JsonKey()
   final bool enableDebugLogging;
 
+  /// Default prefetch threshold (number of items from end to trigger load)
+  @override
+  @JsonKey()
+  final int defaultPrefetchThreshold;
+
+  /// Default prefetch threshold in pixels (if threshold is not set)
+  @override
+  @JsonKey()
+  final double defaultPrefetchThresholdPixels;
+
   @override
   String toString() {
-    return 'PaginationOptions(defaultPageSize: $defaultPageSize, maxPageSize: $maxPageSize, requestTimeout: $requestTimeout, enableDebugLogging: $enableDebugLogging)';
+    return 'PaginationOptions(defaultPageSize: $defaultPageSize, maxPageSize: $maxPageSize, requestTimeout: $requestTimeout, enableDebugLogging: $enableDebugLogging, defaultPrefetchThreshold: $defaultPrefetchThreshold, defaultPrefetchThresholdPixels: $defaultPrefetchThresholdPixels)';
   }
 
   @override
@@ -191,13 +234,26 @@ class _$PaginationOptionsImpl implements _PaginationOptions {
             (identical(other.requestTimeout, requestTimeout) ||
                 other.requestTimeout == requestTimeout) &&
             (identical(other.enableDebugLogging, enableDebugLogging) ||
-                other.enableDebugLogging == enableDebugLogging));
+                other.enableDebugLogging == enableDebugLogging) &&
+            (identical(
+                    other.defaultPrefetchThreshold, defaultPrefetchThreshold) ||
+                other.defaultPrefetchThreshold == defaultPrefetchThreshold) &&
+            (identical(other.defaultPrefetchThresholdPixels,
+                    defaultPrefetchThresholdPixels) ||
+                other.defaultPrefetchThresholdPixels ==
+                    defaultPrefetchThresholdPixels));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, defaultPageSize, maxPageSize,
-      requestTimeout, enableDebugLogging);
+  int get hashCode => Object.hash(
+      runtimeType,
+      defaultPageSize,
+      maxPageSize,
+      requestTimeout,
+      enableDebugLogging,
+      defaultPrefetchThreshold,
+      defaultPrefetchThresholdPixels);
 
   @JsonKey(ignore: true)
   @override
@@ -219,7 +275,9 @@ abstract class _PaginationOptions implements PaginationOptions {
       {final int defaultPageSize,
       final int maxPageSize,
       final Duration requestTimeout,
-      final bool enableDebugLogging}) = _$PaginationOptionsImpl;
+      final bool enableDebugLogging,
+      final int defaultPrefetchThreshold,
+      final double defaultPrefetchThresholdPixels}) = _$PaginationOptionsImpl;
 
   factory _PaginationOptions.fromJson(Map<String, dynamic> json) =
       _$PaginationOptionsImpl.fromJson;
@@ -240,6 +298,14 @@ abstract class _PaginationOptions implements PaginationOptions {
 
   /// Whether to enable debug logging
   bool get enableDebugLogging;
+  @override
+
+  /// Default prefetch threshold (number of items from end to trigger load)
+  int get defaultPrefetchThreshold;
+  @override
+
+  /// Default prefetch threshold in pixels (if threshold is not set)
+  double get defaultPrefetchThresholdPixels;
   @override
   @JsonKey(ignore: true)
   _$$PaginationOptionsImplCopyWith<_$PaginationOptionsImpl> get copyWith =>

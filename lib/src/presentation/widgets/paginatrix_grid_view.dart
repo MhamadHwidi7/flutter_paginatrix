@@ -187,7 +187,11 @@ class PaginatrixGridView<T> extends StatelessWidget {
       onNotification: (notification) {
         if (notification is ScrollUpdateNotification ||
             notification is ScrollEndNotification) {
-          _checkForLoadMore(notification);
+          controller.checkAndLoadIfNearEnd(
+            metrics: notification.metrics,
+            prefetchThreshold: prefetchThreshold,
+            reverse: reverse,
+          );
         }
         return false;
       },
@@ -260,31 +264,5 @@ class PaginatrixGridView<T> extends StatelessWidget {
     }
 
     return const SizedBox.shrink();
-  }
-
-  void _checkForLoadMore(ScrollNotification notification) {
-    // Don't trigger if already loading or no more items available
-    if (!controller.canLoadMore || controller.isLoading) return;
-
-    final metrics = notification.metrics;
-    
-    // Only check if we have valid scroll dimensions
-    if (!metrics.hasContentDimensions || metrics.maxScrollExtent == 0) return;
-    
-    final threshold = prefetchThreshold ?? 3;
-    final thresholdPixels = threshold * 100.0;
-    
-    // Calculate remaining scroll distance
-    final remainingScroll = metrics.maxScrollExtent - metrics.pixels;
-    
-    // Check if we're near the end (within threshold pixels from bottom)
-    // For reverse scrolling, check distance from top
-    final isNearEnd = reverse
-        ? metrics.pixels <= metrics.minScrollExtent + thresholdPixels
-        : remainingScroll <= thresholdPixels;
-
-    if (isNearEnd) {
-      controller.loadNextPage();
-    }
   }
 }

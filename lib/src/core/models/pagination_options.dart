@@ -18,6 +18,12 @@ class PaginationOptions with _$PaginationOptions {
 
     /// Whether to enable debug logging
     @Default(false) bool enableDebugLogging,
+
+    /// Default prefetch threshold (number of items from end to trigger load)
+    @Default(3) int defaultPrefetchThreshold,
+
+    /// Default prefetch threshold in pixels (if threshold is not set)
+    @Default(300.0) double defaultPrefetchThresholdPixels,
   }) = _PaginationOptions;
 
   factory PaginationOptions.fromJson(Map<String, dynamic> json) =>
