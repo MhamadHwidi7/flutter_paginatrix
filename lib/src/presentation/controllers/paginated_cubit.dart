@@ -248,8 +248,9 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
       final meta = _metaParser.parseMeta(data);
 
       // Determine final list of items (append vs. replace)
-      final newItems = (type == PaginatrixLoadType.next)
-          ? [...state.items, ...decodedItems]
+      // Using List.from + addAll is more efficient than spread operator for large lists
+      final newItems = type == PaginatrixLoadType.next
+          ? (List<T>.from(state.items)..addAll(decodedItems))
           : decodedItems;
 
       final newState = PaginationState.success(

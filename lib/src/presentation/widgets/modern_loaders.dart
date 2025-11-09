@@ -148,7 +148,7 @@ class _WaveLoaderState extends State<WaveLoader>
     );
 
     _animations = List.generate(5, (index) {
-      return Tween<double>(begin: 0.4, end: 1.0).animate(
+      return Tween<double>(begin: 0.4, end: 1).animate(
         CurvedAnimation(
           parent: _controller,
           curve: Interval(

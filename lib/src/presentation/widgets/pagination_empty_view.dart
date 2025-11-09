@@ -71,13 +71,18 @@ class PaginationEmptyView extends StatelessWidget {
           ],
           
           if (action != null) ...[
-            if (onActionTap != null)
-              GestureDetector(
-                onTap: onActionTap,
-                child: action!,
-              )
-            else
-              action!,
+            Builder(
+              builder: (context) {
+                final widget = action!;
+                if (onActionTap != null) {
+                  return GestureDetector(
+                    onTap: onActionTap,
+                    child: widget,
+                  );
+                }
+                return widget;
+              },
+            ),
           ],
         ],
       ),
