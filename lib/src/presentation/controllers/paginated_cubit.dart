@@ -12,6 +12,7 @@ import '../../core/entities/request_context.dart';
 import '../../core/enums/paginatrix_load_type.dart';
 import '../../core/models/pagination_options.dart';
 import '../../core/typedefs/typedefs.dart';
+import '../../core/utils/error_utils.dart';
 import '../../core/utils/generation_guard.dart';
 
 /// Cubit-based controller for managing paginated data
@@ -70,6 +71,12 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
 
   CancelToken? _currentCancelToken;
   Timer? _scrollDebounceTimer;
+  
+  // Retry backoff tracking
+  int _retryCount = 0;
+  DateTime? _lastRetryTime;
+  static const int _maxRetries = 5;
+  static const Duration _initialBackoff = Duration(milliseconds: 500);
 
   /// Whether more data can be loaded
   bool get canLoadMore => state.canLoadMore;
@@ -127,7 +134,11 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
       
       // Create new debounce timer
       _scrollDebounceTimer = Timer(debounceDuration, () {
-        if (!isClosed && canLoadMore && !isLoading) {
+        // Guard against race condition: check if cubit is closed first
+        if (isClosed) return;
+        
+        // Only load if conditions are met
+        if (canLoadMore && !isLoading) {
           loadNextPage();
         }
       });
@@ -163,12 +174,57 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
   }
 
   /// Retries the last failed operation
+  /// Retries the last failed request with exponential backoff
+  ///
+  /// Implements exponential backoff to prevent hammering the server:
+  /// - Wait time = initialBackoff * 2^retryCount
+  /// - Max retries = 5
+  /// - Resets after 60 seconds of no retries
   Future<void> retry() async {
+    // Reset retry count if last retry was more than 60 seconds ago
+    if (_lastRetryTime != null &&
+        DateTime.now().difference(_lastRetryTime!) > const Duration(seconds: 60)) {
+      _retryCount = 0;
+    }
+
+    // Check if max retries exceeded
+    if (_retryCount >= _maxRetries) {
+      debugPrint(
+        'PaginatedCubit: Max retry attempts ($_maxRetries) exceeded. '
+        'Wait 60 seconds before retrying again.',
+      );
+      return;
+    }
+
+    // Calculate backoff delay using exponential backoff
+    final backoffDelay = _initialBackoff * (1 << _retryCount); // 2^retryCount
+    
+    debugPrint(
+      'PaginatedCubit: Retry attempt ${_retryCount + 1}/$_maxRetries '
+      'after ${backoffDelay.inMilliseconds}ms delay',
+    );
+
+    // Wait for backoff delay
+    await Future.delayed(backoffDelay);
+
+    // Update retry tracking
+    _retryCount++;
+    _lastRetryTime = DateTime.now();
+
+    // Perform retry based on current state
     if (state.hasError) {
       await loadFirstPage();
     } else if (state.hasAppendError) {
       await loadNextPage();
     }
+  }
+  
+  /// Resets retry tracking
+  ///
+  /// Called automatically on successful loads
+  void _resetRetryTracking() {
+    _retryCount = 0;
+    _lastRetryTime = null;
   }
 
   /// Cancels the current request
@@ -195,7 +251,7 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
     // Meta validation for operations requiring existing data
     // This prevents null pointer exceptions when trying to append or refresh
     final currentMeta = state.meta;
-    if ((type == PaginatrixLoadType.next || type == PaginatrixLoadType.refresh)) {
+    if (type == PaginatrixLoadType.next || type == PaginatrixLoadType.refresh) {
       if (currentMeta == null) {
         debugPrint(
           'PaginatedCubit: Cannot ${type == PaginatrixLoadType.next ? "append" : "refresh"} '
@@ -248,10 +304,20 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
     try {
       // Determine page to fetch
       final page = (type == PaginatrixLoadType.next) ? _getNextPageNumber() : 1;
+      
+      // Add timeout to prevent infinite loading states
       final data = await _loader(
         page: page,
         perPage: _options.defaultPageSize,
         cancelToken: cancelToken,
+      ).timeout(
+        _options.requestTimeout,
+        onTimeout: () {
+          throw PaginationError.network(
+            message: 'Request timed out after ${_options.requestTimeout.inSeconds} seconds',
+            statusCode: 408,
+          );
+        },
       );
 
       if (!_generationGuard.isValid(requestContext)) {
@@ -274,14 +340,10 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
         rethrow;
       } catch (e) {
         // Convert parsing/decoding errors to PaginationError.parse
-        final truncatedData = data.toString().length > 200 
-            ? '${data.toString().substring(0, 200)}...' 
-            : data.toString();
-        
         throw PaginationError.parse(
           message: 'Failed to process response data: ${e.toString()}',
           expectedFormat: 'Expected valid items array and metadata structure',
-          actualData: truncatedData,
+          actualData: ErrorUtils.truncateData(data),
         );
       }
 
@@ -291,13 +353,23 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
           ? (List<T>.from(state.items)..addAll(decodedItems))
           : decodedItems;
 
-      final newState = PaginationState.success(
-        items: newItems,
-        meta: meta,
-        requestContext: requestContext,
-      );
+      // Check if the result is empty (only for initial load and refresh)
+      // For append operations, we keep existing items even if new batch is empty
+      final PaginationState<T> newState;
+      if (newItems.isEmpty && type != PaginatrixLoadType.next) {
+        newState = PaginationState<T>.empty(requestContext: requestContext);
+      } else {
+        newState = PaginationState.success(
+          items: newItems,
+          meta: meta,
+          requestContext: requestContext,
+        );
+      }
 
       emit(newState);
+      
+      // Reset retry tracking on successful load
+      _resetRetryTracking();
     } catch (e) {
       if (!_generationGuard.isValid(requestContext)) {
         return; // Stale response
@@ -315,13 +387,23 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
           break;
 
         case PaginatrixLoadType.next:
-          // Safe to use currentMeta here because of the guard check above
-          emit(PaginationState.appendError(
-            appendError: error,
-            requestContext: requestContext,
-            currentItems: state.items,
-            currentMeta: currentMeta!,
-          ));
+          // Double-check currentMeta is not null in error handler
+          // This prevents crashes if an exception occurs in an edge case
+          if (currentMeta == null) {
+            // Fallback to initial error state if meta is missing
+            emit(PaginationState.error(
+              error: error,
+              requestContext: requestContext,
+              previousItems: state.items,
+            ));
+          } else {
+            emit(PaginationState.appendError(
+              appendError: error,
+              requestContext: requestContext,
+              currentItems: state.items,
+              currentMeta: currentMeta,
+            ));
+          }
           break;
 
         case PaginatrixLoadType.refresh:
@@ -335,13 +417,17 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
       }
     } finally {
       _currentCancelToken = null;
+      // Cancel any pending debounce timer to prevent memory leaks
+      // and prevent multiple rapid API calls after errors
+      _scrollDebounceTimer?.cancel();
     }
   }
 
   int _getNextPageNumber() {
     final meta = state.meta;
-    if (meta?.page != null) {
-      return meta!.page! + 1;
+    final page = meta?.page;
+    if (page != null) {
+      return page + 1;
     }
     return 2; // Default fallback
   }
