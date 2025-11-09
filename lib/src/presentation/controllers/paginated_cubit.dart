@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -66,6 +68,7 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
   final GenerationGuard _generationGuard = GenerationGuard();
 
   CancelToken? _currentCancelToken;
+  Timer? _scrollDebounceTimer;
 
   /// Whether more data can be loaded
   bool get canLoadMore => state.canLoadMore;
@@ -81,18 +84,20 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
 
   /// Checks if scroll position is near the end and triggers load if needed
   ///
-  /// This method encapsulates the scroll detection logic, moving it from UI
-  /// widgets to the cubit for better separation of concerns and performance.
+  /// This method uses debouncing to prevent excessive load triggers during
+  /// rapid scroll events, improving performance and reducing unnecessary API calls.
   ///
   /// [metrics] - Scroll metrics from ScrollNotification
   /// [prefetchThreshold] - Optional threshold override (number of items from end)
   /// [reverse] - Whether scrolling is reversed (default: false)
+  /// [debounceDuration] - Duration to wait before triggering load (default: 100ms)
   ///
-  /// Returns true if load was triggered, false otherwise
+  /// Returns true if scroll position is near end, false otherwise
   bool checkAndLoadIfNearEnd({
     required ScrollMetrics metrics,
     int? prefetchThreshold,
     bool reverse = false,
+    Duration debounceDuration = const Duration(milliseconds: 100),
   }) {
     // Don't trigger if already loading or no more items available
     if (!canLoadMore || isLoading) return false;
@@ -116,7 +121,16 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
         : remainingScroll <= thresholdPixels;
 
     if (isNearEnd) {
-      loadNextPage();
+      // Cancel any pending debounce timer
+      _scrollDebounceTimer?.cancel();
+      
+      // Create new debounce timer
+      _scrollDebounceTimer = Timer(debounceDuration, () {
+        if (!isClosed && canLoadMore && !isLoading) {
+          loadNextPage();
+        }
+      });
+      
       return true;
     }
 
@@ -325,6 +339,7 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
 
   @override
   Future<void> close() {
+    _scrollDebounceTimer?.cancel();
     cancel();
     return super.close();
   }

@@ -1,132 +1,88 @@
-import 'package:dio/dio.dart';
-
-import '../core/contracts/meta_parser.dart';
-import '../core/models/pagination_options.dart';
-import '../data/meta_parser/config_meta_parser.dart';
-
-/// Paginatrix dependency injection container
+/// Paginatrix simple dependency injection container
 ///
-/// Provides a simple dependency injection solution for pagination services
-/// without requiring external DI packages. Manages registration and retrieval
-/// of dependencies like MetaParser, Dio, and PaginationOptions.
+/// A minimal DI solution for registering and retrieving dependencies
+/// in your pagination implementation. This is optional and most users
+/// can simply create instances directly.
+///
+/// ## Usage
+///
+/// ```dart
+/// // Register dependencies
+/// PaginatrixDI.register<Dio>(Dio());
+/// PaginatrixDI.register<MetaParser>(
+///   ConfigMetaParser(MetaConfig.nestedMeta)
+/// );
+///
+/// // Retrieve dependencies
+/// final dio = PaginatrixDI.get<Dio>();
+/// final parser = PaginatrixDI.get<MetaParser>();
+///
+/// // Clean up (useful in tests)
+/// PaginatrixDI.reset();
+/// ```
+///
+/// ## Note
+/// This is a simple service locator pattern. For more complex DI needs,
+/// consider using dedicated packages like get_it, provider, or riverpod.
 class PaginatrixDI {
   static final Map<Type, dynamic> _instances = {};
-  static final Map<String, dynamic> _namedInstances = {};
 
-  /// Configures all dependencies
-  static Future<void> configure({
-    String environment = 'dev',
-    bool isTest = false,
-  }) async {
-    // Clear existing registrations
-    _instances.clear();
-    _namedInstances.clear();
-
-    // Configure environment-specific settings
-    await _configureEnvironment(environment, isTest);
-
-    // Register core services
-    _registerCoreServices();
-
-    // Register environment-specific services
-    await _registerEnvironmentServices(environment, isTest);
+  /// Registers an instance of type [T]
+  ///
+  /// Example:
+  /// ```dart
+  /// PaginatrixDI.register<Dio>(Dio());
+  /// ```
+  static void register<T>(T instance) {
+    _instances[T] = instance;
   }
 
-  /// Configures environment-specific settings
-  static Future<void> _configureEnvironment(
-      String environment, bool isTest) async {
-    switch (environment) {
-      case 'dev':
-        await _configureDevEnvironment();
-        break;
-      case 'prod':
-        await _configureProdEnvironment();
-        break;
-      case 'test':
-        await _configureTestEnvironment();
-        break;
-      default:
-        throw ArgumentError('Unknown environment: $environment');
-    }
-  }
-
-  /// Development environment configuration
-  static Future<void> _configureDevEnvironment() async {
-    _namedInstances['debugLogging'] = true;
-    _namedInstances['requestTimeout'] = const Duration(seconds: 60);
-  }
-
-  /// Production environment configuration
-  static Future<void> _configureProdEnvironment() async {
-    _namedInstances['debugLogging'] = false;
-    _namedInstances['requestTimeout'] = const Duration(seconds: 30);
-  }
-
-  /// Test environment configuration
-  static Future<void> _configureTestEnvironment() async {
-    _namedInstances['debugLogging'] = false;
-    _namedInstances['requestTimeout'] = const Duration(seconds: 5);
-  }
-
-  /// Registers core services
-  static void _registerCoreServices() {
-    // Pagination options
-    _instances[PaginationOptions] = PaginationOptions(
-      requestTimeout: _namedInstances['requestTimeout'] as Duration,
-      enableDebugLogging: _namedInstances['debugLogging'] as bool,
-    );
-  }
-
-  /// Registers environment-specific services
-  static Future<void> _registerEnvironmentServices(
-      String environment, bool isTest) async {
-    // Meta parser
-    const config = MetaConfig(
-      pagePath: 'meta.current_page',
-      perPagePath: 'meta.per_page',
-      totalPath: 'meta.total',
-      lastPagePath: 'meta.last_page',
-      hasMorePath: 'meta.has_more',
-      nextCursorPath: 'meta.next_cursor',
-      offsetPath: 'meta.offset',
-      itemsPath: 'data',
-    );
-    _instances[MetaParser] = ConfigMetaParser(config);
-
-    // Dio client
-    final dio = Dio();
-    dio.options.connectTimeout = _namedInstances['requestTimeout'] as Duration;
-    dio.options.receiveTimeout = _namedInstances['requestTimeout'] as Duration;
-    _instances[Dio] = dio;
-
-    // These are not needed for basic functionality
-  }
-
-  /// Gets a dependency
-  static T get<T extends Object>({String? instanceName}) {
-    if (instanceName != null) {
-      if (!_namedInstances.containsKey(instanceName)) {
-        throw StateError('Named instance $instanceName not registered');
-      }
-      return _namedInstances[instanceName] as T;
-    }
+  /// Retrieves the registered instance of type [T]
+  ///
+  /// Throws [StateError] if [T] is not registered.
+  ///
+  /// Example:
+  /// ```dart
+  /// final dio = PaginatrixDI.get<Dio>();
+  /// ```
+  static T get<T>() {
     if (!_instances.containsKey(T)) {
-      throw StateError('Instance of type $T not registered');
+      throw StateError(
+        'Instance of type $T not registered. '
+        'Call PaginatrixDI.register<$T>(instance) first.',
+      );
     }
     return _instances[T] as T;
   }
 
-  /// Checks if a dependency is registered
-  static bool isRegistered<T extends Object>({String? instanceName}) {
-    if (instanceName != null) {
-      return _namedInstances.containsKey(instanceName);
-    }
+  /// Checks if an instance of type [T] is registered
+  ///
+  /// Example:
+  /// ```dart
+  /// if (PaginatrixDI.isRegistered<Dio>()) {
+  ///   final dio = PaginatrixDI.get<Dio>();
+  /// }
+  /// ```
+  static bool isRegistered<T>() {
     return _instances.containsKey(T);
   }
 
-  /// Resets all dependencies
-  static Future<void> reset() async {
+  /// Clears all registered instances
+  ///
+  /// Useful for testing or when you want to reset the DI container.
+  ///
+  /// Example:
+  /// ```dart
+  /// tearDown(() {
+  ///   PaginatrixDI.reset();
+  /// });
+  /// ```
+  static void reset() {
     _instances.clear();
-    _namedInstances.clear();
   }
+
+  /// Returns the number of registered instances
+  ///
+  /// Useful for debugging or testing.
+  static int get registeredCount => _instances.length;
 }
