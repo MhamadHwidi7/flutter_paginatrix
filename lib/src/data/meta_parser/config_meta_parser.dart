@@ -102,16 +102,33 @@ class ConfigMetaParser implements MetaParser {
   @override
   PageMeta parseMeta(Map<String, dynamic> data) {
     try {
-      final page = _extractValue(data, _config.pagePath) as int?;
-      final perPage = _extractValue(data, _config.perPagePath) as int?;
-      final total = _extractValue(data, _config.totalPath) as int?;
-      final lastPage = _extractValue(data, _config.lastPagePath) as int?;
-      final hasMore = _extractValue(data, _config.hasMorePath) as bool?;
-      final nextCursor = _extractValue(data, _config.nextCursorPath) as String?;
-      final previousCursor =
-          _extractValue(data, _config.previousCursorPath) as String?;
-      final offset = _extractValue(data, _config.offsetPath) as int?;
-      final limit = _extractValue(data, _config.limitPath) as int?;
+      // Safe type extraction with runtime checks
+      final pageValue = _extractValue(data, _config.pagePath);
+      final page = pageValue is int ? pageValue : null;
+      
+      final perPageValue = _extractValue(data, _config.perPagePath);
+      final perPage = perPageValue is int ? perPageValue : null;
+      
+      final totalValue = _extractValue(data, _config.totalPath);
+      final total = totalValue is int ? totalValue : null;
+      
+      final lastPageValue = _extractValue(data, _config.lastPagePath);
+      final lastPage = lastPageValue is int ? lastPageValue : null;
+      
+      final hasMoreValue = _extractValue(data, _config.hasMorePath);
+      final hasMore = hasMoreValue is bool ? hasMoreValue : null;
+      
+      final nextCursorValue = _extractValue(data, _config.nextCursorPath);
+      final nextCursor = nextCursorValue is String ? nextCursorValue : null;
+      
+      final previousCursorValue = _extractValue(data, _config.previousCursorPath);
+      final previousCursor = previousCursorValue is String ? previousCursorValue : null;
+      
+      final offsetValue = _extractValue(data, _config.offsetPath);
+      final offset = offsetValue is int ? offsetValue : null;
+      
+      final limitValue = _extractValue(data, _config.limitPath);
+      final limit = limitValue is int ? limitValue : null;
 
       // Determine pagination type and create appropriate PageMeta
       if (page != null && perPage != null) {
