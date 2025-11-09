@@ -143,14 +143,59 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
       // Cancel any pending debounce timer
       _cancelDebounceTimer();
 
-      // Create new debounce timer
-      _scrollDebounceTimer = Timer(debounceDuration, () {
+      // Emit appending state immediately to show loading footer
+      // This provides immediate visual feedback while debouncing the actual API call
+      final currentMeta = state.meta;
+      if (currentMeta != null && !state.status.maybeWhen(appending: () => true, orElse: () => false)) {
+        // Create a temporary request context for immediate feedback
+        final tempRequestContext = RequestContext.create(
+          generation: _generationGuard.currentGeneration,
+          cancelToken: CancelToken(),
+          isAppend: true,
+        );
+        
+        // Emit appending state immediately - footer will show right away
+        emit(PaginationState.appending(
+          requestContext: tempRequestContext,
+          currentItems: state.items,
+          currentMeta: currentMeta,
+        ));
+      }
+
+      // Create new debounce timer for actual API call
+      _scrollDebounceTimer = Timer(debounceDuration, () async {
         // Guard against race condition: check if cubit is closed first
         if (isClosed) return;
 
         // Only load if conditions are met (double-check after timer delay)
-        if (canLoadMore && !isLoading && !isClosed) {
-          loadNextPage();
+        // Note: We allow proceeding even if already in appending state (from immediate emit above)
+        if (canLoadMore && !isClosed) {
+          // Check if we're already loading from a previous call
+          final isCurrentlyLoading = state.status.maybeWhen(
+            loading: () => true,
+            refreshing: () => true,
+            orElse: () => false,
+          );
+          
+          // Only proceed if not already loading (but allow if just appending from immediate emit)
+          if (!isCurrentlyLoading) {
+            // Call loadNextPage and handle only specific race condition errors
+            try {
+              await loadNextPage();
+            } catch (e) {
+              // Only catch StateError about emitting after close
+              if (e is StateError && 
+                  e.message.contains('Cannot emit new states after calling close')) {
+                // Silently ignore - cubit was closed during execution
+                return;
+              }
+              // For other errors, log if cubit is still open
+              if (!isClosed) {
+                _debugLog('Unexpected error loading next page: $e');
+              }
+              // Don't rethrow - errors are already handled in _loadData
+            }
+          }
         }
       });
 
@@ -207,7 +252,15 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
 
       // Double-check loading state after debounce delay
       if (!state.isLoading && !isClosed) {
-        await _loadData(PaginatrixLoadType.refresh);
+        // Wrap in try-catch to handle race condition if cubit closes during execution
+        try {
+          await _loadData(PaginatrixLoadType.refresh);
+        } catch (e) {
+          // Silently ignore state errors if cubit was closed
+          if (isClosed) return;
+          // Re-throw other errors
+          rethrow;
+        }
       }
     });
   }
@@ -295,7 +348,17 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
   /// Checks if load operation should proceed
   /// Returns true if load should proceed, false otherwise
   bool _shouldProceedWithLoad(PaginatrixLoadType type) {
-    if (state.isLoading) return false;
+    // Allow proceeding if we're in appending state and trying to load next page
+    // This handles the case where we emit appending state immediately for visual feedback
+    final isAppending = state.status.maybeWhen(
+      appending: () => true,
+      orElse: () => false,
+    );
+    
+    // Block if already loading (but allow appending state for next page loads)
+    if (state.isLoading && !(isAppending && type == PaginatrixLoadType.next)) {
+      return false;
+    }
     if (type == PaginatrixLoadType.next && !canLoadMore) return false;
     if (isClosed) return false;
     return true;
