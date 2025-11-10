@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
   flutter_paginatrix:
     path: ../../
+  flutter_bloc: ^8.1.6
   dio: ^5.4.0
   cached_network_image: ^3.3.1
 

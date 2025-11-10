@@ -108,6 +108,7 @@ PaginatedCubit<T> createTestController<T>({
   MetaParser? metaParser,
   int itemsPerPage = 20,
   Duration loaderDelay = Duration.zero,
+  PaginationOptions? options,
 }) {
   return PaginatedCubit<T>(
     loader: createMockLoader<T>(
@@ -117,6 +118,25 @@ PaginatedCubit<T> createTestController<T>({
     ),
     itemDecoder: itemDecoder ?? ((json) => json as T),
     metaParser: metaParser ?? ConfigMetaParser(MetaConfig.nestedMeta),
+    options: options,
+  );
+}
+
+/// Test helper: Creates a controller with zero refresh debounce (for refresh tests)
+PaginatedCubit<T> createTestControllerWithZeroDebounce<T>({
+  required List<Map<String, dynamic>> mockData,
+  ItemDecoder<T>? itemDecoder,
+  MetaParser? metaParser,
+  int itemsPerPage = 20,
+  Duration loaderDelay = Duration.zero,
+}) {
+  return createTestController<T>(
+    mockData: mockData,
+    itemDecoder: itemDecoder,
+    metaParser: metaParser,
+    itemsPerPage: itemsPerPage,
+    loaderDelay: loaderDelay,
+    options: const PaginationOptions(refreshDebounceDuration: Duration.zero),
   );
 }
 

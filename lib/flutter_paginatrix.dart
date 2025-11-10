@@ -34,6 +34,8 @@ export 'src/core/enums/paginatrix_load_type.dart';
 export 'src/core/extensions/pagination_state_extension.dart';
 // Core models
 export 'src/core/models/pagination_options.dart';
+// Core config
+export 'src/core/config/build_config.dart';
 // Core typedefs
 export 'src/core/typedefs/typedefs.dart';
 // Core utilities

@@ -40,10 +40,12 @@ class PokemonPage extends StatelessWidget {
 
     // Create the PaginatedCubit with repository
     // The loader function will be called for both initial load and pagination
+    final config = BuildConfig.current;
     final controller = PaginatedCubit<Pokemon>(
       loader: repository.loadPokemonPage,
       itemDecoder: Pokemon.fromJson,
       metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
+      options: config.defaultPaginationOptions,
     );
 
     // Create and provide the BLoC

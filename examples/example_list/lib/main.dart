@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
 
 import 'memory_monitor.dart';
@@ -10,10 +11,8 @@ void main() {
   // Ensure Flutter binding is initialized before accessing SchedulerBinding
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Start performance monitoring (optional)
+  // Start performance monitoring
   PerformanceMonitor.start();
-
-  // Start memory monitoring (optional)
   MemoryMonitor.start();
 
   runApp(const MyApp());
@@ -26,9 +25,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Paginatrix Example',
-      // Enable performance overlay to check for jank frames
-      // Remove this in production or set to false
-      showPerformanceOverlay: true, // Set to true to see FPS and frame times
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
@@ -51,14 +47,18 @@ class _UsersPageState extends State<UsersPage> {
   @override
   void initState() {
     super.initState();
+    final config = BuildConfig.current;
+    
     _cubit = PaginatedCubit<User>(
       loader: _loadUsers,
       itemDecoder: User.fromJson,
       metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
-      options: const PaginationOptions(
+      // Use environment-specific options with custom page size
+      options: config.defaultPaginationOptions.copyWith(
         defaultPageSize: 50, // 50 items per page
       ),
     );
+    
     _cubit.loadFirstPage();
   }
 
@@ -120,7 +120,6 @@ class _UsersPageState extends State<UsersPage> {
         title: const Text('Users'),
         elevation: 0,
         actions: [
-          // Memory and Performance stats button
           IconButton(
             icon: const Icon(Icons.analytics),
             tooltip: 'View Memory & Performance Stats',
@@ -130,7 +129,12 @@ class _UsersPageState extends State<UsersPage> {
           ),
         ],
       ),
-      body: PaginatrixListView<User>(
+      body: BlocBuilder<PaginatedCubit<User>, PaginationState<User>>(
+        bloc: _cubit,
+        builder: (context, state) {
+          return Stack(
+            children: [
+              PaginatrixListView<User>(
         cubit: _cubit,
         padding: const EdgeInsets.symmetric(vertical: 8),
         // Performance optimizations
@@ -151,6 +155,10 @@ class _UsersPageState extends State<UsersPage> {
         ),
         onPullToRefresh: () {
           // Optional: Add custom refresh logic
+        },
+              ),
+            ],
+          );
         },
       ),
       floatingActionButton: FloatingActionButton(

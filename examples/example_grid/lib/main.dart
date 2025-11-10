@@ -36,11 +36,15 @@ class _ProductsPageState extends State<ProductsPage> {
   @override
   void initState() {
     super.initState();
+    final config = BuildConfig.current;
+    
     _cubit = PaginatedCubit<Product>(
       loader: _loadProducts,
       itemDecoder: Product.fromJson,
       metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
+      options: config.defaultPaginationOptions,
     );
+    
     _cubit.loadFirstPage();
   }
 

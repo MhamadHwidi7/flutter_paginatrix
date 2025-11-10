@@ -37,6 +37,8 @@ class _PokemonPageState extends State<PokemonPage> {
   void initState() {
     super.initState();
     
+    final config = BuildConfig.current;
+    
     // Create the Cubit
     _cubit = PaginatedCubit<Pokemon>(
       loader: _loadPokemonPage,
@@ -77,6 +79,7 @@ class _PokemonPageState extends State<PokemonPage> {
           };
         },
       ),
+      options: config.defaultPaginationOptions,
     );
     
     // Load first page
