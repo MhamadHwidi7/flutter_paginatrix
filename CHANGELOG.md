@@ -62,12 +62,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Developer-friendly** - Simple API with minimal configuration
 
 ### Examples
-- `example_list` - Basic list pagination
-- `example_grid` - Grid pagination
-- `example_bloc` - BLoC pattern integration with Pokemon API
-- `example_cubit` - Cubit usage example
-- `example_web_scroll` - Web scroll-based pagination
-- `example_web_pages` - Web page selection pagination
+- `example_basic_controller` - Basic usage with PaginatrixController
+- `example_list_view` - PaginatrixListView with performance monitoring
+- `example_grid_view` - PaginatrixGridView pagination
+- `example_bloc_pattern` - BLoC pattern integration with custom events
+- `example_cubit_direct` - Direct PaginatrixCubit usage
+- `example_web_infinite_scroll` - Web infinite scroll pagination
+- `example_web_page_selector` - Web page selector pagination
 
 ### Documentation
 - Complete API reference
