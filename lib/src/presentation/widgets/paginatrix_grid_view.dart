@@ -9,7 +9,7 @@ import 'package:flutter_paginatrix/src/presentation/widgets/paginatrix_state_bui
 
 /// GridView adapter for Paginatrix using BlocBuilder
 ///
-/// This widget uses [PaginatedCubit] with [BlocBuilder] for reactive UI updates.
+/// This widget uses [PaginatrixCubit] with [BlocBuilder] for reactive UI updates.
 ///
 /// ## Scroll Direction & Reverse
 ///
@@ -21,14 +21,14 @@ import 'package:flutter_paginatrix/src/presentation/widgets/paginatrix_state_bui
 /// ## Example
 ///
 /// ```dart
-/// final cubit = PaginatedCubit<Pokemon>(
+/// final pagination = PaginatrixController<Pokemon>(
 ///   loader: repository.loadPokemon,
 ///   itemDecoder: Pokemon.fromJson,
 ///   metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
 /// );
 ///
 /// PaginatrixGridView<Pokemon>(
-///   cubit: cubit,
+///   controller: pagination,
 ///   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
 ///     crossAxisCount: 2,
 ///     crossAxisSpacing: 8,
@@ -39,11 +39,16 @@ import 'package:flutter_paginatrix/src/presentation/widgets/paginatrix_state_bui
 ///   },
 /// )
 /// ```
+///
+/// **Note:** You can use either `controller` or `cubit` parameter.
+/// `PaginatrixController` is the recommended public API and doesn't
+/// require importing `flutter_bloc` directly.
 class PaginatrixGridView<T> extends StatelessWidget
     with PaginatrixStateBuilderMixin<T> {
-  const PaginatrixGridView({
+  PaginatrixGridView({
     super.key,
-    required this.cubit,
+    PaginatrixCubit<T>? cubit,
+    PaginatrixController<T>? controller,
     required this.itemBuilder,
     required this.gridDelegate,
     this.keyBuilder,
@@ -66,14 +71,19 @@ class PaginatrixGridView<T> extends StatelessWidget
     this.addSemanticIndexes = true,
     this.cacheExtent,
   }) : assert(
+          cubit != null || controller != null,
+          'Either cubit or controller must be provided',
+        ),
+        assert(
           scrollDirection == Axis.vertical ||
               scrollDirection == Axis.horizontal,
           'scrollDirection must be either Axis.vertical or Axis.horizontal',
-        );
+        ),
+        cubit = cubit ?? controller!;
 
   // Required by mixin
   @override
-  final PaginatedCubit<T> cubit;
+  final PaginatrixCubit<T> cubit;
 
   // Widget-specific fields
   final Widget Function(BuildContext context, T item, int index) itemBuilder;
@@ -113,7 +123,7 @@ class PaginatrixGridView<T> extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<PaginatedCubit<T>, PaginationState<T>>(
+    return BlocBuilder<PaginatrixCubit<T>, PaginationState<T>>(
       bloc: cubit,
       builder: buildContent,
     );

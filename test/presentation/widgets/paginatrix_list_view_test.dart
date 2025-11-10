@@ -201,26 +201,26 @@ void main() {
 
       // Trigger load next page
       final future = cubit.loadNextPage();
-
+      
       // Wait for appending state
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
-
+      
       // Check if appending state is active (loader might render very quickly)
       final isAppending = cubit.state.status.maybeWhen(
         appending: () => true,
         orElse: () => false,
       );
-
+      
       // Either we're in appending state (and loader should be visible) or already done
       if (isAppending) {
         expect(find.byType(AppendLoader), findsOneWidget);
       }
-
+      
       // Wait for load to complete
       await future;
       await tester.pumpAndSettle();
-
+      
       // Verify items were loaded
       expect(cubit.state.items.length, greaterThan(20));
     });
@@ -239,26 +239,26 @@ void main() {
       await tester.pumpAndSettle();
 
       final future = cubit.loadNextPage();
-
+      
       // Wait for appending state
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
-
+      
       // Check if appending state is active
       final isAppending = cubit.state.status.maybeWhen(
         appending: () => true,
         orElse: () => false,
       );
-
+      
       // Either we're in appending state (and custom loader should be visible) or already done
       if (isAppending) {
         expect(find.text('Loading more...'), findsOneWidget);
       }
-
+      
       // Wait for load to complete
       await future;
       await tester.pumpAndSettle();
-
+      
       // Verify items were loaded
       expect(cubit.state.items.length, greaterThan(20));
     });
@@ -323,7 +323,7 @@ void main() {
       // Verify append error exists in state (custom builder is used when appendErrorBuilder is provided)
       expect(errorCubit.state.items.length, 20); // Items preserved
       expect(errorCubit.state.appendError, isNotNull); // Append error exists
-
+      
       // The custom builder should be rendered, but might not be visible if footer is off-screen
       // We verify the state is correct which means the builder would be called
       errorCubit.close();
@@ -384,12 +384,12 @@ void main() {
               width: 800,
               height: 600,
               child: PaginatrixListView<Map<String, dynamic>>(
-                cubit: cubit,
-                scrollDirection: Axis.horizontal,
-                itemBuilder: (context, item, index) => SizedBox(
-                  width: 200, // Fixed width for horizontal scrolling
-                  child: ListTile(
-                    title: Text(item['name'] ?? 'Item $index'),
+          cubit: cubit,
+          scrollDirection: Axis.horizontal,
+          itemBuilder: (context, item, index) => SizedBox(
+            width: 200, // Fixed width for horizontal scrolling
+            child: ListTile(
+              title: Text(item['name'] ?? 'Item $index'),
                   ),
                 ),
               ),

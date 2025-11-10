@@ -27,7 +27,7 @@ import 'package:flutter_paginatrix/src/presentation/widgets/pagination_error_vie
 /// ```
 mixin PaginatrixStateBuilderMixin<T> on StatelessWidget {
   // Abstract getters that must be implemented by the widget
-  PaginatedCubit<T> get cubit;
+  PaginatrixCubit<T> get cubit;
 
   // Common callbacks
   Widget Function(BuildContext context)? get emptyBuilder;

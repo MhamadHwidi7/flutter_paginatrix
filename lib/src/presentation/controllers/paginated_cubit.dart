@@ -7,42 +7,43 @@ import 'package:flutter_paginatrix/flutter_paginatrix.dart';
 
 /// Cubit-based controller for managing paginated data
 ///
-/// This is the recommended way to use flutter_paginatrix with flutter_bloc.
-/// It provides automatic state management, stream handling, and lifecycle management.
+/// This is the internal implementation used by [PaginatrixController].
+/// For most use cases, use [PaginatrixController] instead, which provides
+/// a cleaner API without requiring flutter_bloc imports.
 ///
-/// **Advantages over PaginatedController:**
+/// **Advantages:**
 /// - ✅ No manual StreamController management
 /// - ✅ Automatic disposal and cleanup
 /// - ✅ Built-in safety checks (no isClosed checks needed)
 /// - ✅ Better testability with blocTest
 /// - ✅ Consistent with flutter_bloc patterns
 ///
-/// ## Usage
+/// ## Usage (Advanced - with BlocProvider)
 ///
 /// ```dart
-/// final cubit = PaginatedCubit<Pokemon>(
+/// final cubit = PaginatrixCubit<Pokemon>(
 ///   loader: repository.loadPokemonPage,
 ///   itemDecoder: Pokemon.fromJson,
 ///   metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
 /// );
 ///
 /// // In widget:
-/// BlocBuilder<PaginatedCubit<Pokemon>, PaginationState<Pokemon>>(
+/// BlocBuilder<PaginatrixCubit<Pokemon>, PaginationState<Pokemon>>(
 ///   bloc: cubit,
 ///   builder: (context, state) {
 ///     // Use state directly
 ///   },
 /// )
 /// ```
-class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
-  /// Creates a new PaginatedCubit
+class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
+  /// Creates a new PaginatrixCubit
   ///
   /// [loader] - Single function that loads a page of data. Called for both
   ///            initial load (page 1) and pagination (page 2, 3, etc.).
   /// [itemDecoder] - Function to decode individual items from raw data
   /// [metaParser] - Parser to extract pagination metadata
   /// [options] - Optional pagination options
-  PaginatedCubit({
+  PaginatrixCubit({
     required LoaderFn<T> loader,
     required ItemDecoder<T> itemDecoder,
     required MetaParser metaParser,
@@ -97,7 +98,7 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
   /// Logs a debug message if debug logging is enabled
   void _debugLog(String message) {
     if (_options.enableDebugLogging) {
-      debugPrint('PaginatedCubit: $message');
+      debugPrint('PaginatrixCubit: $message');
     }
   }
 
@@ -636,3 +637,33 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
     return super.close();
   }
 }
+
+/// Public API for managing paginated data
+/// 
+/// This is the recommended way to use flutter_paginatrix. It provides
+/// a clean, package-consistent API without exposing implementation details.
+/// 
+/// **Why PaginatrixController?**
+/// - Consistent with package naming (`PaginatrixListView`, `PaginatrixGridView`)
+/// - Clean and intuitive API
+/// - No need to import `flutter_bloc` directly
+/// - Implementation-agnostic (uses `PaginatrixCubit` internally)
+/// 
+/// ## Usage
+/// 
+/// ```dart
+/// final pagination = PaginatrixController<User>(
+///   loader: _loadUsers,
+///   itemDecoder: User.fromJson,
+///   metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
+/// );
+/// 
+/// PaginatrixListView<User>(
+///   controller: pagination,
+///   itemBuilder: (context, user, index) => UserTile(user: user),
+/// )
+/// ```
+/// 
+/// **Note:** For advanced usage with `BlocProvider` and `BlocBuilder`, you can
+/// still use `PaginatrixCubit` directly, which this type aliases to.
+typedef PaginatrixController<T> = PaginatrixCubit<T>;
