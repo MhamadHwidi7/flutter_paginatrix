@@ -8,7 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:example_web_scroll/main.dart' as app;
+import 'package:example_web_page_selector/main.dart' as app;
 
 void main() {
   testWidgets('App loads successfully', (WidgetTester tester) async {

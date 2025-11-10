@@ -1,12 +1,12 @@
 # Cubit Example - Direct Usage
 
-This example demonstrates the **simplest and most direct** way to use `flutter_paginatrix` with `PaginatedCubit` and `BlocBuilder`.
+This example demonstrates the **simplest and most direct** way to use `flutter_paginatrix` with `PaginatrixCubit` and `BlocBuilder`.
 
 ## 🎯 What's Different?
 
-### vs example_bloc
-- **example_bloc**: Wraps `PaginatedController` in a custom BLoC with events
-- **example_cubit**: Uses `PaginatedCubit` **directly** - no wrapper needed!
+### vs example_bloc_pattern
+- **example_bloc_pattern**: Wraps `PaginatrixController` in a custom BLoC with events
+- **example_cubit_direct**: Uses `PaginatrixCubit` **directly** - no wrapper needed!
 
 ### Key Advantages
 
@@ -22,7 +22,7 @@ This example demonstrates the **simplest and most direct** way to use `flutter_p
 ### 1. Create the Cubit
 
 ```dart
-final cubit = PaginatedCubit<Pokemon>(
+final cubit = PaginatrixCubit<Pokemon>(
   loader: _loadPokemonPage,
   itemDecoder: Pokemon.fromJson,
   metaParser: CustomMetaParser(
@@ -54,7 +54,7 @@ PaginatrixCubitGridView<Pokemon>(
 
 **Option B: Manual BlocBuilder**
 ```dart
-BlocBuilder<PaginatedCubit<Pokemon>, PaginationState<Pokemon>>(
+BlocBuilder<PaginatrixCubit<Pokemon>, PaginationState<Pokemon>>(
   bloc: cubit,
   builder: (context, state) {
     // Handle states manually
@@ -135,7 +135,7 @@ cubit.state.canLoadMore
 
 ## 🆚 Comparison
 
-### example_bloc (Wrapped BLoC)
+### example_bloc_pattern (Wrapped BLoC)
 
 ```dart
 // 1. Create controller
@@ -158,14 +158,14 @@ bloc.add(const LoadFirstPage());
 bloc.add(const LoadNextPage());
 ```
 
-### example_cubit (Direct Cubit) ✅
+### example_cubit_direct (Direct Cubit) ✅
 
 ```dart
 // 1. Create cubit (that's it!)
-final cubit = PaginatedCubit<Pokemon>(...);
+final cubit = PaginatrixCubit<Pokemon>(...);
 
 // 2. Use BlocBuilder directly
-BlocBuilder<PaginatedCubit<Pokemon>, PaginationState<Pokemon>>(
+BlocBuilder<PaginatrixCubit<Pokemon>, PaginationState<Pokemon>>(
   bloc: cubit,
   builder: (context, state) {
     // Direct state access!
@@ -337,11 +337,11 @@ class _PokemonPageState extends State<PokemonPage> {
 
 ## 📚 Next Steps
 
-- Read [example_bloc](../example_bloc) for wrapped BLoC pattern
-- Check [example_list](../example_list) for basic controller usage
-- See [DOCUMENTATION.md](../../DOCUMENTATION.md) for full API
+- Read [example_bloc_pattern](../example_bloc_pattern) for wrapped BLoC pattern
+- Check [example_basic_controller](../example_basic_controller) for basic controller usage
+- See [README.md](../../README.md) for full API documentation
 
 ---
 
-**Recommendation:** Start with this example (Cubit). If you need more control, upgrade to the wrapped BLoC pattern in [example_bloc](../example_bloc).
+**Recommendation:** Start with this example (Cubit). If you need more control, upgrade to the wrapped BLoC pattern in [example_bloc_pattern](../example_bloc_pattern).
 

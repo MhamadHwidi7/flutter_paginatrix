@@ -1,6 +1,6 @@
 {
-    "name": "example_web_pages",
-    "short_name": "example_web_pages",
+    "name": "example_web_infinite_scroll",
+    "short_name": "example_web_infinite_scroll",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

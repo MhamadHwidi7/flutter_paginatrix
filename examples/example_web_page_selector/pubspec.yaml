@@ -1,5 +1,5 @@
-name: example_web_scroll
-description: Web scroll-based pagination example for flutter_paginatrix
+name: example_web_page_selector
+description: Web page selector pagination example
 publish_to: 'none'
 version: 1.0.0
 

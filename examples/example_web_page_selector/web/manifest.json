@@ -1,6 +1,6 @@
 {
-    "name": "example_web_scroll",
-    "short_name": "example_web_scroll",
+    "name": "example_web_page_selector",
+    "short_name": "example_web_page_selector",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
