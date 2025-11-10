@@ -37,8 +37,6 @@ dependencies:
   dio: ^5.4.0  # Optional - Only needed if using Dio for HTTP requests
 ```
 
-> **Note:** `flutter_bloc` is included as a dependency of `flutter_paginatrix`, so you don't need to add it to your `pubspec.yaml`. The package uses it internally for state management, but you can use the API without importing `flutter_bloc` directly.
-
 Then run:
 
 ```bash
