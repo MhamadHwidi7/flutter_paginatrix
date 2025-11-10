@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_paginatrix/src/presentation/widgets/pagination_skeletonizer.dart';
+import 'package:flutter_paginatrix/src/core/mixins/theme_access_mixin.dart';
 
 /// Modern bouncing dots loader
 class BouncingDotsLoader extends StatefulWidget {
@@ -59,9 +60,8 @@ class _BouncingDotsLoaderState extends State<BouncingDotsLoader>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
     final color = widget.color ?? colorScheme.primary;
 
     return Container(
@@ -169,9 +169,8 @@ class _WaveLoaderState extends State<WaveLoader> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
     final color = widget.color ?? colorScheme.primary;
 
     return Container(
@@ -274,9 +273,8 @@ class _RotatingSquaresLoaderState extends State<RotatingSquaresLoader>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
     final color = widget.color ?? colorScheme.primary;
 
     return Container(
@@ -401,9 +399,8 @@ class _PulseLoaderState extends State<PulseLoader>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
     final color = widget.color ?? colorScheme.primary;
 
     return Container(
@@ -493,18 +490,18 @@ class SkeletonLoader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
 
     return Container(
       padding: padding ?? const EdgeInsets.all(16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Use PaginationSkeletonizer for skeleton effect
+          // Use PaginatrixSkeletonizer for skeleton effect
           SizedBox(
             height: 200,
-            child: PaginationSkeletonizer(
+            child: PaginatrixSkeletonizer(
               itemCount: itemCount,
               shrinkWrap: true,
             ),
@@ -514,7 +511,7 @@ class SkeletonLoader extends StatelessWidget {
             Text(
               message!,
               style: textTheme.bodySmall?.copyWith(
-                color: color ?? theme.colorScheme.onSurfaceVariant,
+                color: color ?? colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w500,
               ),
               textAlign: TextAlign.center,

@@ -1,9 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
+/// Creates a CustomScrollView wrapped in Skeletonizer with common properties
+/// This helper reduces duplication between PaginatrixSkeletonizer and PaginatrixGridSkeletonizer
+Widget _createSkeletonizedScrollView({
+  required bool enabled,
+  required List<Widget> slivers,
+  ScrollPhysics? physics,
+  bool shrinkWrap = false,
+  Axis scrollDirection = Axis.vertical,
+  bool reverse = false,
+  EdgeInsetsGeometry? padding,
+}) {
+  return Skeletonizer(
+    enabled: enabled,
+    child: CustomScrollView(
+      physics: physics,
+      shrinkWrap: shrinkWrap,
+      scrollDirection: scrollDirection,
+      reverse: reverse,
+      slivers: [
+        if (padding != null) SliverPadding(padding: padding),
+        ...slivers,
+      ],
+    ),
+  );
+}
+
 /// Skeleton loading effect for pagination loading states using Skeletonizer
-class PaginationSkeletonizer extends StatelessWidget {
-  const PaginationSkeletonizer({
+class PaginatrixSkeletonizer extends StatelessWidget {
+  const PaginatrixSkeletonizer({
     super.key,
     this.itemCount = 10,
     this.itemBuilder,
@@ -26,26 +52,24 @@ class PaginationSkeletonizer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Skeletonizer(
+    return _createSkeletonizedScrollView(
       enabled: enabled,
-      child: CustomScrollView(
-        physics: physics,
-        shrinkWrap: shrinkWrap,
-        scrollDirection: scrollDirection,
-        reverse: reverse,
-        slivers: [
-          if (padding != null) SliverPadding(padding: padding!),
-          SliverList.builder(
-            itemCount: itemCount,
-            itemBuilder: (context, index) {
-              if (itemBuilder != null) {
-                return itemBuilder!(context, index);
-              }
-              return const _DefaultSkeletonItem();
-            },
-          ),
-        ],
-      ),
+      physics: physics,
+      shrinkWrap: shrinkWrap,
+      scrollDirection: scrollDirection,
+      reverse: reverse,
+      padding: padding,
+      slivers: [
+        SliverList.builder(
+          itemCount: itemCount,
+          itemBuilder: (context, index) {
+            if (itemBuilder != null) {
+              return itemBuilder!(context, index);
+            }
+            return const _DefaultSkeletonItem();
+          },
+        ),
+      ],
     );
   }
 }
@@ -89,8 +113,8 @@ class _DefaultSkeletonItem extends StatelessWidget {
 }
 
 /// Skeleton loading effect for grid items using Skeletonizer
-class PaginationGridSkeletonizer extends StatelessWidget {
-  const PaginationGridSkeletonizer({
+class PaginatrixGridSkeletonizer extends StatelessWidget {
+  const PaginatrixGridSkeletonizer({
     super.key,
     this.itemCount = 10,
     this.itemBuilder,
@@ -115,27 +139,25 @@ class PaginationGridSkeletonizer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Skeletonizer(
+    return _createSkeletonizedScrollView(
       enabled: enabled,
-      child: CustomScrollView(
-        physics: physics,
-        shrinkWrap: shrinkWrap,
-        scrollDirection: scrollDirection,
-        reverse: reverse,
-        slivers: [
-          if (padding != null) SliverPadding(padding: padding!),
-          SliverGrid.builder(
-            gridDelegate: gridDelegate,
-            itemCount: itemCount,
-            itemBuilder: (context, index) {
-              if (itemBuilder != null) {
-                return itemBuilder!(context, index);
-              }
-              return const _DefaultGridSkeletonItem();
-            },
-          ),
-        ],
-      ),
+      physics: physics,
+      shrinkWrap: shrinkWrap,
+      scrollDirection: scrollDirection,
+      reverse: reverse,
+      padding: padding,
+      slivers: [
+        SliverGrid.builder(
+          gridDelegate: gridDelegate,
+          itemCount: itemCount,
+          itemBuilder: (context, index) {
+            if (itemBuilder != null) {
+              return itemBuilder!(context, index);
+            }
+            return const _DefaultGridSkeletonItem();
+          },
+        ),
+      ],
     );
   }
 }

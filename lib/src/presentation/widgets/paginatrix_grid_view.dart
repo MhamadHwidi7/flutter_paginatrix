@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
-import 'package:flutter_paginatrix/src/presentation/widgets/paginatrix_state_builder_mixin.dart';
+import 'package:flutter_paginatrix/src/core/mixins/paginatrix_state_builder_mixin.dart';
 
 /// GridView adapter for Paginatrix using BlocBuilder
 ///
@@ -95,16 +94,11 @@ class PaginatrixGridView<T> extends StatelessWidget
     this.addRepaintBoundaries = true,
     this.addSemanticIndexes = true,
     this.cacheExtent,
-  })  : assert(
-          cubit != null || controller != null,
-          'Either cubit or controller must be provided',
-        ),
-        assert(
-          scrollDirection == Axis.vertical ||
-              scrollDirection == Axis.horizontal,
-          'scrollDirection must be either Axis.vertical or Axis.horizontal',
-        ),
-        cubit = cubit ?? controller!;
+  }) : cubit = validateAndInitializeCubit<T>(
+          cubit: cubit,
+          controller: controller,
+          scrollDirection: scrollDirection,
+        );
 
   // Required by mixin
   @override
@@ -131,24 +125,29 @@ class PaginatrixGridView<T> extends StatelessWidget
   final int? prefetchThreshold;
 
   /// Padding around the grid.
+  @override
   final EdgeInsetsGeometry? padding;
 
   /// Scroll physics behavior.
+  @override
   final ScrollPhysics? physics;
 
   /// Whether the grid should shrink-wrap its contents.
   ///
   /// Defaults to false.
+  @override
   final bool shrinkWrap;
 
   /// Scroll direction (vertical or horizontal).
   ///
   /// Defaults to [Axis.vertical].
+  @override
   final Axis scrollDirection;
 
   /// Whether to reverse the scroll direction.
   ///
   /// Defaults to false.
+  @override
   final bool reverse;
 
   /// Custom skeleton loader builder for initial loading state.
@@ -205,49 +204,38 @@ class PaginatrixGridView<T> extends StatelessWidget
   /// Whether to add automatic keep-alives to grid items.
   ///
   /// Defaults to true.
+  @override
   final bool addAutomaticKeepAlives;
 
   /// Whether to add repaint boundaries to grid items.
   ///
   /// Defaults to true.
+  @override
   final bool addRepaintBoundaries;
 
   /// Whether to add semantic indexes to grid items.
   ///
   /// Defaults to true.
+  @override
   final bool addSemanticIndexes;
 
   /// Cache extent for the scroll view.
   ///
   /// Controls how much content is kept in memory off-screen.
+  @override
   final double? cacheExtent;
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<PaginatrixCubit<T>, PaginationState<T>>(
-      bloc: cubit,
-      builder: buildContent,
-    );
-  }
+  // build() method is now in the mixin
 
   @override
   Widget buildLoadingState(BuildContext context) {
     if (skeletonizerBuilder != null) {
-      return CustomScrollView(
-        physics: physics,
-        shrinkWrap: shrinkWrap,
-        scrollDirection: scrollDirection,
-        reverse: reverse,
-        cacheExtent: cacheExtent,
+      return createCustomScrollView(
         slivers: [
-          if (padding != null) SliverPadding(padding: padding!),
           SliverGrid(
-            delegate: SliverChildBuilderDelegate(
-              skeletonizerBuilder!,
+            delegate: createSliverDelegate(
+              builder: skeletonizerBuilder!,
               childCount: 10, // Default skeletonizer count
-              addAutomaticKeepAlives: addAutomaticKeepAlives,
-              addRepaintBoundaries: addRepaintBoundaries,
-              addSemanticIndexes: addSemanticIndexes,
             ),
             gridDelegate: gridDelegate,
           ),
@@ -255,7 +243,7 @@ class PaginatrixGridView<T> extends StatelessWidget
       );
     }
 
-    return PaginationGridSkeletonizer(
+    return PaginatrixGridSkeletonizer(
       padding: padding,
       physics: physics,
       shrinkWrap: shrinkWrap,
@@ -280,17 +268,11 @@ class PaginatrixGridView<T> extends StatelessWidget
     return createScrollListener(
       prefetchThreshold: prefetchThreshold,
       reverse: reverse,
-      child: CustomScrollView(
-        physics: physics,
-        shrinkWrap: shrinkWrap,
-        scrollDirection: scrollDirection,
-        reverse: reverse,
-        cacheExtent: cacheExtent,
+      child: createCustomScrollView(
         slivers: [
-          if (padding != null) SliverPadding(padding: padding!),
           SliverGrid(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
+            delegate: createSliverDelegate(
+              builder: (context, index) {
                 if (index < itemCount) {
                   return buildItem(
                       context, items[index], index, itemBuilder, keyBuilder);
@@ -298,9 +280,6 @@ class PaginatrixGridView<T> extends StatelessWidget
                 return const SizedBox.shrink();
               },
               childCount: itemCount,
-              addAutomaticKeepAlives: addAutomaticKeepAlives,
-              addRepaintBoundaries: addRepaintBoundaries,
-              addSemanticIndexes: addSemanticIndexes,
             ),
             gridDelegate: gridDelegate,
           ),

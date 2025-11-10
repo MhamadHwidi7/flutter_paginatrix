@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
-import 'package:flutter_paginatrix/src/presentation/widgets/paginatrix_state_builder_mixin.dart';
+import 'package:flutter_paginatrix/src/core/mixins/paginatrix_state_builder_mixin.dart';
 
 /// ListView adapter for Paginatrix using BlocBuilder
 ///
@@ -90,16 +89,11 @@ class PaginatrixListView<T> extends StatelessWidget
     this.addRepaintBoundaries = true,
     this.addSemanticIndexes = true,
     this.cacheExtent,
-  })  : assert(
-          cubit != null || controller != null,
-          'Either cubit or controller must be provided',
-        ),
-        assert(
-          scrollDirection == Axis.vertical ||
-              scrollDirection == Axis.horizontal,
-          'scrollDirection must be either Axis.vertical or Axis.horizontal',
-        ),
-        cubit = cubit ?? controller!;
+  }) : cubit = validateAndInitializeCubit<T>(
+          cubit: cubit,
+          controller: controller,
+          scrollDirection: scrollDirection,
+        );
 
   // Required by mixin
   @override
@@ -121,24 +115,29 @@ class PaginatrixListView<T> extends StatelessWidget
   final int? prefetchThreshold;
 
   /// Padding around the list.
+  @override
   final EdgeInsetsGeometry? padding;
 
   /// Scroll physics behavior.
+  @override
   final ScrollPhysics? physics;
 
   /// Whether the list should shrink-wrap its contents.
   ///
   /// Defaults to false.
+  @override
   final bool shrinkWrap;
 
   /// Scroll direction (vertical or horizontal).
   ///
   /// Defaults to [Axis.vertical].
+  @override
   final Axis scrollDirection;
 
   /// Whether to reverse the scroll direction.
   ///
   /// Defaults to false.
+  @override
   final bool reverse;
 
   /// Optional builder for separators between items.
@@ -200,57 +199,46 @@ class PaginatrixListView<T> extends StatelessWidget
   /// Whether to add automatic keep-alives to list items.
   ///
   /// Defaults to true.
+  @override
   final bool addAutomaticKeepAlives;
 
   /// Whether to add repaint boundaries to list items.
   ///
   /// Defaults to true.
+  @override
   final bool addRepaintBoundaries;
 
   /// Whether to add semantic indexes to list items.
   ///
   /// Defaults to true.
+  @override
   final bool addSemanticIndexes;
 
   /// Cache extent for the scroll view.
   ///
   /// Controls how much content is kept in memory off-screen.
+  @override
   final double? cacheExtent;
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<PaginatrixCubit<T>, PaginationState<T>>(
-      bloc: cubit,
-      builder: buildContent,
-    );
-  }
+  // build() method is now in the mixin
 
   @override
   Widget buildLoadingState(BuildContext context) {
     if (skeletonizerBuilder != null) {
-      return CustomScrollView(
-        physics: physics,
-        shrinkWrap: shrinkWrap,
-        scrollDirection: scrollDirection,
-        reverse: reverse,
-        cacheExtent: cacheExtent,
+      return createCustomScrollView(
         slivers: [
-          if (padding != null) SliverPadding(padding: padding!),
           SliverList(
-            delegate: SliverChildBuilderDelegate(
-              skeletonizerBuilder!,
+            delegate: createSliverDelegate(
+              builder: skeletonizerBuilder!,
               childCount: 10,
-              addAutomaticKeepAlives: addAutomaticKeepAlives,
-              addRepaintBoundaries: addRepaintBoundaries,
-              addSemanticIndexes: addSemanticIndexes,
             ),
           ),
         ],
       );
     }
 
-    // Use PaginationSkeletonizer which handles its own CustomScrollView
-    return PaginationSkeletonizer(
+    // Use PaginatrixSkeletonizer which handles its own CustomScrollView
+    return PaginatrixSkeletonizer(
       padding: padding,
       physics: physics,
       shrinkWrap: shrinkWrap,
@@ -275,17 +263,11 @@ class PaginatrixListView<T> extends StatelessWidget
     return createScrollListener(
       prefetchThreshold: prefetchThreshold,
       reverse: reverse,
-      child: CustomScrollView(
-        physics: physics,
-        shrinkWrap: shrinkWrap,
-        scrollDirection: scrollDirection,
-        reverse: reverse,
-        cacheExtent: cacheExtent,
+      child: createCustomScrollView(
         slivers: [
-          if (padding != null) SliverPadding(padding: padding!),
           SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
+            delegate: createSliverDelegate(
+              builder: (context, index) {
                 if (hasSeparator && index > 0) {
                   // Return separator before item (except first item)
                   return Column(
@@ -301,9 +283,6 @@ class PaginatrixListView<T> extends StatelessWidget
                     context, items[index], index, itemBuilder, keyBuilder);
               },
               childCount: itemCount,
-              addAutomaticKeepAlives: addAutomaticKeepAlives,
-              addRepaintBoundaries: addRepaintBoundaries,
-              addSemanticIndexes: addSemanticIndexes,
             ),
           ),
           // Always show footer when appending or has error, even if no more items
