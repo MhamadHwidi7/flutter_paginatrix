@@ -920,13 +920,15 @@ flutter test --coverage
 
 ## 🔄 CI/CD
 
-The package supports CI/CD integration. You can set up your own CI/CD pipeline
-using GitHub Actions, GitLab CI, or any other CI/CD service to:
+The package includes a complete CI/CD pipeline:
 
-- Run automated tests on every push and pull request
-- Validate code formatting and analysis
-- Generate code coverage reports
-- Automate publishing to pub.dev on version tags
+- **Automated testing** on every push and pull request
+- **Code formatting** and analysis checks
+- **Code coverage** reporting
+- **Automated publishing** to pub.dev on version tags
+- **GitHub Releases** creation
+
+The CI/CD pipeline is configured in `.github/workflows/ci-cd.yml`.
 
 ---
 
