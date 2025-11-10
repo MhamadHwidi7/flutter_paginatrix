@@ -98,7 +98,7 @@ void main() {
       await tester.pump();
 
       // Should show skeleton loader
-      expect(find.byType(PaginationSkeletonizer), findsOneWidget);
+      expect(find.byType(PaginatrixSkeletonizer), findsOneWidget);
     });
 
     testWidgets('should display items after successful load', (tester) async {
@@ -126,7 +126,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should show empty view
-      expect(find.byType(GenericEmptyView), findsOneWidget);
+      expect(find.byType(PaginatrixGenericEmptyView), findsOneWidget);
       emptyCubit.close();
     });
 
@@ -163,7 +163,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should show error view
-      expect(find.byType(PaginationErrorView), findsOneWidget);
+      expect(find.byType(PaginatrixErrorView), findsOneWidget);
       errorCubit.close();
     });
 
@@ -286,7 +286,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should show append error (might be in footer, so check if it exists)
-      // AppendErrorView is shown in the list footer, so we check if items are preserved
+      // PaginatrixAppendErrorView is shown in the list footer, so we check if items are preserved
       expect(errorCubit.state.items.length, 20); // Items preserved
       expect(errorCubit.state.appendError, isNotNull); // Append error exists
       errorCubit.close();
@@ -549,7 +549,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should show error
-      expect(find.byType(PaginationErrorView), findsOneWidget);
+      expect(find.byType(PaginatrixErrorView), findsOneWidget);
       expect(errorCubit.hasError, isTrue);
 
       // Retry by calling loadFirstPage again (simpler than retry())
@@ -620,13 +620,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should show empty view
-      expect(find.byType(GenericEmptyView), findsOneWidget);
+      expect(find.byType(PaginatrixGenericEmptyView), findsOneWidget);
 
       // Refresh should still show empty
       await emptyCubit.refresh();
       await tester.pumpAndSettle();
 
-      expect(find.byType(GenericEmptyView), findsOneWidget);
+      expect(find.byType(PaginatrixGenericEmptyView), findsOneWidget);
       emptyCubit.close();
     });
   });

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_paginatrix/src/core/mixins/theme_access_mixin.dart';
 
 /// A container widget for page selection with multiple display styles
 class PageSelector extends StatelessWidget {
@@ -56,8 +57,8 @@ class PageSelector extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = context.colorScheme;
+    final theme = context.theme;
 
     final container = Container(
       padding:

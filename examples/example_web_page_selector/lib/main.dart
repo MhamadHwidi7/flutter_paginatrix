@@ -201,7 +201,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     }
 
                     if (state.hasError && !state.hasData) {
-                      return PaginationErrorView(
+                      return PaginatrixErrorView(
                         error: state.error!,
                         onRetry: () {
                           _cubit.retry();
@@ -213,7 +213,7 @@ class _ProductsPageState extends State<ProductsPage> {
                       empty: () => true,
                       orElse: () => false,
                     )) {
-                      return PaginationEmptyView(
+                      return PaginatrixEmptyView(
                         title: 'No products found',
                         description: 'Try refreshing to load products',
                         action: ElevatedButton(

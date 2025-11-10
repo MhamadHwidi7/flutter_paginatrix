@@ -128,7 +128,7 @@ class _PokemonView extends StatelessWidget {
     final bloc = context.read<PaginationBloc<Pokemon>>();
     final error = bloc.state.error;
 
-    return PaginationErrorView(
+    return PaginatrixErrorView(
       error: error!,
       onRetry: () => bloc.add(const RetryPagination()),
     );
@@ -136,7 +136,7 @@ class _PokemonView extends StatelessWidget {
 
   /// Builds the empty state view
   Widget _buildEmptyView(BuildContext context) {
-    return PaginationEmptyView(
+    return PaginatrixEmptyView(
       title: 'No Pokemon found',
       description: 'Try refreshing to load Pokemon',
       action: ElevatedButton(

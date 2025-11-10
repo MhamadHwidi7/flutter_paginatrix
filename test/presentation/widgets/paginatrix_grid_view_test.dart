@@ -70,7 +70,7 @@ void main() {
       // Initial state should show skeletonizer (initial state is converted to loading)
       // Check that skeletonizer or loading state is present
       final hasSkeletonizer =
-          find.byType(PaginationGridSkeletonizer).evaluate().isNotEmpty;
+          find.byType(PaginatrixGridSkeletonizer).evaluate().isNotEmpty;
       final isInitialOrLoading = cubit.state.status.maybeWhen(
         initial: () => true,
         loading: () => true,
@@ -159,7 +159,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should show empty view
-      expect(find.byType(GenericEmptyView), findsOneWidget);
+      expect(find.byType(PaginatrixGenericEmptyView), findsOneWidget);
       emptyCubit.close();
     });
 
@@ -190,7 +190,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should show error view
-      expect(find.byType(PaginationErrorView), findsOneWidget);
+      expect(find.byType(PaginatrixErrorView), findsOneWidget);
       errorCubit.close();
     });
 
