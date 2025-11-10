@@ -68,19 +68,33 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
   int _retryCount = 0;
   DateTime? _lastRetryTime;
 
-  /// Whether more data can be loaded
+  /// Whether more data can be loaded.
+  ///
+  /// Returns true if there are more pages available to load, false otherwise.
+  /// This is determined by checking if the current page is less than the last page.
   bool get canLoadMore => state.canLoadMore;
 
-  /// Whether the cubit is currently loading
+  /// Whether the cubit is currently loading data.
+  ///
+  /// Returns true if a load operation is in progress, false otherwise.
+  /// This includes initial load, refresh, and append operations.
   bool get isLoading => state.isLoading;
 
-  /// Whether the cubit has data
+  /// Whether the cubit has successfully loaded data.
+  ///
+  /// Returns true if there are items in the current state, false otherwise.
   bool get hasData => state.hasData;
 
-  /// Whether the cubit has an error
+  /// Whether the cubit has encountered an error during initial load.
+  ///
+  /// Returns true if the initial load failed, false otherwise.
+  /// Use [retry] to attempt loading again.
   bool get hasError => state.hasError;
 
-  /// Whether the cubit has an append error
+  /// Whether the cubit has encountered an error during append operation.
+  ///
+  /// Returns true if loading the next page failed, false otherwise.
+  /// Use [retry] to attempt loading again.
   bool get hasAppendError => state.hasAppendError;
 
   /// Safely cancels the scroll debounce timer to prevent memory leaks
@@ -208,30 +222,62 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     return false;
   }
 
-  /// Loads the first page of data (resets the list and starts fresh)
+  /// Loads the first page of data (resets the list and starts fresh).
   ///
   /// Calls the loader function with page 1 and replaces all existing items
   /// with the new data. This is used for initial load or when resetting the list.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// await controller.loadFirstPage();
+  /// ```
+  ///
+  /// **State transitions:**
+  /// - Initial/Loading → Success (with data) or Empty (no data) or Error
+  ///
+  /// **Note:** This will cancel any in-flight requests and reset the state.
   Future<void> loadFirstPage() async {
     await _loadData(PaginatrixLoadType.first);
   }
 
-  /// Loads the next page of data (appends new data to existing list)
+  /// Loads the next page of data (appends new data to existing list).
   ///
   /// Calls the same loader function with the next page number and appends
   /// the returned data to the existing list. This is used for pagination.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// await controller.loadNextPage();
+  /// ```
+  ///
+  /// **State transitions:**
+  /// - Success → Appending → Success (with more items) or AppendError
+  ///
+  /// **Note:** This requires that the first page has been loaded successfully.
+  /// Will not proceed if [canLoadMore] is false or if already loading.
   Future<void> loadNextPage() async {
     await _loadData(PaginatrixLoadType.next);
   }
 
-  /// Refreshes the current data (reloads first page and replaces all items)
+  /// Refreshes the current data (reloads first page and replaces all items).
   ///
   /// Calls the loader function with page 1 to refresh the data,
   /// replacing all existing items with fresh data from the server.
   ///
+  /// **Usage:**
+  /// ```dart
+  /// await controller.refresh();
+  /// ```
+  ///
+  /// **State transitions:**
+  /// - Success → Refreshing → Success (with fresh data) or Error
+  ///
+  /// **Debouncing:**
   /// Uses debouncing to prevent rapid successive refresh calls.
-  /// If a refresh is already in progress or debounced, subsequent calls
-  /// will be ignored or queued.
+  /// The debounce duration is configurable via [PaginationOptions.refreshDebounceDuration].
+  /// If a refresh is already in progress or debounced, subsequent calls will be ignored.
+  ///
+  /// **Note:** This preserves existing items while refreshing, providing a smooth UX.
   Future<void> refresh() async {
     // If already loading, don't queue another refresh
     if (state.isLoading) {
@@ -268,13 +314,29 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     });
   }
 
-  /// Retries the last failed operation
-  /// Retries the last failed request with exponential backoff
+  /// Retries the last failed operation with exponential backoff.
   ///
+  /// Automatically determines whether to retry the initial load or append operation
+  /// based on the current error state.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// await controller.retry();
+  /// ```
+  ///
+  /// **Exponential Backoff:**
   /// Implements exponential backoff to prevent hammering the server:
-  /// - Wait time = initialBackoff * 2^retryCount
-  /// - Max retries from PaginationOptions
-  /// - Resets after retryResetTimeout from PaginationOptions
+  /// - Wait time = `initialBackoff * 2^retryCount`
+  /// - Max retries from [PaginationOptions.maxRetries]
+  /// - Resets after [PaginationOptions.retryResetTimeout]
+  ///
+  /// **Example:**
+  /// - 1st retry: waits 500ms (initialBackoff * 2^0)
+  /// - 2nd retry: waits 1000ms (initialBackoff * 2^1)
+  /// - 3rd retry: waits 2000ms (initialBackoff * 2^2)
+  ///
+  /// **Note:** If max retries are exceeded, this method will log a warning
+  /// and return without attempting a retry. Wait for the reset timeout before retrying again.
   Future<void> retry() async {
     // Check if cubit is closed before proceeding
     if (isClosed) return;
@@ -336,13 +398,36 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     _lastRetryTime = null;
   }
 
-  /// Cancels the current request
+  /// Cancels the current in-flight request.
+  ///
+  /// This will cancel any ongoing HTTP request and prevent it from updating the state.
+  /// Useful when you need to cancel a request (e.g., when navigating away from a page).
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// controller.cancel();
+  /// ```
+  ///
+  /// **Note:** This does not reset the state, only cancels the current request.
+  /// Use [clear] if you want to reset the state as well.
   void cancel() {
     _currentCancelToken?.cancel();
     _currentCancelToken = null;
   }
 
-  /// Clears all data and resets to initial state
+  /// Clears all data and resets to initial state.
+  ///
+  /// Cancels any in-flight requests and resets the state to initial.
+  /// This is useful when you want to completely reset the pagination state.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// controller.clear();
+  /// // Then load first page again
+  /// await controller.loadFirstPage();
+  /// ```
+  ///
+  /// **Note:** This will emit the initial state, clearing all items and metadata.
   void clear() {
     cancel();
     emit(PaginationState.initial());
@@ -629,6 +714,21 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     );
   }
 
+  /// Closes the cubit and cleans up all resources.
+  ///
+  /// Cancels any pending timers, in-flight requests, and closes the cubit.
+  /// Always call this in the `dispose` method of your widget to prevent memory leaks.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// @override
+  /// void dispose() {
+  ///   controller.close();
+  ///   super.dispose();
+  /// }
+  /// ```
+  ///
+  /// **Note:** After calling [close], the cubit cannot emit new states.
   @override
   Future<void> close() {
     _cancelDebounceTimer();
@@ -639,31 +739,31 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
 }
 
 /// Public API for managing paginated data
-/// 
+///
 /// This is the recommended way to use flutter_paginatrix. It provides
 /// a clean, package-consistent API without exposing implementation details.
-/// 
+///
 /// **Why PaginatrixController?**
 /// - Consistent with package naming (`PaginatrixListView`, `PaginatrixGridView`)
 /// - Clean and intuitive API
 /// - No need to import `flutter_bloc` directly
 /// - Implementation-agnostic (uses `PaginatrixCubit` internally)
-/// 
+///
 /// ## Usage
-/// 
+///
 /// ```dart
 /// final pagination = PaginatrixController<User>(
 ///   loader: _loadUsers,
 ///   itemDecoder: User.fromJson,
 ///   metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
 /// );
-/// 
+///
 /// PaginatrixListView<User>(
 ///   controller: pagination,
 ///   itemBuilder: (context, user, index) => UserTile(user: user),
 /// )
 /// ```
-/// 
+///
 /// **Note:** For advanced usage with `BlocProvider` and `BlocBuilder`, you can
 /// still use `PaginatrixCubit` directly, which this type aliases to.
 typedef PaginatrixController<T> = PaginatrixCubit<T>;

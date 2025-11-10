@@ -3,7 +3,7 @@ import 'package:flutter_paginatrix/flutter_paginatrix.dart';
 import 'package:dio/dio.dart';
 
 /// Simple example showing usage without importing flutter_bloc
-/// 
+///
 /// This demonstrates that users don't need to add flutter_bloc
 /// to their pubspec.yaml or import it directly.
 class UsersPage extends StatefulWidget {
@@ -92,4 +92,3 @@ void main() {
     home: UsersPage(),
   ));
 }
-
