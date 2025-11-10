@@ -29,3 +29,7 @@ migrate_working_dir/
 .flutter-plugins-dependencies
 /build/
 /coverage/
+
+# GitHub templates and workflows documentation
+.github/PULL_REQUEST_TEMPLATE.md
+.github/workflows/README.md
