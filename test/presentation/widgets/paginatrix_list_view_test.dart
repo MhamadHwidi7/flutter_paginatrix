@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
 import 'package:dio/dio.dart';
 
@@ -357,6 +356,9 @@ void main() {
         ),
       );
       await tester.pump();
+      
+      // Verify refresh callback can be called
+      expect(refreshCalled, isFalse); // Initially false
 
       await cubit.loadFirstPage();
       await tester.pumpAndSettle();
