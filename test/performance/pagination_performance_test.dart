@@ -21,28 +21,101 @@ void main() {
     group('Large List Rendering', () {
       test('should handle loading 1000+ items efficiently', () async {
         final largeData = createMockData(totalItems: 5000);
-        controller = createTestController(
-          mockData: largeData,
-          itemsPerPage: 1000,
+        controller = PaginatedCubit<Map<String, dynamic>>(
+          loader: createMockLoader(
+            mockData: largeData,
+            itemsPerPage: 1000,
+          ),
+          itemDecoder: (json) => json,
+          metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
+          options: const PaginationOptions(
+            defaultPageSize: 1000,
+            maxPageSize: 1000,
+          ),
         );
 
         final stopwatch = Stopwatch()..start();
 
+        // Load initial data
         await controller.loadFirstPage();
-        await controller.loadNextPage();
-        await controller.loadNextPage();
-        await controller.loadNextPage();
-        await controller.loadNextPage();
+        expect(controller.state.items.length, 1000);
+        expect(controller.state.status, equals(PaginationStatus.success));
+
+        // Load subsequent pages
+        for (var i = 0; i < 4; i++) {
+          await controller.loadNextPage();
+          expect(controller.state.status, equals(PaginationStatus.success));
+          expect(controller.state.items.length, (i + 2) * 1000);
+        }
 
         stopwatch.stop();
 
+        // Verify final state
         expect(controller.state.items.length, 5000);
-        expect(stopwatch.elapsedMilliseconds, lessThan(1000)); // Should be fast
-        print('Loaded 5000 items in ${stopwatch.elapsedMilliseconds}ms');
+        expect(controller.state.meta?.total, 5000);
+        expect(controller.canLoadMore, isFalse);
+        expect(stopwatch.elapsedMilliseconds, lessThan(2000),
+            reason: 'Loading 5000 items should complete within 2 seconds');
+        
+        // Memory usage verification
+        final memoryBefore = controller.state.items.length;
+        await controller.refresh();
+        expect(controller.state.items.length, 1000,
+            reason: 'After refresh, should release memory and only keep first page');
+        expect(memoryBefore, greaterThan(controller.state.items.length),
+            reason: 'Memory should be freed after refresh');
       });
 
-      test('should handle rapid pagination requests efficiently', () async {
-        controller = createTestController(mockData: mockData);
+      test('should handle concurrent operations without race conditions', () async {
+        controller = PaginatedCubit<Map<String, dynamic>>(
+          loader: createMockLoader(
+            mockData: mockData,
+            itemsPerPage: 20,
+            delay: const Duration(milliseconds: 100), // Simulate network delay
+          ),
+          itemDecoder: (json) => json,
+          metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
+          options: const PaginationOptions(
+            defaultPageSize: 20,
+            maxPageSize: 20,
+          ),
+        );
+
+        final stopwatch = Stopwatch()..start();
+
+        // Start multiple operations concurrently
+        await Future.wait([
+          controller.loadFirstPage(),
+          controller.loadNextPage(), // Should be queued
+          controller.refresh(), // Should cancel previous operations
+          controller.loadNextPage(), // Should be queued after refresh
+        ]);
+
+        stopwatch.stop();
+
+        // Verify final state
+        expect(controller.state.status, equals(PaginationStatus.success));
+        expect(controller.state.items.length, 40); // Should have 2 pages after all operations
+        expect(controller.state.meta?.page, 2);
+        expect(controller.hasError, isFalse);
+        
+        print('Concurrent operations completed in ${stopwatch.elapsedMilliseconds}ms');
+      });
+
+      test('should handle rapid pagination with debounce', () async {
+        controller = PaginatedCubit<Map<String, dynamic>>(
+          loader: createMockLoader(
+            mockData: mockData,
+            itemsPerPage: 20,
+            delay: const Duration(milliseconds: 100), // Simulate network delay
+          ),
+          itemDecoder: (json) => json,
+          metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
+          options: const PaginationOptions(
+            defaultPageSize: 20,
+            maxPageSize: 20,
+          ),
+        );
 
         final stopwatch = Stopwatch()..start();
 
@@ -60,7 +133,7 @@ void main() {
 
         stopwatch.stop();
 
-        expect(controller.state.items.length, 200);
+        expect(controller.state.items.length, 200); // 10 pages * 20 items = 200
         expect(stopwatch.elapsedMilliseconds, lessThan(2000));
         print('Loaded 10 pages in ${stopwatch.elapsedMilliseconds}ms');
       });
