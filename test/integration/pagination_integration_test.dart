@@ -1,12 +1,12 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_paginatrix/flutter_paginatrix.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_paginatrix/flutter_paginatrix.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_helpers.dart';
 
 void main() {
   group('Pagination Integration Tests', () {
-    late PaginatedCubit<Map<String, dynamic>> controller;
+    late PaginatrixCubit<Map<String, dynamic>> controller;
     late List<Map<String, dynamic>> mockData;
 
     setUp(() {
@@ -42,7 +42,7 @@ void main() {
           reason: 'Status should be success');
 
       // Verify first page data
-      var firstPageData = controller.state.items;
+      final firstPageData = controller.state.items;
 
       // Load next page
       await controller.loadNextPage();
@@ -72,7 +72,7 @@ void main() {
 
     test('error recovery flow: error -> retry -> success', () async {
       var shouldFail = true;
-      controller = PaginatedCubit<Map<String, dynamic>>(
+      controller = PaginatrixCubit<Map<String, dynamic>>(
         loader: ({
           int? page,
           int? perPage,
@@ -109,7 +109,7 @@ void main() {
 
     test('cancellation behavior', () async {
       var loadCount = 0;
-      controller = PaginatedCubit<Map<String, dynamic>>(
+      controller = PaginatrixCubit<Map<String, dynamic>>(
         loader: ({
           int? page,
           int? perPage,
@@ -145,7 +145,7 @@ void main() {
     });
 
     test('empty response handling', () async {
-      controller = PaginatedCubit<Map<String, dynamic>>(
+      controller = PaginatrixCubit<Map<String, dynamic>>(
         loader: ({
           int? page,
           int? perPage,
@@ -187,7 +187,7 @@ void main() {
 
     test('append error recovery: append fails -> retry -> success', () async {
       var failCount = 0;
-      controller = PaginatedCubit<Map<String, dynamic>>(
+      controller = PaginatrixCubit<Map<String, dynamic>>(
         loader: ({
           int? page,
           int? perPage,
@@ -306,7 +306,7 @@ void main() {
 
     test('retry after error: should reset retry count on success', () async {
       var failCount = 0;
-      controller = PaginatedCubit<Map<String, dynamic>>(
+      controller = PaginatrixCubit<Map<String, dynamic>>(
         loader: ({
           int? page,
           int? perPage,
@@ -359,7 +359,7 @@ void main() {
 
     test('refresh while loading: should cancel and restart', () async {
       var loadCount = 0;
-      controller = PaginatedCubit<Map<String, dynamic>>(
+      controller = PaginatrixCubit<Map<String, dynamic>>(
         loader: ({
           int? page,
           int? perPage,
@@ -446,7 +446,7 @@ void main() {
 
     test('item preservation: should preserve items on error', () async {
       var failAppend = true;
-      controller = PaginatedCubit<Map<String, dynamic>>(
+      controller = PaginatrixCubit<Map<String, dynamic>>(
         loader: ({
           int? page,
           int? perPage,

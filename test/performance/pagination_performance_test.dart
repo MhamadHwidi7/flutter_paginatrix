@@ -1,13 +1,12 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_helpers.dart';
 
 void main() {
   group('Pagination Performance Benchmarks', () {
-    late PaginatedCubit<Map<String, dynamic>> controller;
+    late PaginatrixCubit<Map<String, dynamic>> controller;
     late List<Map<String, dynamic>> mockData;
 
     setUp(() {
@@ -21,7 +20,7 @@ void main() {
     group('Large List Rendering', () {
       test('should handle loading 1000+ items efficiently', () async {
         final largeData = createMockData(totalItems: 5000);
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: createMockLoader(
             mockData: largeData,
             itemsPerPage: 1000,
@@ -72,16 +71,14 @@ void main() {
 
       test('should handle concurrent operations without race conditions',
           () async {
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: createMockLoader(
             mockData: mockData,
-            itemsPerPage: 20,
             delay: const Duration(milliseconds: 100), // Simulate network delay
           ),
           itemDecoder: (json) => json,
           metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
           options: const PaginationOptions(
-            defaultPageSize: 20,
             maxPageSize: 20,
           ),
         );
@@ -113,16 +110,14 @@ void main() {
       });
 
       test('should handle rapid pagination with debounce', () async {
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: createMockLoader(
             mockData: mockData,
-            itemsPerPage: 20,
             delay: const Duration(milliseconds: 100), // Simulate network delay
           ),
           itemDecoder: (json) => json,
           metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
           options: const PaginationOptions(
-            defaultPageSize: 20,
             maxPageSize: 20,
           ),
         );
@@ -165,7 +160,7 @@ void main() {
       });
 
       test('should clean up properly on dispose', () async {
-        final controllers = <PaginatedCubit>[];
+        final controllers = <PaginatrixCubit>[];
 
         // Create many controllers
         for (int i = 0; i < 100; i++) {
@@ -217,7 +212,7 @@ void main() {
         for (int i = 0; i < 100; i++) {
           final mockMetrics = _MockScrollMetrics(
             pixels: 100.0 * i,
-            maxScrollExtent: 2000.0,
+            maxScrollExtent: 2000,
           );
           controller.checkAndLoadIfNearEnd(
             metrics: mockMetrics,
@@ -240,8 +235,8 @@ void main() {
         // Rapid scroll events
         for (int i = 0; i < 10; i++) {
           final mockMetrics = _MockScrollMetrics(
-            pixels: 1900.0,
-            maxScrollExtent: 2000.0,
+            pixels: 1900,
+            maxScrollExtent: 2000,
           );
           controller.checkAndLoadIfNearEnd(
             metrics: mockMetrics,
@@ -363,6 +358,10 @@ void main() {
 
 /// Mock scroll metrics for testing
 class _MockScrollMetrics implements ScrollMetrics {
+  _MockScrollMetrics({
+    required this.pixels,
+    required this.maxScrollExtent,
+  });
   @override
   final double pixels;
 
@@ -370,10 +369,10 @@ class _MockScrollMetrics implements ScrollMetrics {
   final double maxScrollExtent;
 
   @override
-  final double minScrollExtent = 0.0;
+  final double minScrollExtent = 0;
 
   @override
-  final double viewportDimension = 800.0;
+  final double viewportDimension = 800;
 
   @override
   final Axis axis = Axis.vertical;
@@ -382,16 +381,16 @@ class _MockScrollMetrics implements ScrollMetrics {
   final AxisDirection axisDirection = AxisDirection.down;
 
   @override
-  final double devicePixelRatio = 1.0;
+  final double devicePixelRatio = 1;
 
   @override
   final bool atEdge = false;
 
   @override
-  final double extentAfter = 0.0;
+  final double extentAfter = 0;
 
   @override
-  final double extentBefore = 0.0;
+  final double extentBefore = 0;
 
   @override
   double get extentInside => viewportDimension;
@@ -414,11 +413,6 @@ class _MockScrollMetrics implements ScrollMetrics {
   final bool hasMinScrollExtent = true;
 
   final bool hasMaxScrollExtent = true;
-
-  _MockScrollMetrics({
-    required this.pixels,
-    required this.maxScrollExtent,
-  });
 
   @override
   ScrollMetrics copyWith({

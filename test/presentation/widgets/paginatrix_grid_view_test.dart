@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_helpers.dart';
 
 void main() {
   group('PaginatrixGridView Widget Tests', () {
-    late PaginatedCubit<Map<String, dynamic>> cubit;
+    late PaginatrixCubit<Map<String, dynamic>> cubit;
     late List<Map<String, dynamic>> mockData;
 
     setUp(() {
@@ -164,7 +164,7 @@ void main() {
     });
 
     testWidgets('should display error view on error state', (tester) async {
-      final errorCubit = PaginatedCubit<Map<String, dynamic>>(
+      final errorCubit = PaginatrixCubit<Map<String, dynamic>>(
         loader: createFailingLoader(),
         itemDecoder: (json) => json,
         metaParser: ConfigMetaParser(MetaConfig.nestedMeta),

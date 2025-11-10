@@ -1,13 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_paginatrix/flutter_paginatrix.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_paginatrix/flutter_paginatrix.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_helpers.dart';
 
 void main() {
   group('PaginatrixListView Widget Tests', () {
-    late PaginatedCubit<Map<String, dynamic>> cubit;
+    late PaginatrixCubit<Map<String, dynamic>> cubit;
     late List<Map<String, dynamic>> mockData;
 
     setUp(() {
@@ -20,7 +20,7 @@ void main() {
     });
 
     Widget createTestWidget({
-      required PaginatedCubit<Map<String, dynamic>> cubit,
+      required PaginatrixCubit<Map<String, dynamic>> cubit,
       Axis scrollDirection = Axis.vertical,
       Widget Function(BuildContext, Map<String, dynamic>, int)? itemBuilder,
       Widget Function(BuildContext)? emptyBuilder,
@@ -65,10 +65,10 @@ void main() {
     }
 
     /// Helper to create a cubit that fails on page 2 (for append error tests)
-    PaginatedCubit<Map<String, dynamic>> createAppendErrorCubit({
+    PaginatrixCubit<Map<String, dynamic>> createAppendErrorCubit({
       required bool Function(int page) shouldFail,
     }) {
-      return PaginatedCubit<Map<String, dynamic>>(
+      return PaginatrixCubit<Map<String, dynamic>>(
         loader: ({
           int? page,
           int? perPage,
@@ -150,7 +150,7 @@ void main() {
     });
 
     testWidgets('should display error view on error state', (tester) async {
-      final errorCubit = PaginatedCubit<Map<String, dynamic>>(
+      final errorCubit = PaginatrixCubit<Map<String, dynamic>>(
         loader: createFailingLoader(),
         itemDecoder: (json) => json,
         metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
@@ -169,7 +169,7 @@ void main() {
 
     testWidgets('should display custom error builder when provided',
         (tester) async {
-      final errorCubit = PaginatedCubit<Map<String, dynamic>>(
+      final errorCubit = PaginatrixCubit<Map<String, dynamic>>(
         loader: createFailingLoader(),
         itemDecoder: (json) => json,
         metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
@@ -201,26 +201,26 @@ void main() {
 
       // Trigger load next page
       final future = cubit.loadNextPage();
-      
+
       // Wait for appending state
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
-      
+
       // Check if appending state is active (loader might render very quickly)
       final isAppending = cubit.state.status.maybeWhen(
         appending: () => true,
         orElse: () => false,
       );
-      
+
       // Either we're in appending state (and loader should be visible) or already done
       if (isAppending) {
         expect(find.byType(AppendLoader), findsOneWidget);
       }
-      
+
       // Wait for load to complete
       await future;
       await tester.pumpAndSettle();
-      
+
       // Verify items were loaded
       expect(cubit.state.items.length, greaterThan(20));
     });
@@ -239,26 +239,26 @@ void main() {
       await tester.pumpAndSettle();
 
       final future = cubit.loadNextPage();
-      
+
       // Wait for appending state
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
-      
+
       // Check if appending state is active
       final isAppending = cubit.state.status.maybeWhen(
         appending: () => true,
         orElse: () => false,
       );
-      
+
       // Either we're in appending state (and custom loader should be visible) or already done
       if (isAppending) {
         expect(find.text('Loading more...'), findsOneWidget);
       }
-      
+
       // Wait for load to complete
       await future;
       await tester.pumpAndSettle();
-      
+
       // Verify items were loaded
       expect(cubit.state.items.length, greaterThan(20));
     });
@@ -323,7 +323,7 @@ void main() {
       // Verify append error exists in state (custom builder is used when appendErrorBuilder is provided)
       expect(errorCubit.state.items.length, 20); // Items preserved
       expect(errorCubit.state.appendError, isNotNull); // Append error exists
-      
+
       // The custom builder should be rendered, but might not be visible if footer is off-screen
       // We verify the state is correct which means the builder would be called
       errorCubit.close();
@@ -356,7 +356,7 @@ void main() {
         ),
       );
       await tester.pump();
-      
+
       // Verify refresh callback can be called
       expect(refreshCalled, isFalse); // Initially false
 
@@ -384,12 +384,12 @@ void main() {
               width: 800,
               height: 600,
               child: PaginatrixListView<Map<String, dynamic>>(
-          cubit: cubit,
-          scrollDirection: Axis.horizontal,
-          itemBuilder: (context, item, index) => SizedBox(
-            width: 200, // Fixed width for horizontal scrolling
-            child: ListTile(
-              title: Text(item['name'] ?? 'Item $index'),
+                cubit: cubit,
+                scrollDirection: Axis.horizontal,
+                itemBuilder: (context, item, index) => SizedBox(
+                  width: 200, // Fixed width for horizontal scrolling
+                  child: ListTile(
+                    title: Text(item['name'] ?? 'Item $index'),
                   ),
                 ),
               ),
@@ -478,7 +478,7 @@ void main() {
     });
 
     testWidgets('should respect padding parameter', (tester) async {
-      const testPadding = EdgeInsets.all(16.0);
+      const testPadding = EdgeInsets.all(16);
 
       await tester.pumpWidget(
         createTestWidget(
@@ -519,7 +519,7 @@ void main() {
 
     testWidgets('should handle error recovery with retry', (tester) async {
       var shouldFail = true;
-      final errorCubit = PaginatedCubit<Map<String, dynamic>>(
+      final errorCubit = PaginatrixCubit<Map<String, dynamic>>(
         loader: ({
           int? page,
           int? perPage,
@@ -564,7 +564,7 @@ void main() {
 
     testWidgets('should handle append error recovery', (tester) async {
       var failCount = 0;
-      final errorCubit = PaginatedCubit<Map<String, dynamic>>(
+      final errorCubit = PaginatrixCubit<Map<String, dynamic>>(
         loader: ({
           int? page,
           int? perPage,

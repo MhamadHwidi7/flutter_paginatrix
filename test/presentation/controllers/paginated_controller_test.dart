@@ -1,14 +1,14 @@
 import 'dart:async';
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_paginatrix/flutter_paginatrix.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_paginatrix/flutter_paginatrix.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_helpers.dart';
 
 void main() {
-  group('PaginatedCubit', () {
-    late PaginatedCubit<Map<String, dynamic>> controller;
+  group('PaginatrixCubit', () {
+    late PaginatrixCubit<Map<String, dynamic>> controller;
     late List<Map<String, dynamic>> mockData;
 
     setUp(() {
@@ -241,7 +241,7 @@ void main() {
 
     group('Error Handling', () {
       test('should handle initial load error', () async {
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: createFailingLoader(),
           itemDecoder: (json) => json,
           metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
@@ -256,7 +256,7 @@ void main() {
 
       test('should retry initial error successfully', () async {
         var shouldFail = true;
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: ({
             int? page,
             int? perPage,
@@ -290,7 +290,7 @@ void main() {
 
       test('should handle append error without losing existing data', () async {
         var shouldFail = false;
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: ({
             int? page,
             int? perPage,
@@ -325,7 +325,7 @@ void main() {
 
       test('should retry append error', () async {
         var failCount = 0;
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: ({
             int? page,
             int? perPage,
@@ -362,10 +362,9 @@ void main() {
 
     group('Request Cancellation', () {
       test('should cancel in-flight request', () async {
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: createSlowLoader(
             mockData: mockData,
-            delay: const Duration(seconds: 5),
           ),
           itemDecoder: (json) => json,
           metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
@@ -474,7 +473,7 @@ void main() {
       });
 
       test('should correctly report hasError', () async {
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: createFailingLoader(),
           itemDecoder: (json) => json,
           metaParser: ConfigMetaParser(MetaConfig.nestedMeta),

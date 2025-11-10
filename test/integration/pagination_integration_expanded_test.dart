@@ -1,12 +1,12 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_paginatrix/flutter_paginatrix.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_paginatrix/flutter_paginatrix.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_helpers.dart';
 
 void main() {
   group('Expanded Pagination Integration Tests', () {
-    late PaginatedCubit<Map<String, dynamic>> controller;
+    late PaginatrixCubit<Map<String, dynamic>> controller;
     late List<Map<String, dynamic>> mockData;
 
     setUp(() {
@@ -35,7 +35,7 @@ void main() {
 
       test('cursor-based pagination', () async {
         var currentCursor = 'cursor_0';
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: ({
             int? page,
             int? perPage,
@@ -69,7 +69,7 @@ void main() {
       });
 
       test('offset-based pagination', () async {
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: ({
             int? page,
             int? perPage,
@@ -127,7 +127,7 @@ void main() {
 
     group('Error Scenarios', () {
       test('network error on initial load', () async {
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: createFailingLoader(message: 'Connection failed'),
           itemDecoder: (json) => json,
           metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
@@ -141,7 +141,7 @@ void main() {
       });
 
       test('parse error on invalid response', () async {
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: ({
             int? page,
             int? perPage,
@@ -173,7 +173,7 @@ void main() {
       });
 
       test('rate limit error', () async {
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: ({
             int? page,
             int? perPage,
@@ -208,7 +208,7 @@ void main() {
       });
 
       test('circuit breaker error', () async {
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: ({
             int? page,
             int? perPage,
@@ -234,7 +234,7 @@ void main() {
 
       test('append error preserves existing items', () async {
         var failOnce = true;
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: ({
             int? page,
             int? perPage,
@@ -268,7 +268,7 @@ void main() {
 
     group('Cancellation', () {
       test('should cancel in-flight request', () async {
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: createSlowLoader(mockData: mockData),
           itemDecoder: (json) => json,
           metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
@@ -305,7 +305,7 @@ void main() {
         await controller.loadFirstPage();
 
         // Start append with slow loader
-        final slowController = PaginatedCubit<Map<String, dynamic>>(
+        final slowController = PaginatrixCubit<Map<String, dynamic>>(
           loader: createSlowLoader(mockData: mockData),
           itemDecoder: (json) => json,
           metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
@@ -325,7 +325,7 @@ void main() {
       });
 
       test('should prevent stale responses after cancellation', () async {
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: ({
             int? page,
             int? perPage,
@@ -335,7 +335,7 @@ void main() {
             CancelToken? cancelToken,
           }) async {
             await Future.delayed(const Duration(milliseconds: 100));
-            if (cancelToken?.isCancelled == true) {
+            if (cancelToken?.isCancelled ?? false) {
               throw const PaginationError.cancelled(message: 'Cancelled');
             }
             return createMockLoader(mockData: mockData)(
@@ -376,7 +376,7 @@ void main() {
     group('Retry Logic', () {
       test('should retry failed initial load', () async {
         var attemptCount = 0;
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: ({
             int? page,
             int? perPage,
@@ -408,7 +408,7 @@ void main() {
 
       test('should retry failed append', () async {
         var attemptCount = 0;
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: ({
             int? page,
             int? perPage,
@@ -443,11 +443,11 @@ void main() {
       });
 
       test('should respect max retry limit', () async {
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: createFailingLoader(),
           itemDecoder: (json) => json,
           metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
-          options: PaginationOptions(maxRetries: 2),
+          options: const PaginationOptions(maxRetries: 2),
         );
 
         await controller.loadFirstPage();
@@ -464,7 +464,7 @@ void main() {
 
       test('should reset retry count after successful load', () async {
         var attemptCount = 0;
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: ({
             int? page,
             int? perPage,
@@ -501,7 +501,7 @@ void main() {
     group('Refresh Debouncing', () {
       test('should debounce rapid refresh calls', () async {
         var loadCount = 0;
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: ({
             int? page,
             int? perPage,
@@ -518,8 +518,8 @@ void main() {
           },
           itemDecoder: (json) => json,
           metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
-          options: PaginationOptions(
-            refreshDebounceDuration: const Duration(milliseconds: 200),
+          options: const PaginationOptions(
+            refreshDebounceDuration: Duration(milliseconds: 200),
           ),
         );
 
@@ -540,7 +540,7 @@ void main() {
       test('should allow immediate refresh when debounce is disabled',
           () async {
         var loadCount = 0;
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: ({
             int? page,
             int? perPage,
@@ -557,7 +557,7 @@ void main() {
           },
           itemDecoder: (json) => json,
           metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
-          options: PaginationOptions(
+          options: const PaginationOptions(
             refreshDebounceDuration: Duration.zero,
           ),
         );
@@ -667,14 +667,14 @@ void main() {
       test('should handle very large page size', () async {
         final largeData = createMockData(totalItems: 200);
         // Create controller with custom options for large page size
-        controller = PaginatedCubit<Map<String, dynamic>>(
+        controller = PaginatrixCubit<Map<String, dynamic>>(
           loader: createMockLoader(
             mockData: largeData,
             itemsPerPage: 1000,
           ),
           itemDecoder: (json) => json,
           metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
-          options: PaginationOptions(defaultPageSize: 1000),
+          options: const PaginationOptions(defaultPageSize: 1000),
         );
 
         await controller.loadFirstPage();
