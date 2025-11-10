@@ -22,7 +22,7 @@ Flutter Paginatrix provides everything you need for pagination with clean archit
 - ✅ **Beautiful UI Components** - Pre-built widgets with modern loading animations
 - ✅ **Request Cancellation** - Automatic cleanup of in-flight requests
 - ✅ **Stale Response Prevention** - Generation-based guards prevent race conditions
-- ✅ **Zero External Dependencies** - No complex DI frameworks required
+- ✅ **Minimal Dependencies** - Only requires flutter_bloc for state management
 - ✅ **171+ Tests** - Comprehensive test coverage
 
 ---
@@ -34,8 +34,8 @@ Add `flutter_paginatrix` to your `pubspec.yaml`:
 ```yaml
 dependencies:
   flutter_paginatrix: ^1.0.0
-  flutter_bloc: ^8.1.6  # Required for PaginatedCubit
-  dio: ^5.4.0  # For HTTP requests (optional)
+  flutter_bloc: ^8.1.6  # Required - PaginatedCubit extends Cubit from flutter_bloc
+  dio: ^5.4.0  # Optional - Only needed if using Dio for HTTP requests
 ```
 
 Then run:
