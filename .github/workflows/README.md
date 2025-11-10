@@ -6,7 +6,7 @@
 
 ## 🚀 What It Does
 
-### On Push to `development` or `main`:
+### On Push to `main`:
 - ✅ Tests code
 - ✅ Validates formatting
 - ✅ Analyzes code
@@ -30,7 +30,7 @@ Add `PUB_CREDENTIALS` secret:
 
 ### Daily Work:
 ```bash
-git push origin development
+git push origin main
 ```
 → CI runs automatically ✅
 

@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 # When to run
 on:
   push:
-    branches: [main, development]
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:  # Manual trigger
