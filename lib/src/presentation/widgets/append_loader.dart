@@ -1,15 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_paginatrix/src/core/enums/paginatrix_loader_type.dart';
 import 'package:flutter_paginatrix/src/presentation/widgets/modern_loaders.dart';
-
-/// Types of modern loaders available
-enum LoaderType {
-  bouncingDots,
-  wave,
-  rotatingSquares,
-  pulse,
-  skeleton,
-  traditional,
-}
+import 'package:flutter_paginatrix/src/core/mixins/theme_access_mixin.dart';
 
 /// Inline loader for append operations
 class AppendLoader extends StatefulWidget {
@@ -63,9 +55,8 @@ class _AppendLoaderState extends State<AppendLoader>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
 
     if (widget.customLoader != null) {
       return Container(
@@ -182,8 +173,7 @@ class MinimalAppendLoader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = context.colorScheme;
 
     return Container(
       padding: padding ?? const EdgeInsets.all(16),
@@ -260,9 +250,8 @@ class _PulsingAppendLoaderState extends State<PulsingAppendLoader>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
 
     return Container(
       padding: widget.padding ?? const EdgeInsets.all(16),
