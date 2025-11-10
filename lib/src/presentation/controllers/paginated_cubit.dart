@@ -737,33 +737,3 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     return super.close();
   }
 }
-
-/// Public API for managing paginated data
-///
-/// This is the recommended way to use flutter_paginatrix. It provides
-/// a clean, package-consistent API without exposing implementation details.
-///
-/// **Why PaginatrixController?**
-/// - Consistent with package naming (`PaginatrixListView`, `PaginatrixGridView`)
-/// - Clean and intuitive API
-/// - No need to import `flutter_bloc` directly
-/// - Implementation-agnostic (uses `PaginatrixCubit` internally)
-///
-/// ## Usage
-///
-/// ```dart
-/// final pagination = PaginatrixController<User>(
-///   loader: _loadUsers,
-///   itemDecoder: User.fromJson,
-///   metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
-/// );
-///
-/// PaginatrixListView<User>(
-///   controller: pagination,
-///   itemBuilder: (context, user, index) => UserTile(user: user),
-/// )
-/// ```
-///
-/// **Note:** For advanced usage with `BlocProvider` and `BlocBuilder`, you can
-/// still use `PaginatrixCubit` directly, which this type aliases to.
-typedef PaginatrixController<T> = PaginatrixCubit<T>;

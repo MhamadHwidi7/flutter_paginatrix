@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_paginatrix/src/core/extensions/pagination_state_extension.dart';
-import 'package:flutter_paginatrix/src/core/entities/pagination_error.dart';
-import 'package:flutter_paginatrix/src/core/entities/pagination_state.dart';
-import 'package:flutter_paginatrix/src/presentation/controllers/paginated_cubit.dart';
-import 'package:flutter_paginatrix/src/presentation/widgets/pagination_skeletonizer.dart';
+import 'package:flutter_paginatrix/flutter_paginatrix.dart';
 import 'package:flutter_paginatrix/src/presentation/widgets/paginatrix_state_builder_mixin.dart';
 
 /// GridView adapter for Paginatrix using BlocBuilder

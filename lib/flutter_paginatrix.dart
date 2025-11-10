@@ -50,6 +50,8 @@ export 'src/data/meta_parser/custom_meta_parser.dart';
 export 'src/di/paginatrix_dependency_injection.dart';
 // Presentation layer - Controllers
 export 'src/presentation/controllers/paginated_cubit.dart';
+// Paginatrix typedefs (must be exported after controllers)
+export 'src/core/typedefs/paginatrix_typedefs.dart';
 // Presentation layer - UI widgets
 export 'src/presentation/widgets/append_loader.dart';
 export 'src/presentation/widgets/modern_loaders.dart';
