@@ -32,8 +32,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Refresh debouncing** - Prevents rapid successive refresh calls
 - **UI Components**:
   - `AppendLoader` - Beautiful loading widget with 6 animation types (circular, linear, pulse, rotating, wave, bouncingDots)
-  - `PaginationErrorView` - Error display with retry functionality
-  - `PaginationEmptyView` - Empty state display
+  - `PaginatrixErrorView` - Error display with retry functionality
+  - `PaginatrixAppendErrorView` - Inline error view for append failures
+  - `PaginatrixEmptyView` - Empty state display
+  - `PaginatrixGenericEmptyView` - Predefined generic empty view
+  - `PaginatrixSearchEmptyView` - Predefined search empty view
+  - `PaginatrixNetworkEmptyView` - Predefined network empty view
   - `PaginationSkeletonizer` - Skeleton loading effect
   - `PageSelector` - Page selection widget with multiple display styles (buttons, dropdown, compact)
 - **Build flavors** - Development and Production configurations via `BuildConfig`

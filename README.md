@@ -541,14 +541,14 @@ class _UsersPageWithErrorHandlingState extends State<UsersPageWithErrorHandling>
         bloc: _controller,
         builder: (context, state) {
           if (state.hasError) {
-            return PaginationErrorView(
+            return PaginatrixErrorView(
               error: state.error!,
               onRetry: () => _controller.retry(),
             );
           }
           
           if (state.isEmpty) {
-            return PaginationEmptyView(
+            return PaginatrixEmptyView(
               title: 'No users found',
               description: 'Try refreshing to load users',
               action: ElevatedButton(
@@ -804,23 +804,23 @@ final controller = PaginatrixController<User>(
 
 ## 🎨 UI Components
 
-### PaginationErrorView
+### PaginatrixErrorView
 
 Displays pagination errors with retry functionality:
 
 ```dart
-PaginationErrorView(
+PaginatrixErrorView(
   error: state.error!,
   onRetry: () => controller.retry(),
 )
 ```
 
-### PaginationEmptyView
+### PaginatrixEmptyView
 
 Displays empty states:
 
 ```dart
-PaginationEmptyView(
+PaginatrixEmptyView(
   title: 'No items found',
   description: 'Try refreshing to load items',
   action: ElevatedButton(
