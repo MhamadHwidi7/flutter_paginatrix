@@ -1,5 +1,5 @@
 /// Enum representing different pagination UI types
-enum PaginationType {
+enum PaginatrixType {
   /// Scroll-based pagination (infinite scroll)
   /// Automatically loads more items as user scrolls
   scroll,
@@ -17,17 +17,17 @@ enum PaginationType {
   cursor,
 }
 
-extension PaginationTypeExtension on PaginationType {
+extension PaginatrixTypeExtension on PaginatrixType {
   /// Display name for the pagination type
   String get displayName {
     switch (this) {
-      case PaginationType.scroll:
+      case PaginatrixType.scroll:
         return 'Infinite Scroll';
-      case PaginationType.pageSelection:
+      case PaginatrixType.pageSelection:
         return 'Page Selection';
-      case PaginationType.loadMoreButton:
+      case PaginatrixType.loadMoreButton:
         return 'Load More Button';
-      case PaginationType.cursor:
+      case PaginatrixType.cursor:
         return 'Cursor Based';
     }
   }
@@ -35,14 +35,15 @@ extension PaginationTypeExtension on PaginationType {
   /// Description of the pagination type
   String get description {
     switch (this) {
-      case PaginationType.scroll:
+      case PaginatrixType.scroll:
         return 'Automatically loads more items as you scroll down';
-      case PaginationType.pageSelection:
+      case PaginatrixType.pageSelection:
         return 'Select specific page numbers to navigate';
-      case PaginationType.loadMoreButton:
+      case PaginatrixType.loadMoreButton:
         return 'Click a button to load more items';
-      case PaginationType.cursor:
+      case PaginatrixType.cursor:
         return 'Uses cursors or tokens for pagination';
     }
   }
 }
+
