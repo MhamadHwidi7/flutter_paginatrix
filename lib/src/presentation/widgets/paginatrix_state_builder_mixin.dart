@@ -28,11 +28,13 @@ import 'package:flutter_paginatrix/src/presentation/widgets/pagination_error_vie
 mixin PaginatrixStateBuilderMixin<T> on StatelessWidget {
   // Abstract getters that must be implemented by the widget
   PaginatedCubit<T> get cubit;
-  
+
   // Common callbacks
   Widget Function(BuildContext context)? get emptyBuilder;
-  Widget Function(BuildContext context, PaginationError error)? get errorBuilder;
-  Widget Function(BuildContext context, PaginationError error)? get appendErrorBuilder;
+  Widget Function(BuildContext context, PaginationError error)?
+      get errorBuilder;
+  Widget Function(BuildContext context, PaginationError error)?
+      get appendErrorBuilder;
   Widget Function(BuildContext context)? get appendLoaderBuilder;
   VoidCallback? get onPullToRefresh;
   VoidCallback? get onRetryInitial;
@@ -207,4 +209,3 @@ mixin PaginatrixStateBuilderMixin<T> on StatelessWidget {
     );
   }
 }
-

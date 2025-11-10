@@ -55,8 +55,10 @@ class MemoryMonitor {
 
     final current = _snapshots.last;
     final initial = _snapshots.first;
-    final peak = _snapshots.map((s) => s.memoryMB).reduce((a, b) => a > b ? a : b);
-    final average = _snapshots.map((s) => s.memoryMB).reduce((a, b) => a + b) / _snapshots.length;
+    final peak =
+        _snapshots.map((s) => s.memoryMB).reduce((a, b) => a > b ? a : b);
+    final average = _snapshots.map((s) => s.memoryMB).reduce((a, b) => a + b) /
+        _snapshots.length;
     final growth = current.memoryMB - initial.memoryMB;
 
     return MemoryStats(
@@ -88,10 +90,10 @@ class MemoryMonitor {
       // - Platform-specific plugins (e.g., device_info_plus)
       // - Flutter DevTools memory profiler
       // - Custom native code for precise memory tracking
-      
+
       // Get memory info (approximate)
       final memoryMB = _getApproximateMemoryMB();
-      
+
       _snapshots.add(MemorySnapshot(
         timestamp: DateTime.now(),
         memoryMB: memoryMB,
@@ -130,26 +132,28 @@ class MemoryMonitor {
       // If not started, return a default value
       return 0.0;
     }
-    
+
     _snapshotCounter++;
     final elapsedSeconds = DateTime.now().difference(_startTime!).inSeconds;
-    
+
     // Set base memory on first snapshot
     if (!_baseMemorySet) {
       _baseMemory = 35.0 + (elapsedSeconds * 0.1); // Initial estimate
       _baseMemorySet = true;
     }
-    
+
     // Estimate memory growth based on:
     // - Base app memory
     // - Time elapsed (simulating gradual growth)
     // - Number of snapshots (simulating object accumulation)
     final timeGrowth = elapsedSeconds * 0.2; // ~0.2 MB per second
     final snapshotGrowth = _snapshotCounter * 0.08; // ~0.08 MB per snapshot
-    final randomVariation = (DateTime.now().millisecond % 15) * 0.15; // Small random variation
-    
-    final estimatedMemory = _baseMemory + timeGrowth + snapshotGrowth + randomVariation;
-    
+    final randomVariation =
+        (DateTime.now().millisecond % 15) * 0.15; // Small random variation
+
+    final estimatedMemory =
+        _baseMemory + timeGrowth + snapshotGrowth + randomVariation;
+
     // Ensure minimum value and cap at reasonable maximum for demo purposes
     return estimatedMemory.clamp(35.0, 500.0);
   }
@@ -216,4 +220,3 @@ Memory Stats:
 ''';
   }
 }
-

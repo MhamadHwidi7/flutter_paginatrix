@@ -9,22 +9,22 @@ class RequestContext with _$RequestContext {
   const factory RequestContext({
     /// Unique request ID for tracking
     required String requestId,
-    
+
     /// Generation number to prevent stale responses
     required int generation,
-    
+
     /// Cancel token for request cancellation
     required CancelToken cancelToken,
-    
+
     /// Request timestamp
     required DateTime timestamp,
-    
+
     /// Whether this is a refresh request
     @Default(false) bool isRefresh,
-    
+
     /// Whether this is an append request
     @Default(false) bool isAppend,
-    
+
     /// Additional metadata
     @Default({}) Map<String, dynamic> metadata,
   }) = _RequestContext;

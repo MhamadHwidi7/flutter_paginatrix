@@ -39,12 +39,14 @@ void main() {
         // Load initial data
         await controller.loadFirstPage();
         expect(controller.state.items.length, 1000);
-        expect(controller.state.status, equals(const PaginationStatus.success()));
+        expect(
+            controller.state.status, equals(const PaginationStatus.success()));
 
         // Load subsequent pages
         for (var i = 0; i < 4; i++) {
           await controller.loadNextPage();
-          expect(controller.state.status, equals(const PaginationStatus.success()));
+          expect(controller.state.status,
+              equals(const PaginationStatus.success()));
           expect(controller.state.items.length, (i + 2) * 1000);
         }
 
@@ -56,7 +58,7 @@ void main() {
         expect(controller.canLoadMore, isFalse);
         expect(stopwatch.elapsedMilliseconds, lessThan(2000),
             reason: 'Loading 5000 items should complete within 2 seconds');
-        
+
         // Memory usage verification
         final memoryBefore = controller.state.items.length;
         await controller.refresh();
@@ -68,7 +70,8 @@ void main() {
         // The important thing is that refresh works correctly
       });
 
-      test('should handle concurrent operations without race conditions', () async {
+      test('should handle concurrent operations without race conditions',
+          () async {
         controller = PaginatedCubit<Map<String, dynamic>>(
           loader: createMockLoader(
             mockData: mockData,
@@ -90,19 +93,23 @@ void main() {
         controller.loadNextPage(); // Should be queued
         await controller.refresh(); // Should cancel previous operations
         await controller.loadNextPage(); // Should be queued after refresh
-        
+
         // Wait for all operations to complete
         await Future.delayed(const Duration(milliseconds: 500));
 
         stopwatch.stop();
 
         // Verify final state
-        expect(controller.state.status, equals(const PaginationStatus.success()));
-        expect(controller.state.items.length, greaterThanOrEqualTo(20), reason: 'Should have at least 1 page after all operations');
-        expect(controller.state.meta?.page, greaterThanOrEqualTo(1), reason: 'Should be on at least page 1');
+        expect(
+            controller.state.status, equals(const PaginationStatus.success()));
+        expect(controller.state.items.length, greaterThanOrEqualTo(20),
+            reason: 'Should have at least 1 page after all operations');
+        expect(controller.state.meta?.page, greaterThanOrEqualTo(1),
+            reason: 'Should be on at least page 1');
         expect(controller.hasError, isFalse);
-        
-        print('Concurrent operations completed in ${stopwatch.elapsedMilliseconds}ms');
+
+        print(
+            'Concurrent operations completed in ${stopwatch.elapsedMilliseconds}ms');
       });
 
       test('should handle rapid pagination with debounce', () async {
@@ -180,10 +187,12 @@ void main() {
 
       test('should handle large items efficiently', () async {
         // Create items with large data
-        final largeItems = List.generate(100, (index) => {
-          'id': index,
-          'data': 'x' * 10000, // 10KB per item
-        });
+        final largeItems = List.generate(
+            100,
+            (index) => {
+                  'id': index,
+                  'data': 'x' * 10000, // 10KB per item
+                });
 
         controller = createTestController(mockData: largeItems);
 
@@ -220,7 +229,8 @@ void main() {
 
         // Should handle rapidly without issues
         expect(stopwatch.elapsedMilliseconds, lessThan(100));
-        print('Handled 100 scroll events in ${stopwatch.elapsedMilliseconds}ms');
+        print(
+            'Handled 100 scroll events in ${stopwatch.elapsedMilliseconds}ms');
       });
 
       test('should debounce scroll events correctly', () async {
@@ -272,7 +282,8 @@ void main() {
         stopwatch.stop();
 
         expect(stopwatch.elapsedMilliseconds, lessThan(1000));
-        print('Parsed metadata 1000 times in ${stopwatch.elapsedMilliseconds}ms');
+        print(
+            'Parsed metadata 1000 times in ${stopwatch.elapsedMilliseconds}ms');
       });
 
       test('should cache parsed paths efficiently', () async {
@@ -296,7 +307,8 @@ void main() {
         stopwatch.stop();
 
         expect(stopwatch.elapsedMilliseconds, lessThan(2000));
-        print('Parsed with caching 10000 times in ${stopwatch.elapsedMilliseconds}ms');
+        print(
+            'Parsed with caching 10000 times in ${stopwatch.elapsedMilliseconds}ms');
       });
     });
 
@@ -423,4 +435,3 @@ class _MockScrollMetrics implements ScrollMetrics {
     );
   }
 }
-

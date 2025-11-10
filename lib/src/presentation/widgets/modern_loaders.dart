@@ -11,7 +11,7 @@ class BouncingDotsLoader extends StatefulWidget {
     this.message,
     this.padding,
   });
-  
+
   final Color? color;
   final double size;
   final Duration duration;
@@ -36,7 +36,7 @@ class _BouncingDotsLoaderState extends State<BouncingDotsLoader>
         vsync: this,
       );
     });
-    
+
     _animations = _controllers.map((controller) {
       return Tween<double>(begin: 0, end: 1).animate(
         CurvedAnimation(parent: controller, curve: Curves.easeInOut),
@@ -122,7 +122,7 @@ class WaveLoader extends StatefulWidget {
     this.message,
     this.padding,
   });
-  
+
   final Color? color;
   final double size;
   final Duration duration;
@@ -133,8 +133,7 @@ class WaveLoader extends StatefulWidget {
   State<WaveLoader> createState() => _WaveLoaderState();
 }
 
-class _WaveLoaderState extends State<WaveLoader>
-    with TickerProviderStateMixin {
+class _WaveLoaderState extends State<WaveLoader> with TickerProviderStateMixin {
   late AnimationController _controller;
   late List<Animation<double>> _animations;
 
@@ -232,7 +231,7 @@ class RotatingSquaresLoader extends StatefulWidget {
     this.message,
     this.padding,
   });
-  
+
   final Color? color;
   final double size;
   final Duration duration;
@@ -350,7 +349,7 @@ class PulseLoader extends StatefulWidget {
     this.message,
     this.padding,
   });
-  
+
   final Color? color;
   final double size;
   final Duration duration;
@@ -475,7 +474,7 @@ class _PulseLoaderState extends State<PulseLoader>
 }
 
 /// Modern skeleton loader using Skeletonizer
-/// 
+///
 /// This loader uses the skeletonizer package to create a skeleton loading effect.
 /// It's more efficient and provides a better user experience than shimmer.
 class SkeletonLoader extends StatelessWidget {
@@ -486,7 +485,7 @@ class SkeletonLoader extends StatelessWidget {
     this.padding,
     this.itemCount = 3,
   });
-  
+
   final Color? color;
   final String? message;
   final EdgeInsetsGeometry? padding;

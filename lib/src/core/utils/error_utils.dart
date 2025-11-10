@@ -24,10 +24,10 @@ class ErrorUtils {
   static String truncateData(
     dynamic data, {
     int maxChars = 200,
-    int? maxBytes,               // If set, enforces a UTF-8 byte ceiling
-    bool middle = true,          // Keep head+tail instead of tail-only
-    int headChars = 140,         // Used for middle truncation
-    int tailChars = 40,          // Used for middle truncation
+    int? maxBytes, // If set, enforces a UTF-8 byte ceiling
+    bool middle = true, // Keep head+tail instead of tail-only
+    int headChars = 140, // Used for middle truncation
+    int tailChars = 40, // Used for middle truncation
     bool prettyJson = true,
     bool redactSecrets = true,
     String ellipsis = '…',
@@ -50,7 +50,7 @@ class ErrorUtils {
         'headChars ($headChars) + tailChars ($tailChars) cannot exceed maxChars ($maxChars)',
       );
     }
-    
+
     String s = _safeStringify(data, prettyJson: prettyJson);
     if (redactSecrets) {
       s = _redactSecrets(s);
@@ -160,19 +160,19 @@ class ErrorUtils {
     // Cache UTF-8 encoding to avoid repeated encoding
     final utf8Bytes = utf8.encode(s);
     final utf8ByteLength = utf8Bytes.length;
-    
+
     // Pre-calculate ellipsis byte length
     final ellipsisBytes = utf8.encode(ellipsis);
     final ellipsisByteLength = ellipsisBytes.length;
-    
+
     // Quick path: already within limit
     if (utf8ByteLength <= maxBytes) return s;
-    
+
     // If maxBytes is smaller than ellipsis, return just ellipsis
     if (maxBytes < ellipsisByteLength) {
       return ellipsis;
     }
-    
+
     if (!middle) {
       // End truncation by bytes
       final buf = StringBuffer();
@@ -186,25 +186,25 @@ class ErrorUtils {
       buf.write(ellipsis);
       return buf.toString();
     }
-    
+
     // Middle truncation by bytes: build head, tail under the ceiling.
     String takeHead(int nChars) => String.fromCharCodes(s.runes.take(nChars));
     String takeTail(int nChars) =>
         String.fromCharCodes(s.runes.skip(s.runes.length - nChars));
-    
+
     String head = takeHead(headChars);
     String tail = takeTail(tailChars);
-    
+
     // Adjust head/tail to fit byte ceiling
     // Add safety counter to prevent infinite loops
     int iterations = 0;
     const maxIterations = 1000; // Safety limit
-    
+
     while (iterations < maxIterations) {
       final candidate = '$head$ellipsis$tail';
       final size = utf8.encode(candidate).length;
       if (size <= maxBytes) return candidate;
-      
+
       // Shrink head first, then tail
       if (head.isNotEmpty) {
         // More efficient: use rune list manipulation
@@ -228,10 +228,10 @@ class ErrorUtils {
         // As a last resort, return just the ellipsis
         return ellipsis;
       }
-      
+
       iterations++;
     }
-    
+
     // Safety fallback: if we've exceeded max iterations, return ellipsis
     return ellipsis;
   }

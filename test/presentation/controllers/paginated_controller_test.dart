@@ -167,9 +167,9 @@ void main() {
 
         expect(
           states.any((s) => s.status.maybeWhen(
-            appending: () => true,
-            orElse: () => false,
-          )),
+                appending: () => true,
+                orElse: () => false,
+              )),
           isTrue,
         );
 
@@ -205,8 +205,8 @@ void main() {
         expect(controller.state.lastLoadedAt, isNotNull);
         // Check that timestamp was updated (should be after first load or equal if very fast)
         expect(
-          controller.state.lastLoadedAt!.isAfter(firstLoadTime!) || 
-          controller.state.lastLoadedAt == firstLoadTime,
+          controller.state.lastLoadedAt!.isAfter(firstLoadTime!) ||
+              controller.state.lastLoadedAt == firstLoadTime,
           isTrue,
           reason: 'lastLoadedAt should be updated or equal after refresh',
         );
@@ -228,9 +228,9 @@ void main() {
 
         expect(
           states.any((s) => s.status.maybeWhen(
-            refreshing: () => true,
-            orElse: () => false,
-          )),
+                refreshing: () => true,
+                orElse: () => false,
+              )),
           isTrue,
         );
 

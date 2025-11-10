@@ -14,4 +14,3 @@ enum PaginatrixLoadType {
   /// Refresh the current data (reloads first page and replaces all items)
   refresh,
 }
-

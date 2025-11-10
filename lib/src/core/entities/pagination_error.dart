@@ -11,31 +11,31 @@ class PaginationError with _$PaginationError {
     int? statusCode,
     String? originalError,
   }) = _NetworkError;
-  
+
   /// Parse error (invalid response format, missing keys, etc.)
   const factory PaginationError.parse({
     required String message,
     String? expectedFormat,
     String? actualData,
   }) = _ParseError;
-  
+
   /// Cancellation error (request was cancelled)
   const factory PaginationError.cancelled({
     required String message,
   }) = _CancelledError;
-  
+
   /// Rate limit error (too many requests)
   const factory PaginationError.rateLimited({
     required String message,
     Duration? retryAfter,
   }) = _RateLimitedError;
-  
+
   /// Circuit breaker error (service unavailable)
   const factory PaginationError.circuitBreaker({
     required String message,
     Duration? retryAfter,
   }) = _CircuitBreakerError;
-  
+
   /// Unknown error
   const factory PaginationError.unknown({
     required String message,
@@ -55,7 +55,7 @@ extension PaginationErrorExtension on PaginationError {
       unknown: (_, __) => false,
     );
   }
-  
+
   /// Whether this error should be shown to the user
   bool get isUserVisible {
     return when(
@@ -67,7 +67,7 @@ extension PaginationErrorExtension on PaginationError {
       unknown: (_, __) => true,
     );
   }
-  
+
   /// User-friendly error message
   String get userMessage {
     return when(

@@ -150,4 +150,3 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
     return super.close();
   }
 }
-

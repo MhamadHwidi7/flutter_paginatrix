@@ -20,4 +20,3 @@ enum PaginatrixBlocAction {
   /// Clear all data and reset to initial state
   clear,
 }
-

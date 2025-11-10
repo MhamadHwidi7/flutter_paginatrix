@@ -32,7 +32,7 @@ class Pokemon {
   final int? baseExperience;
 
   /// Creates a Pokemon from JSON
-  /// 
+  ///
   /// This handles both:
   /// 1. Full Pokemon details from API (with types, sprites, etc.)
   /// 2. Simplified Pokemon from repository (with pre-processed data)
@@ -57,7 +57,7 @@ class Pokemon {
     // Full format from PokeAPI
     final id = json['id'] as int;
     final name = json['name'] as String;
-    
+
     // Extract types
     final typesList = json['types'] as List<dynamic>? ?? [];
     final types = typesList
@@ -67,7 +67,8 @@ class Pokemon {
     // Get official artwork image
     final sprites = json['sprites'] as Map<String, dynamic>? ?? {};
     final other = sprites['other'] as Map<String, dynamic>? ?? {};
-    final officialArtwork = other['official-artwork'] as Map<String, dynamic>? ?? {};
+    final officialArtwork =
+        other['official-artwork'] as Map<String, dynamic>? ?? {};
     final imageUrl = officialArtwork['front_default'] as String? ??
         sprites['front_default'] as String? ??
         '';
@@ -90,11 +91,12 @@ class Pokemon {
     final url = json['url'] as String? ?? '';
     final idMatch = RegExp(r'/pokemon/(\d+)/').firstMatch(url);
     final id = idMatch != null ? int.parse(idMatch.group(1)!) : 0;
-    
+
     final name = json['name'] as String;
-    
+
     // Construct image URL from ID
-    final imageUrl = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png';
+    final imageUrl =
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png';
 
     return Pokemon(
       id: id,
@@ -142,4 +144,3 @@ class Pokemon {
   @override
   int get hashCode => id.hashCode ^ name.hashCode;
 }
-

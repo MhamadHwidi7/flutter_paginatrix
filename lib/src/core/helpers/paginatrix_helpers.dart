@@ -94,4 +94,3 @@ String formatPaginationInfo({
   final itemsInfo = totalItems != null ? ' ($totalItems items)' : '';
   return 'Page $currentPage of $totalPages$itemsInfo';
 }
-

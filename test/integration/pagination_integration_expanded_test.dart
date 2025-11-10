@@ -100,13 +100,15 @@ void main() {
         // For offset-based pagination, the parser should extract offset and limit from meta
         // The loader returns meta.offset: 0 and meta.limit: 20
         final meta = controller.state.meta;
-        expect(meta, isNotNull, reason: 'Meta should not be null after loadFirstPage');
+        expect(meta, isNotNull,
+            reason: 'Meta should not be null after loadFirstPage');
         // Check if offset was parsed (it might be null if parser didn't extract it)
         if (meta?.offset == null) {
           // If offset is null, the parser might have created a different meta type
           // This could happen if the parser logic doesn't match the response structure
           // For now, we'll check that meta exists and has the expected structure
-          expect(meta?.hasMore, isNotNull, reason: 'Meta should have hasMore field');
+          expect(meta?.hasMore, isNotNull,
+              reason: 'Meta should have hasMore field');
         } else {
           expect(meta?.offset, 0, reason: 'Offset should be 0 for first page');
           expect(meta?.limit, 20, reason: 'Limit should be 20');
@@ -114,9 +116,11 @@ void main() {
 
         await controller.loadNextPage();
         // After loading next page, items should increase
-        expect(controller.state.items.length, greaterThanOrEqualTo(20), reason: 'Should have loaded more items');
+        expect(controller.state.items.length, greaterThanOrEqualTo(20),
+            reason: 'Should have loaded more items');
         if (controller.state.meta?.offset != null) {
-          expect(controller.state.meta?.offset, 20, reason: 'Offset should be 20 after second page');
+          expect(controller.state.meta?.offset, 20,
+              reason: 'Offset should be 20 after second page');
         }
       });
     });
@@ -278,7 +282,7 @@ void main() {
 
         // Wait for cancellation to be processed
         await Future.delayed(const Duration(milliseconds: 200));
-        
+
         // Wait for the load future to complete (it may have been cancelled)
         try {
           await loadFuture;
@@ -290,7 +294,9 @@ void main() {
         // The important thing is that the request was cancelled
         // Check that we're not in a success state (unless it completed before cancellation)
         // Note: In a real scenario, cancellation might happen after data is loaded
-        expect(controller.isLoading || !controller.hasData || controller.hasError, isTrue);
+        expect(
+            controller.isLoading || !controller.hasData || controller.hasError,
+            isTrue);
       });
 
       test('should handle cancellation during append', () async {
@@ -347,17 +353,17 @@ void main() {
 
         // Cancel and start new request
         controller.cancel();
-        
+
         // Wait a bit for cancellation to process
         await Future.delayed(const Duration(milliseconds: 50));
-        
+
         // Start fresh request
         await controller.loadFirstPage();
 
         // Should have fresh data, not stale
         expect(controller.hasData, isTrue);
         expect(controller.state.items.length, 20);
-        
+
         // Clean up the first load future if it's still pending
         try {
           await firstLoad.timeout(const Duration(milliseconds: 100));
@@ -531,7 +537,8 @@ void main() {
         expect(loadCount, initialLoadCount + 1);
       });
 
-      test('should allow immediate refresh when debounce is disabled', () async {
+      test('should allow immediate refresh when debounce is disabled',
+          () async {
         var loadCount = 0;
         controller = PaginatedCubit<Map<String, dynamic>>(
           loader: ({
@@ -579,24 +586,30 @@ void main() {
         await controller.loadFirstPage();
         await Future.delayed(const Duration(milliseconds: 100));
 
-        expect(states.any((s) => s.status.maybeWhen(
-          loading: () => true,
-          orElse: () => false,
-        )), isTrue);
+        expect(
+            states.any((s) => s.status.maybeWhen(
+                  loading: () => true,
+                  orElse: () => false,
+                )),
+            isTrue);
 
-        expect(states.any((s) => s.status.maybeWhen(
-          success: () => true,
-          orElse: () => false,
-        )), isTrue);
+        expect(
+            states.any((s) => s.status.maybeWhen(
+                  success: () => true,
+                  orElse: () => false,
+                )),
+            isTrue);
 
         // Success -> Appending -> Success
         await controller.loadNextPage();
         await Future.delayed(const Duration(milliseconds: 100));
 
-        expect(states.any((s) => s.status.maybeWhen(
-          appending: () => true,
-          orElse: () => false,
-        )), isTrue);
+        expect(
+            states.any((s) => s.status.maybeWhen(
+                  appending: () => true,
+                  orElse: () => false,
+                )),
+            isTrue);
 
         // Success -> Refreshing -> Success
         await controller.refresh();
@@ -605,19 +618,21 @@ void main() {
 
         // Check if refreshing state was emitted (it might be debounced)
         final hasRefreshingState = states.any((s) => s.status.maybeWhen(
-          refreshing: () => true,
-          orElse: () => false,
-        ));
-        
+              refreshing: () => true,
+              orElse: () => false,
+            ));
+
         // If refresh debounce is enabled, refreshing state might not be captured
         // Check that we end up in success state after refresh
         expect(
-          hasRefreshingState || controller.state.status.maybeWhen(
-            success: () => true,
-            orElse: () => false,
-          ),
+          hasRefreshingState ||
+              controller.state.status.maybeWhen(
+                success: () => true,
+                orElse: () => false,
+              ),
           isTrue,
-          reason: 'Should have refreshing state or end in success after refresh',
+          reason:
+              'Should have refreshing state or end in success after refresh',
         );
 
         await subscription.cancel();
@@ -630,15 +645,18 @@ void main() {
 
         await controller.loadFirstPage();
 
-        expect(controller.state.status.maybeWhen(
-          empty: () => true,
-          orElse: () => false,
-        ), isTrue);
+        expect(
+            controller.state.status.maybeWhen(
+              empty: () => true,
+              orElse: () => false,
+            ),
+            isTrue);
         expect(controller.state.items, isEmpty);
       });
 
       test('should handle single page of data', () async {
-        controller = createTestController(mockData: createMockData(totalItems: 10));
+        controller =
+            createTestController(mockData: createMockData(totalItems: 10));
 
         await controller.loadFirstPage();
 
@@ -682,9 +700,9 @@ void main() {
 
         // Should handle gracefully - at least one should have processed
         // but not all three (due to loading guard)
-        expect(controller.state.items.length, greaterThanOrEqualTo(initialCount));
+        expect(
+            controller.state.items.length, greaterThanOrEqualTo(initialCount));
       });
     });
   });
 }
-

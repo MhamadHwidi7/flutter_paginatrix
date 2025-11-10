@@ -9,10 +9,12 @@ List<Map<String, dynamic>> createMockData({
   String idKey = 'id',
   String nameKey = 'name',
 }) {
-  return List.generate(totalItems, (index) => {
-    idKey: index + 1,
-    nameKey: 'Item ${index + 1}',
-  });
+  return List.generate(
+      totalItems,
+      (index) => {
+            idKey: index + 1,
+            nameKey: 'Item ${index + 1}',
+          });
 }
 
 /// Test helper: Creates a mock loader function
@@ -46,7 +48,8 @@ LoaderFn<T> createMockLoader<T>({
 
     if (shouldFail != null && shouldFail(currentPage)) {
       throw PaginationError.network(
-        message: errorMessage?.call(currentPage) ?? 'Network error on page $currentPage',
+        message: errorMessage?.call(currentPage) ??
+            'Network error on page $currentPage',
       );
     }
 
@@ -148,14 +151,14 @@ Future<void> waitForState<T>(
   Duration pollInterval = const Duration(milliseconds: 50),
 }) async {
   final startTime = DateTime.now();
-  
+
   while (DateTime.now().difference(startTime) < timeout) {
     if (condition(controller.state)) {
       return;
     }
     await Future.delayed(pollInterval);
   }
-  
+
   throw TimeoutException(
     'State condition not met within ${timeout.inSeconds} seconds',
     timeout,
@@ -169,10 +172,9 @@ Future<List<PaginationState<T>>> collectStates<T>(
 ) async {
   final states = <PaginationState<T>>[];
   final subscription = controller.stream.listen(states.add);
-  
+
   await Future.delayed(duration);
   await subscription.cancel();
-  
+
   return states;
 }
-

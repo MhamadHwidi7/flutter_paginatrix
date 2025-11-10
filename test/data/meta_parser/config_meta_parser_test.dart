@@ -183,7 +183,8 @@ void main() {
         expect(meta.hasMore, true);
       });
 
-      test('should calculate hasMore from offset and total when not provided', () {
+      test('should calculate hasMore from offset and total when not provided',
+          () {
         final offsetParser = ConfigMetaParser(MetaConfig.offsetBased);
         final data = {
           'data': [],
@@ -295,7 +296,9 @@ void main() {
     group('validateStructure', () {
       test('should return true for valid nested meta structure', () {
         final data = {
-          'data': [{'id': 1}],
+          'data': [
+            {'id': 1}
+          ],
           'meta': {
             'current_page': 1,
             'per_page': 20,
@@ -308,7 +311,9 @@ void main() {
       test('should return true for valid results format', () {
         final resultsParser = ConfigMetaParser(MetaConfig.resultsFormat);
         final data = {
-          'results': [{'id': 1}],
+          'results': [
+            {'id': 1}
+          ],
           'page': 1,
         };
 
@@ -342,7 +347,9 @@ void main() {
         );
 
         final data = {
-          'data': [{'id': 1}],
+          'data': [
+            {'id': 1}
+          ],
         };
 
         expect(itemsOnlyParser.validateStructure(data), isTrue);
@@ -501,7 +508,8 @@ void main() {
     });
 
     group('Error handling', () {
-      test('should throw PaginationError with truncated data on parse failure', () {
+      test('should throw PaginationError with truncated data on parse failure',
+          () {
         // Create data that will cause a parse error
         final data = {
           'data': 'not a list', // This will cause extractItems to fail
@@ -550,4 +558,3 @@ void main() {
     });
   });
 }
-

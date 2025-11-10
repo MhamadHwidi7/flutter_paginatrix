@@ -36,9 +36,9 @@ class _PokemonPageState extends State<PokemonPage> {
   @override
   void initState() {
     super.initState();
-    
+
     final config = BuildConfig.current;
-    
+
     // Create the Cubit
     _cubit = PaginatedCubit<Pokemon>(
       loader: _loadPokemonPage,
@@ -48,12 +48,12 @@ class _PokemonPageState extends State<PokemonPage> {
           // Extract items
           final results = data['results'] as List;
           final items = results.cast<Map<String, dynamic>>();
-          
+
           // Extract meta
           final count = data['count'] as int;
           final next = data['next'] as String?;
           final previous = data['previous'] as String?;
-          
+
           // Extract page number from URL
           int? currentPage;
           if (previous == null) {
@@ -65,14 +65,14 @@ class _PokemonPageState extends State<PokemonPage> {
               currentPage = (offset ~/ 20) + 2;
             }
           }
-          
+
           final meta = PageMeta(
             page: currentPage,
             perPage: 20,
             total: count,
             hasMore: next != null,
           );
-          
+
           return {
             'items': items,
             'meta': meta,
@@ -81,7 +81,7 @@ class _PokemonPageState extends State<PokemonPage> {
       ),
       options: config.defaultPaginationOptions,
     );
-    
+
     // Load first page
     _cubit.loadFirstPage();
   }
@@ -96,7 +96,7 @@ class _PokemonPageState extends State<PokemonPage> {
   }) async {
     final dio = Dio();
     final actualOffset = ((page ?? 1) - 1) * (perPage ?? 20);
-    
+
     final response = await dio.get(
       'https://pokeapi.co/api/v2/pokemon',
       queryParameters: {
@@ -105,7 +105,7 @@ class _PokemonPageState extends State<PokemonPage> {
       },
       cancelToken: cancelToken,
     );
-    
+
     return response.data as Map<String, dynamic>;
   }
 
@@ -272,7 +272,7 @@ class Pokemon {
   factory Pokemon.fromJson(Map<String, dynamic> json) {
     final url = json['url'] as String;
     final id = int.parse(url.split('/')[url.split('/').length - 2]);
-    
+
     return Pokemon(
       id: id,
       name: json['name'] as String,
@@ -288,4 +288,3 @@ class Pokemon {
     return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png';
   }
 }
-

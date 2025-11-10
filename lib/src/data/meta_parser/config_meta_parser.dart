@@ -98,14 +98,14 @@ class MetaConfig with _$MetaConfig {
 class ConfigMetaParser implements MetaParser {
   ConfigMetaParser(this._config);
   final MetaConfig _config;
-  
+
   // Cache for parsed path segments to avoid repeated splitting
   final Map<String, List<String>> _pathCache = {};
-  
+
   // Cache for parsed metadata to avoid re-parsing same data structures
   // Uses a simple hash of the data structure as key
   final Map<int, PageMeta> _metaCache = {};
-  
+
   // Maximum cache size to prevent memory issues
   static const int _maxCacheSize = 100;
 
@@ -118,32 +118,34 @@ class ConfigMetaParser implements MetaParser {
       if (_metaCache.containsKey(dataHash) && data.length < 50) {
         return _metaCache[dataHash]!;
       }
-      
+
       // Safe type extraction with runtime checks
       final pageValue = _extractValue(data, _config.pagePath);
       final page = pageValue is int ? pageValue : null;
-      
+
       final perPageValue = _extractValue(data, _config.perPagePath);
       final perPage = perPageValue is int ? perPageValue : null;
-      
+
       final totalValue = _extractValue(data, _config.totalPath);
       final total = totalValue is int ? totalValue : null;
-      
+
       final lastPageValue = _extractValue(data, _config.lastPagePath);
       final lastPage = lastPageValue is int ? lastPageValue : null;
-      
+
       final hasMoreValue = _extractValue(data, _config.hasMorePath);
       final hasMore = hasMoreValue is bool ? hasMoreValue : null;
-      
+
       final nextCursorValue = _extractValue(data, _config.nextCursorPath);
       final nextCursor = nextCursorValue is String ? nextCursorValue : null;
-      
-      final previousCursorValue = _extractValue(data, _config.previousCursorPath);
-      final previousCursor = previousCursorValue is String ? previousCursorValue : null;
-      
+
+      final previousCursorValue =
+          _extractValue(data, _config.previousCursorPath);
+      final previousCursor =
+          previousCursorValue is String ? previousCursorValue : null;
+
       final offsetValue = _extractValue(data, _config.offsetPath);
       final offset = offsetValue is int ? offsetValue : null;
-      
+
       final limitValue = _extractValue(data, _config.limitPath);
       final limit = limitValue is int ? limitValue : null;
 
@@ -184,12 +186,12 @@ class ConfigMetaParser implements MetaParser {
           limit: limit,
         );
       }
-      
+
       // Cache the parsed metadata if cache is not too large
       if (_metaCache.length < _maxCacheSize && data.length < 50) {
         _metaCache[dataHash] = result;
       }
-      
+
       return result;
     } catch (e) {
       throw PaginationError.parse(
@@ -199,26 +201,26 @@ class ConfigMetaParser implements MetaParser {
       );
     }
   }
-  
+
   /// Computes a simple hash for caching purposes
   /// Uses a combination of relevant pagination fields
   int _computeSimpleHash(Map<String, dynamic> data) {
     final buffer = StringBuffer();
-    
+
     // Include relevant pagination fields in hash
     final pageValue = _extractValue(data, _config.pagePath);
     final perPageValue = _extractValue(data, _config.perPagePath);
     final totalValue = _extractValue(data, _config.totalPath);
     final hasMoreValue = _extractValue(data, _config.hasMorePath);
-    
+
     buffer.write('${pageValue ?? ''}_');
     buffer.write('${perPageValue ?? ''}_');
     buffer.write('${totalValue ?? ''}_');
     buffer.write('${hasMoreValue ?? ''}');
-    
+
     return buffer.toString().hashCode;
   }
-  
+
   /// Clears the metadata cache
   /// Useful for memory management or when data structures change significantly
   void clearCache() {
@@ -289,20 +291,20 @@ class ConfigMetaParser implements MetaParser {
   /// Validates that a path is well-formed
   bool _isValidPath(String? path) {
     if (path == null || path.isEmpty) return false;
-    
+
     // Check for empty segments (e.g., "a..b" or ".a" or "a.")
     final segments = path.split('.');
     if (segments.any((segment) => segment.isEmpty)) {
       return false;
     }
-    
+
     // Check for valid characters (alphanumeric, underscore, hyphen)
     for (final segment in segments) {
       if (segment.isEmpty || !RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(segment)) {
         return false;
       }
     }
-    
+
     return true;
   }
 
@@ -310,7 +312,7 @@ class ConfigMetaParser implements MetaParser {
   /// Uses caching to avoid repeated path parsing
   dynamic _extractValue(Map<String, dynamic> data, String? path) {
     if (path == null || path.isEmpty) return null;
-    
+
     // Validate path format
     if (!_isValidPath(path)) {
       return null;
@@ -324,7 +326,7 @@ class ConfigMetaParser implements MetaParser {
       parts = path.split('.');
       _pathCache[path] = parts;
     }
-    
+
     dynamic current = data;
 
     for (final part in parts) {

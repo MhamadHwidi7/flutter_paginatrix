@@ -46,4 +46,3 @@ extension PaginationTypeExtension on PaginationType {
     }
   }
 }
-

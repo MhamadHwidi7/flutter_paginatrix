@@ -50,4 +50,3 @@ extension PaginationStateExtensions<T> on PaginationState<T> {
   /// Whether we should show content
   bool get shouldShowContent => hasData;
 }
-

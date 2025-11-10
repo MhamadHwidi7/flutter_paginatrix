@@ -17,42 +17,57 @@ void main() {
       controller.close();
     });
 
-    test('complete pagination flow: initial load -> pagination -> refresh', () async {
+    test('complete pagination flow: initial load -> pagination -> refresh',
+        () async {
       controller = createTestControllerWithZeroDebounce(mockData: mockData);
 
       // Initial state
-      expect(controller.state.items, isEmpty, reason: 'Initial state should be empty');
-      expect(controller.isLoading, isFalse, reason: 'Should not be loading initially');
-      expect(controller.state.meta, isNull, reason: 'Meta should be null initially');
+      expect(controller.state.items, isEmpty,
+          reason: 'Initial state should be empty');
+      expect(controller.isLoading, isFalse,
+          reason: 'Should not be loading initially');
+      expect(controller.state.meta, isNull,
+          reason: 'Meta should be null initially');
 
       // Load first page
       await controller.loadFirstPage();
-      expect(controller.hasData, isTrue, reason: 'Should have data after first load');
-      expect(controller.state.items.length, 20, reason: 'First page should have 20 items');
+      expect(controller.hasData, isTrue,
+          reason: 'Should have data after first load');
+      expect(controller.state.items.length, 20,
+          reason: 'First page should have 20 items');
       expect(controller.state.meta?.page, 1, reason: 'Should be on page 1');
-      expect(controller.canLoadMore, isTrue, reason: 'Should be able to load more');
-      expect(controller.state.status, equals(const PaginationStatus.success()), reason: 'Status should be success');
+      expect(controller.canLoadMore, isTrue,
+          reason: 'Should be able to load more');
+      expect(controller.state.status, equals(const PaginationStatus.success()),
+          reason: 'Status should be success');
 
       // Verify first page data
       var firstPageData = controller.state.items;
 
       // Load next page
       await controller.loadNextPage();
-      expect(controller.state.items.length, 40, reason: 'Should have 40 items after second page');
+      expect(controller.state.items.length, 40,
+          reason: 'Should have 40 items after second page');
       expect(controller.state.meta?.page, 2, reason: 'Should be on page 2');
-      expect(controller.state.items.sublist(0, 20), equals(firstPageData), reason: 'First page data should remain unchanged');
+      expect(controller.state.items.sublist(0, 20), equals(firstPageData),
+          reason: 'First page data should remain unchanged');
 
       // Load another page
       await controller.loadNextPage();
-      expect(controller.state.items.length, 60, reason: 'Should have 60 items after third page');
+      expect(controller.state.items.length, 60,
+          reason: 'Should have 60 items after third page');
       expect(controller.state.meta?.page, 3, reason: 'Should be on page 3');
 
       // Refresh - should reset to first page
       await controller.refresh();
-      expect(controller.state.items.length, 20, reason: 'After refresh should have only first page');
-      expect(controller.state.meta?.page, 1, reason: 'After refresh should be on page 1');
-      expect(controller.state.status, equals(const PaginationStatus.success()), reason: 'Status should be success after refresh');
-      expect(controller.canLoadMore, isTrue, reason: 'Should be able to load more after refresh');
+      expect(controller.state.items.length, 20,
+          reason: 'After refresh should have only first page');
+      expect(controller.state.meta?.page, 1,
+          reason: 'After refresh should be on page 1');
+      expect(controller.state.status, equals(const PaginationStatus.success()),
+          reason: 'Status should be success after refresh');
+      expect(controller.canLoadMore, isTrue,
+          reason: 'Should be able to load more after refresh');
     });
 
     test('error recovery flow: error -> retry -> success', () async {
@@ -106,7 +121,8 @@ void main() {
           loadCount++;
           await Future.delayed(const Duration(milliseconds: 500));
           if (cancelToken?.isCancelled ?? false) {
-            throw const PaginationError.cancelled(message: 'Operation cancelled');
+            throw const PaginationError.cancelled(
+                message: 'Operation cancelled');
           }
           return createMockLoader(mockData: mockData)(
             page: page,
@@ -162,7 +178,8 @@ void main() {
           orElse: () => false,
         ),
         isTrue,
-        reason: 'Empty response should result in empty or success with empty items',
+        reason:
+            'Empty response should result in empty or success with empty items',
       );
       expect(controller.state.items, isEmpty);
       expect(controller.canLoadMore, isFalse);
@@ -262,11 +279,13 @@ void main() {
       await controller.loadFirstPage();
       // Wait a bit for all states to be emitted
       await Future.delayed(const Duration(milliseconds: 100));
-      
-      expect(states.any((s) => s.status.maybeWhen(
-        initial: () => true,
-        orElse: () => false,
-      )), isTrue);
+
+      expect(
+          states.any((s) => s.status.maybeWhen(
+                initial: () => true,
+                orElse: () => false,
+              )),
+          isTrue);
       // Check for loading state (might be very fast, so check if we have success state)
       expect(states.any((s) => s.hasData), isTrue);
 
@@ -274,11 +293,13 @@ void main() {
       await controller.loadNextPage();
       // Wait a bit for all states to be emitted
       await Future.delayed(const Duration(milliseconds: 100));
-      
-      expect(states.any((s) => s.status.maybeWhen(
-        appending: () => true,
-        orElse: () => false,
-      )), isTrue);
+
+      expect(
+          states.any((s) => s.status.maybeWhen(
+                appending: () => true,
+                orElse: () => false,
+              )),
+          isTrue);
 
       await subscription.cancel();
     });
@@ -323,7 +344,8 @@ void main() {
     });
 
     test('load next page when already at last page: should not load', () async {
-      controller = createTestController(mockData: createMockData(totalItems: 20));
+      controller =
+          createTestController(mockData: createMockData(totalItems: 20));
 
       await controller.loadFirstPage();
       expect(controller.state.items.length, 20);
@@ -363,11 +385,11 @@ void main() {
 
       // Start loading
       final future = controller.loadFirstPage();
-      
+
       // Refresh while loading
       await Future.delayed(const Duration(milliseconds: 50));
       await controller.refresh();
-      
+
       await future;
       await controller.loadFirstPage();
 
@@ -382,19 +404,21 @@ void main() {
       );
 
       await controller.loadFirstPage();
-      
+
       // Start loading next page (don't await - let it run)
       controller.loadNextPage();
-      
+
       // Try to load another page while appending (should queue)
       await controller.loadNextPage();
-      
+
       // Wait for all operations to complete
       await Future.delayed(const Duration(milliseconds: 400));
 
       // Should have loaded pages sequentially (not concurrently)
-      expect(controller.state.items.length, greaterThanOrEqualTo(40), reason: 'Should have at least 2 pages');
-      expect(controller.state.meta?.page, greaterThanOrEqualTo(2), reason: 'Should be on at least page 2');
+      expect(controller.state.items.length, greaterThanOrEqualTo(40),
+          reason: 'Should have at least 2 pages');
+      expect(controller.state.meta?.page, greaterThanOrEqualTo(2),
+          reason: 'Should be on at least page 2');
     });
 
     test('meta information: should update correctly on each page', () async {
@@ -478,4 +502,3 @@ void main() {
     });
   });
 }
-

@@ -41,7 +41,8 @@ void main() {
       );
     }
 
-    testWidgets('should display loading skeleton on initial state', (tester) async {
+    testWidgets('should display loading skeleton on initial state',
+        (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -68,20 +69,22 @@ void main() {
 
       // Initial state should show skeletonizer (initial state is converted to loading)
       // Check that skeletonizer or loading state is present
-      final hasSkeletonizer = find.byType(PaginationGridSkeletonizer).evaluate().isNotEmpty;
+      final hasSkeletonizer =
+          find.byType(PaginationGridSkeletonizer).evaluate().isNotEmpty;
       final isInitialOrLoading = cubit.state.status.maybeWhen(
         initial: () => true,
         loading: () => true,
         orElse: () => false,
       );
-      expect(hasSkeletonizer || isInitialOrLoading, isTrue, 
-        reason: 'Should show skeletonizer or be in initial/loading state');
+      expect(hasSkeletonizer || isInitialOrLoading, isTrue,
+          reason: 'Should show skeletonizer or be in initial/loading state');
     });
 
-    testWidgets('should display items in grid after successful load', (tester) async {
+    testWidgets('should display items in grid after successful load',
+        (tester) async {
       // Load data first to avoid skeletonizer layout issues
       await cubit.loadFirstPage();
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -111,8 +114,8 @@ void main() {
       expect(find.text('Item 1'), findsOneWidget);
       expect(find.text('Item 2'), findsOneWidget);
       // Item 20 might not be visible if grid doesn't scroll, so check state instead
-      expect(cubit.state.items.length, greaterThanOrEqualTo(20), 
-        reason: 'Should have loaded at least 20 items');
+      expect(cubit.state.items.length, greaterThanOrEqualTo(20),
+          reason: 'Should have loaded at least 20 items');
     });
 
     testWidgets('should support custom grid delegate', (tester) async {
@@ -134,7 +137,8 @@ void main() {
     });
 
     testWidgets('should display empty view when no items', (tester) async {
-      final emptyCubit = createTestController<Map<String, dynamic>>(mockData: []);
+      final emptyCubit =
+          createTestController<Map<String, dynamic>>(mockData: []);
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -190,10 +194,11 @@ void main() {
       errorCubit.close();
     });
 
-    testWidgets('should display append loader when loading more', (tester) async {
+    testWidgets('should display append loader when loading more',
+        (tester) async {
       // Load first page first
       await cubit.loadFirstPage();
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -222,7 +227,7 @@ void main() {
 
       // Trigger load next page
       cubit.loadNextPage();
-      
+
       // Pump to allow state updates
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
@@ -233,29 +238,30 @@ void main() {
         orElse: () => false,
       );
       final hasAppendLoader = find.byType(AppendLoader).evaluate().isNotEmpty;
-      
+
       // The test verifies that either:
       // 1. We're in appending state (caught the state transition)
       // 2. Append loader is visible (UI shows the loader)
       // 3. Load completed quickly (items increased)
       final itemsIncreased = cubit.state.items.length > initialItemCount;
-      
+
       expect(isAppending || hasAppendLoader || itemsIncreased, isTrue,
-        reason: 'Should be in appending state, show append loader, or have loaded more items');
-      
+          reason:
+              'Should be in appending state, show append loader, or have loaded more items');
+
       // Wait a bit more for load to complete if it hasn't
       if (!itemsIncreased) {
         await tester.pump(const Duration(milliseconds: 300));
         // Final verification that items were loaded
         expect(cubit.state.items.length, greaterThan(initialItemCount),
-          reason: 'Should have loaded more items after waiting');
+            reason: 'Should have loaded more items after waiting');
       }
     });
 
     testWidgets('should handle pagination on scroll', (tester) async {
       // Load first page first to avoid skeletonizer layout issues
       await cubit.loadFirstPage();
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -294,7 +300,7 @@ void main() {
       // Wait a bit more for the load to complete
       await tester.pump(const Duration(milliseconds: 500));
       expect(cubit.state.items.length, greaterThanOrEqualTo(initialItemCount),
-        reason: 'Should have loaded more items after scroll');
+          reason: 'Should have loaded more items after scroll');
     });
 
     testWidgets('should support different cross axis counts', (tester) async {
@@ -332,4 +338,3 @@ void main() {
     });
   });
 }
-

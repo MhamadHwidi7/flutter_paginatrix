@@ -21,14 +21,13 @@ class PaginationEmptyView extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final MainAxisAlignment mainAxisAlignment;
   final CrossAxisAlignment crossAxisAlignment;
-  
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    
+
     return Padding(
       padding: padding ?? const EdgeInsets.all(32),
       child: Column(
@@ -46,7 +45,6 @@ class PaginationEmptyView extends StatelessWidget {
             ),
             const SizedBox(height: 24),
           ],
-          
           if (title != null) ...[
             Text(
               title!,
@@ -58,7 +56,6 @@ class PaginationEmptyView extends StatelessWidget {
             ),
             const SizedBox(height: 8),
           ],
-          
           if (description != null) ...[
             Text(
               description!,
@@ -69,7 +66,6 @@ class PaginationEmptyView extends StatelessWidget {
             ),
             const SizedBox(height: 24),
           ],
-          
           if (action != null) ...[
             Builder(
               builder: (context) {
@@ -99,7 +95,7 @@ class SearchEmptyView extends StatelessWidget {
   });
   final String? query;
   final VoidCallback? onClearSearch;
-  
+
   @override
   Widget build(BuildContext context) {
     return PaginationEmptyView(
@@ -109,7 +105,7 @@ class SearchEmptyView extends StatelessWidget {
         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
       ),
       title: 'No results found',
-      description: query != null 
+      description: query != null
           ? 'No results found for "$query"'
           : 'Try adjusting your search terms',
       action: onClearSearch != null
@@ -125,12 +121,12 @@ class SearchEmptyView extends StatelessWidget {
 /// Predefined empty view for network errors
 class NetworkEmptyView extends StatelessWidget {
   final VoidCallback? onRetry;
-  
+
   const NetworkEmptyView({
     super.key,
     this.onRetry,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return PaginationEmptyView(
@@ -155,13 +151,13 @@ class NetworkEmptyView extends StatelessWidget {
 class GenericEmptyView extends StatelessWidget {
   final String? message;
   final VoidCallback? onRefresh;
-  
+
   const GenericEmptyView({
     super.key,
     this.message,
     this.onRefresh,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return PaginationEmptyView(

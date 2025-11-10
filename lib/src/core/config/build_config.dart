@@ -33,8 +33,7 @@ class BuildConfig {
   // ignore: prefer_constructors_over_static_methods
   static BuildConfig get current {
     // Use compile-time constant to determine environment
-    const bool isProduction =
-        bool.fromEnvironment('PRODUCTION');
+    const bool isProduction = bool.fromEnvironment('PRODUCTION');
 
     return isProduction
         ? const BuildConfig.production()

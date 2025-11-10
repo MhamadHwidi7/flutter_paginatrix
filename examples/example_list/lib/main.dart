@@ -48,7 +48,7 @@ class _UsersPageState extends State<UsersPage> {
   void initState() {
     super.initState();
     final config = BuildConfig.current;
-    
+
     _cubit = PaginatedCubit<User>(
       loader: _loadUsers,
       itemDecoder: User.fromJson,
@@ -58,7 +58,7 @@ class _UsersPageState extends State<UsersPage> {
         defaultPageSize: 50, // 50 items per page
       ),
     );
-    
+
     _cubit.loadFirstPage();
   }
 
@@ -135,27 +135,28 @@ class _UsersPageState extends State<UsersPage> {
           return Stack(
             children: [
               PaginatrixListView<User>(
-        cubit: _cubit,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        // Performance optimizations
-        cacheExtent: 250, // Limit off-screen items for better memory usage
-        prefetchThreshold: 2, // Load next page when 200px from end
-        itemBuilder: (context, user, index) {
-          return _UserListItem(user: user);
-        },
-        separatorBuilder: (context, index) => const Divider(height: 1),
-        // Custom loading indicator - choose any LoaderType
-        appendLoaderBuilder: (context) => AppendLoader(
-          loaderType: LoaderType
-              .wave, // Options: bouncingDots, wave, rotatingSquares, pulse, skeleton, traditional
-          message: 'Loading more users...',
-          color: Theme.of(context).colorScheme.primary,
-          size: 24,
-          padding: const EdgeInsets.all(16),
-        ),
-        onPullToRefresh: () {
-          // Optional: Add custom refresh logic
-        },
+                cubit: _cubit,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                // Performance optimizations
+                cacheExtent:
+                    250, // Limit off-screen items for better memory usage
+                prefetchThreshold: 2, // Load next page when 200px from end
+                itemBuilder: (context, user, index) {
+                  return _UserListItem(user: user);
+                },
+                separatorBuilder: (context, index) => const Divider(height: 1),
+                // Custom loading indicator - choose any LoaderType
+                appendLoaderBuilder: (context) => AppendLoader(
+                  loaderType: LoaderType
+                      .wave, // Options: bouncingDots, wave, rotatingSquares, pulse, skeleton, traditional
+                  message: 'Loading more users...',
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 24,
+                  padding: const EdgeInsets.all(16),
+                ),
+                onPullToRefresh: () {
+                  // Optional: Add custom refresh logic
+                },
               ),
             ],
           );

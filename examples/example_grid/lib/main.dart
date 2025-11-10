@@ -37,14 +37,14 @@ class _ProductsPageState extends State<ProductsPage> {
   void initState() {
     super.initState();
     final config = BuildConfig.current;
-    
+
     _cubit = PaginatedCubit<Product>(
       loader: _loadProducts,
       itemDecoder: Product.fromJson,
       metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
       options: config.defaultPaginationOptions,
     );
-    
+
     _cubit.loadFirstPage();
   }
 
@@ -66,7 +66,8 @@ class _ProductsPageState extends State<ProductsPage> {
     await Future.delayed(const Duration(seconds: 2));
 
     final currentPage = page ?? 1;
-    final itemsPerPage = perPage ?? 12; // Reduced to ensure scrollable content in grid
+    final itemsPerPage =
+        perPage ?? 12; // Reduced to ensure scrollable content in grid
 
     // Generate mock products
     final products = List.generate(
@@ -106,7 +107,8 @@ class _ProductsPageState extends State<ProductsPage> {
         cubit: _cubit,
         padding: const EdgeInsets.all(8),
         cacheExtent: 250,
-        prefetchThreshold: 1, // More aggressive threshold for grid (load when 100px from end)
+        prefetchThreshold:
+            1, // More aggressive threshold for grid (load when 100px from end)
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 8,
@@ -118,7 +120,8 @@ class _ProductsPageState extends State<ProductsPage> {
         },
         // Custom loading indicator - choose any LoaderType
         appendLoaderBuilder: (context) => AppendLoader(
-          loaderType: LoaderType.pulse, // Options: bouncingDots, wave, rotatingSquares, pulse, skeleton, traditional
+          loaderType: LoaderType
+              .pulse, // Options: bouncingDots, wave, rotatingSquares, pulse, skeleton, traditional
           message: 'Loading more products...',
           color: Theme.of(context).colorScheme.primary,
           size: 28,

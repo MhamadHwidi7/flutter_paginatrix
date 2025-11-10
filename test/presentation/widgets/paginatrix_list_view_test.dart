@@ -102,8 +102,7 @@ void main() {
       expect(find.byType(PaginationSkeletonizer), findsOneWidget);
     });
 
-    testWidgets('should display items after successful load',
-        (tester) async {
+    testWidgets('should display items after successful load', (tester) async {
       await tester.pumpWidget(createTestWidget(cubit: cubit));
       await tester.pump();
 
@@ -119,7 +118,8 @@ void main() {
     });
 
     testWidgets('should display empty view when no items', (tester) async {
-      final emptyCubit = createTestController<Map<String, dynamic>>(mockData: []);
+      final emptyCubit =
+          createTestController<Map<String, dynamic>>(mockData: []);
       await tester.pumpWidget(createTestWidget(cubit: emptyCubit));
       await tester.pump();
 
@@ -133,7 +133,8 @@ void main() {
 
     testWidgets('should display custom empty builder when provided',
         (tester) async {
-      final emptyCubit = createTestController<Map<String, dynamic>>(mockData: []);
+      final emptyCubit =
+          createTestController<Map<String, dynamic>>(mockData: []);
       await tester.pumpWidget(
         createTestWidget(
           cubit: emptyCubit,
@@ -201,26 +202,26 @@ void main() {
 
       // Trigger load next page
       final future = cubit.loadNextPage();
-      
+
       // Wait for appending state
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
-      
+
       // Check if appending state is active (loader might render very quickly)
       final isAppending = cubit.state.status.maybeWhen(
         appending: () => true,
         orElse: () => false,
       );
-      
+
       // Either we're in appending state (and loader should be visible) or already done
       if (isAppending) {
         expect(find.byType(AppendLoader), findsOneWidget);
       }
-      
+
       // Wait for load to complete
       await future;
       await tester.pumpAndSettle();
-      
+
       // Verify items were loaded
       expect(cubit.state.items.length, greaterThan(20));
     });
@@ -239,26 +240,26 @@ void main() {
       await tester.pumpAndSettle();
 
       final future = cubit.loadNextPage();
-      
+
       // Wait for appending state
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
-      
+
       // Check if appending state is active
       final isAppending = cubit.state.status.maybeWhen(
         appending: () => true,
         orElse: () => false,
       );
-      
+
       // Either we're in appending state (and custom loader should be visible) or already done
       if (isAppending) {
         expect(find.text('Loading more...'), findsOneWidget);
       }
-      
+
       // Wait for load to complete
       await future;
       await tester.pumpAndSettle();
-      
+
       // Verify items were loaded
       expect(cubit.state.items.length, greaterThan(20));
     });
@@ -323,7 +324,7 @@ void main() {
       // Verify append error exists in state (custom builder is used when appendErrorBuilder is provided)
       expect(errorCubit.state.items.length, 20); // Items preserved
       expect(errorCubit.state.appendError, isNotNull); // Append error exists
-      
+
       // The custom builder should be rendered, but might not be visible if footer is off-screen
       // We verify the state is correct which means the builder would be called
       errorCubit.close();
@@ -373,7 +374,7 @@ void main() {
     testWidgets('should support horizontal scrolling', (tester) async {
       // Load data first to avoid skeletonizer layout issues
       await cubit.loadFirstPage();
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -401,10 +402,11 @@ void main() {
       // Verify the state is correct - horizontal scrolling can have layout issues in tests
       // but the important thing is that the data is loaded and the widget is set up correctly
       expect(cubit.hasData, isTrue, reason: 'Should have data after loading');
-      expect(cubit.state.items.length, greaterThan(0), reason: 'Should have items');
+      expect(cubit.state.items.length, greaterThan(0),
+          reason: 'Should have items');
       // Check that the scrollable content is present (CustomScrollView for horizontal)
       expect(find.byType(CustomScrollView), findsOneWidget,
-        reason: 'Should have CustomScrollView for horizontal scrolling');
+          reason: 'Should have CustomScrollView for horizontal scrolling');
     });
 
     testWidgets('should support reverse scrolling', (tester) async {
@@ -607,7 +609,8 @@ void main() {
     });
 
     testWidgets('should handle empty state after refresh', (tester) async {
-      final emptyCubit = createTestController<Map<String, dynamic>>(mockData: []);
+      final emptyCubit =
+          createTestController<Map<String, dynamic>>(mockData: []);
       await tester.pumpWidget(createTestWidget(cubit: emptyCubit));
       await tester.pump();
 

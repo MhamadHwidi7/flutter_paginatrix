@@ -60,10 +60,12 @@ class PageSelector extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     final container = Container(
-      padding: padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding:
+          padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: backgroundColor ?? colorScheme.surface,
-        borderRadius: borderRadius ?? const BorderRadius.all(Radius.circular(12)),
+        borderRadius:
+            borderRadius ?? const BorderRadius.all(Radius.circular(12)),
         border: Border.all(
           color: colorScheme.outlineVariant,
         ),
@@ -116,8 +118,7 @@ class PageSelector extends StatelessWidget {
             1,
             isCurrent: false,
           ),
-        if (showFirstLast && currentPage > 3)
-          const SizedBox(width: 4),
+        if (showFirstLast && currentPage > 3) const SizedBox(width: 4),
         ...pages.map((page) {
           if (page == null) {
             return Padding(
@@ -282,15 +283,11 @@ class PageSelector extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Material(
-        color: isCurrent
-            ? colorScheme.primaryContainer
-            : Colors.transparent,
+        color: isCurrent ? colorScheme.primaryContainer : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
-          onTap: isLoading || isCurrent
-              ? null
-              : () => onPageSelected(page),
+          onTap: isLoading || isCurrent ? null : () => onPageSelected(page),
           child: Container(
             padding: const EdgeInsets.symmetric(
               horizontal: 12,
@@ -362,4 +359,3 @@ enum PageSelectorStyle {
   /// Compact style - shows current/total pages with prev/next buttons
   compact,
 }
-

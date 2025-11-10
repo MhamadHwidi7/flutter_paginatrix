@@ -146,14 +146,15 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
       // Emit appending state immediately to show loading footer
       // This provides immediate visual feedback while debouncing the actual API call
       final currentMeta = state.meta;
-      if (currentMeta != null && !state.status.maybeWhen(appending: () => true, orElse: () => false)) {
+      if (currentMeta != null &&
+          !state.status.maybeWhen(appending: () => true, orElse: () => false)) {
         // Create a temporary request context for immediate feedback
         final tempRequestContext = RequestContext.create(
           generation: _generationGuard.currentGeneration,
           cancelToken: CancelToken(),
           isAppend: true,
         );
-        
+
         // Emit appending state immediately - footer will show right away
         emit(PaginationState.appending(
           requestContext: tempRequestContext,
@@ -176,7 +177,7 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
             refreshing: () => true,
             orElse: () => false,
           );
-          
+
           // Only proceed if not already loading (but allow if just appending from immediate emit)
           if (!isCurrentlyLoading) {
             // Call loadNextPage and handle only specific race condition errors
@@ -184,8 +185,9 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
               await loadNextPage();
             } catch (e) {
               // Only catch StateError about emitting after close
-              if (e is StateError && 
-                  e.message.contains('Cannot emit new states after calling close')) {
+              if (e is StateError &&
+                  e.message
+                      .contains('Cannot emit new states after calling close')) {
                 // Silently ignore - cubit was closed during execution
                 return;
               }
@@ -354,7 +356,7 @@ class PaginatedCubit<T> extends Cubit<PaginationState<T>> {
       appending: () => true,
       orElse: () => false,
     );
-    
+
     // Block if already loading (but allow appending state for next page loads)
     if (state.isLoading && !(isAppending && type == PaginatrixLoadType.next)) {
       return false;

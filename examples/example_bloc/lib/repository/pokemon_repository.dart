@@ -14,13 +14,14 @@ import '../models/pokemon.dart';
 class PokemonRepository {
   PokemonRepository({
     Dio? dio,
-  }) : _dio = dio ?? Dio(
-          BaseOptions(
-            baseUrl: 'https://pokeapi.co/api/v2',
-            connectTimeout: const Duration(seconds: 10),
-            receiveTimeout: const Duration(seconds: 10),
-          ),
-        );
+  }) : _dio = dio ??
+            Dio(
+              BaseOptions(
+                baseUrl: 'https://pokeapi.co/api/v2',
+                connectTimeout: const Duration(seconds: 10),
+                receiveTimeout: const Duration(seconds: 10),
+              ),
+            );
 
   final Dio _dio;
 
@@ -197,4 +198,3 @@ class PokemonRepository {
     };
   }
 }
-

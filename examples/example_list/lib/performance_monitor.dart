@@ -28,7 +28,8 @@ class PerformanceMonitor {
 
   /// Get current performance stats
   static PerformanceStats getStats() {
-    final avgFrameTime = _totalFrames > 0 ? _totalFrameTime / _totalFrames : 0.0;
+    final avgFrameTime =
+        _totalFrames > 0 ? _totalFrameTime / _totalFrames : 0.0;
     final jankPercentage =
         _totalFrames > 0 ? (_jankCount / _totalFrames) * 100.0 : 0.0;
 
@@ -49,15 +50,15 @@ class PerformanceMonitor {
 
   static void _onFrameTimings(List<FrameTiming> timings) {
     if (!_isMonitoring) return;
-    
+
     for (final timing in timings) {
       _totalFrames++;
-      
+
       // Calculate total frame time from build and raster durations
       final buildTime = timing.buildDuration.inMicroseconds / 1000.0;
       final rasterTime = timing.rasterDuration.inMicroseconds / 1000.0;
       final totalTime = buildTime + rasterTime;
-      
+
       _totalFrameTime += totalTime;
 
       // Jank is when frame takes more than 16.67ms (60 FPS threshold)
@@ -95,4 +96,3 @@ Performance Stats:
 ''';
   }
 }
-
