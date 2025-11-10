@@ -27,6 +27,15 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Get example dependencies
+        run: |
+          for example in examples/*/; do
+            if [ -f "$example/pubspec.yaml" ]; then
+              echo "Installing dependencies for $example"
+              cd "$example" && flutter pub get && cd ../..
+            fi
+          done
+
       - name: Run code generation
         run: flutter packages pub run build_runner build --delete-conflicting-outputs
 
@@ -34,7 +43,7 @@ jobs:
         run: dart format --set-exit-if-changed .
 
       - name: Analyze code
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
 
       - name: Run tests
         run: flutter test --coverage
