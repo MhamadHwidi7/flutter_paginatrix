@@ -60,14 +60,15 @@ class _AppendLoaderState extends State<AppendLoader>
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
 
-    if (widget.customLoader != null) {
+    final customLoader = widget.customLoader;
+    if (customLoader != null) {
       return Container(
         padding: widget.padding ?? PaginatrixSpacing.defaultPaddingAll,
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              widget.customLoader!,
+              customLoader,
               if (widget.message != null) ...[
                 const SizedBox(height: 12),
                 Text(

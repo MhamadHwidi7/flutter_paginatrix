@@ -143,7 +143,8 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
 
     // Use provided threshold or default from options
     final threshold = prefetchThreshold ?? _options.defaultPrefetchThreshold;
-    final thresholdPixels = threshold * PaginatrixScrollConstants.thresholdPixelMultiplier;
+    final thresholdPixels =
+        threshold * PaginatrixScrollConstants.thresholdPixelMultiplier;
 
     // Calculate remaining scroll distance
     final remainingScroll = metrics.maxScrollExtent - metrics.pixels;
@@ -342,9 +343,9 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     if (isClosed) return;
 
     // Reset retry count if last retry was more than retryResetTimeout ago
-    if (_lastRetryTime != null &&
-        DateTime.now().difference(_lastRetryTime!) >
-            _options.retryResetTimeout) {
+    final lastRetryTime = _lastRetryTime;
+    if (lastRetryTime != null &&
+        DateTime.now().difference(lastRetryTime) > _options.retryResetTimeout) {
       _retryCount = 0;
     }
 
@@ -496,20 +497,34 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
         break;
 
       case PaginatrixLoadType.next:
-        // Safe to use currentMeta here because of validation
+        // currentMeta is guaranteed to be non-null here due to validation in _loadData
+        final meta = currentMeta;
+        if (meta == null) {
+          _debugLog(
+              'Warning: currentMeta is null for next operation, falling back to loading state');
+          emit(PaginationState.loading(requestContext: requestContext));
+          return;
+        }
         emit(PaginationState.appending(
           requestContext: requestContext,
           currentItems: state.items,
-          currentMeta: currentMeta!,
+          currentMeta: meta,
         ));
         break;
 
       case PaginatrixLoadType.refresh:
-        // Safe to use currentMeta here because of validation
+        // currentMeta is guaranteed to be non-null here due to validation in _loadData
+        final meta = currentMeta;
+        if (meta == null) {
+          _debugLog(
+              'Warning: currentMeta is null for refresh operation, falling back to loading state');
+          emit(PaginationState.loading(requestContext: requestContext));
+          return;
+        }
         emit(PaginationState.refreshing(
           requestContext: requestContext,
           currentItems: state.items,
-          currentMeta: currentMeta!,
+          currentMeta: meta,
         ));
         break;
     }

@@ -115,9 +115,7 @@ mixin PaginatrixStateBuilderMixin<T> on StatelessWidget {
     return RefreshIndicator(
       onRefresh: () async {
         cubit.refresh();
-        if (onPullToRefresh != null) {
-          onPullToRefresh!();
-        }
+        onPullToRefresh?.call();
       },
       child: buildScrollableContent(context, state),
     );
@@ -126,8 +124,9 @@ mixin PaginatrixStateBuilderMixin<T> on StatelessWidget {
   /// Builds empty state when no items exist
   @protected
   Widget buildEmptyState(BuildContext context) {
-    if (emptyBuilder != null) {
-      return emptyBuilder!(context);
+    final builder = emptyBuilder;
+    if (builder != null) {
+      return builder(context);
     }
 
     return PaginatrixGenericEmptyView(
@@ -138,12 +137,21 @@ mixin PaginatrixStateBuilderMixin<T> on StatelessWidget {
   /// Builds error state for initial load failure
   @protected
   Widget buildErrorState(BuildContext context, PaginationState<T> state) {
-    if (errorBuilder != null) {
-      return errorBuilder!(context, state.error!);
+    final error = state.error;
+    if (error == null) {
+      // Fallback if error is null (shouldn't happen in error state, but safe guard)
+      return PaginatrixGenericEmptyView(
+        onRefresh: onRetryInitial ?? cubit.loadFirstPage,
+      );
+    }
+
+    final builder = errorBuilder;
+    if (builder != null) {
+      return builder(context, error);
     }
 
     return PaginatrixErrorView(
-      error: state.error!,
+      error: error,
       onRetry: onRetryInitial ?? cubit.loadFirstPage,
     );
   }
@@ -167,17 +175,24 @@ mixin PaginatrixStateBuilderMixin<T> on StatelessWidget {
     required PaginationState<T> state,
   }) {
     if (hasAppendError) {
-      if (appendErrorBuilder != null) {
-        return appendErrorBuilder!(context, state.appendError!);
+      final appendError = state.appendError;
+      if (appendError == null) {
+        return const SizedBox.shrink();
+      }
+
+      final builder = appendErrorBuilder;
+      if (builder != null) {
+        return builder(context, appendError);
       }
 
       return PaginatrixAppendErrorView(
-        error: state.appendError!,
+        error: appendError,
         onRetry: onRetryAppend ?? cubit.loadNextPage,
       );
     } else if (isAppending) {
-      if (appendLoaderBuilder != null) {
-        return appendLoaderBuilder!(context);
+      final builder = appendLoaderBuilder;
+      if (builder != null) {
+        return builder(context);
       }
 
       return const AppendLoader();
@@ -278,5 +293,8 @@ PaginatrixCubit<T> validateAndInitializeCubit<T>({
     scrollDirection == Axis.vertical || scrollDirection == Axis.horizontal,
     'scrollDirection must be either Axis.vertical or Axis.horizontal',
   );
-  return cubit ?? controller!;
+  // At least one must be non-null due to assertion above
+  return cubit ??
+      (controller ??
+          (throw StateError('Either cubit or controller must be provided')));
 }

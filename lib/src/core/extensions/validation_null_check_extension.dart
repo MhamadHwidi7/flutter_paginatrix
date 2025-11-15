@@ -132,22 +132,29 @@ extension ValidationStringExtension on String? {
   /// if (path == null) return false; // Early return after validation
   /// ```
   String? requireNotEmpty(void Function() onEmpty) {
-    if (this == null || this!.isEmpty) {
+    final value = this;
+    if (value == null || value.isEmpty) {
       onEmpty();
       return null;
     }
-    return this;
+    return value;
   }
 
   /// Checks if the string is null or empty
   ///
   /// **Returns:** True if string is null or empty, false otherwise
-  bool get isNullOrEmpty => this == null || this!.isEmpty;
+  bool get isNullOrEmpty {
+    final value = this;
+    return value == null || value.isEmpty;
+  }
 
   /// Checks if the string is not null and not empty
   ///
   /// **Returns:** True if string is not null and not empty, false otherwise
-  bool get isNotNullOrEmpty => this != null && this!.isNotEmpty;
+  bool get isNotNullOrEmpty {
+    final value = this;
+    return value != null && value.isNotEmpty;
+  }
 }
 
 /// Extension methods for nullable integer validation
@@ -175,15 +182,16 @@ extension ValidationIntExtension on int? {
     required void Function() onNull,
     required void Function(int) onInvalid,
   }) {
-    if (this == null) {
+    final value = this;
+    if (value == null) {
       onNull();
       return null;
     }
-    if (this! < 1) {
-      onInvalid(this!);
+    if (value < 1) {
+      onInvalid(value);
       return null;
     }
-    return this;
+    return value;
   }
 }
 
