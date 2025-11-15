@@ -41,10 +41,10 @@ class PaginatrixErrorView extends StatelessWidget {
         children: [
           if (customIcon != null) ...[
             customIcon!,
-            SizedBox(height: PaginatrixSpacing.iconBottom),
+            const SizedBox(height: PaginatrixSpacing.iconBottom),
           ] else ...[
             _buildErrorIcon(colorScheme),
-            SizedBox(height: PaginatrixSpacing.iconBottom),
+            const SizedBox(height: PaginatrixSpacing.iconBottom),
           ],
           Text(
             customTitle ?? _getErrorTitle(),
@@ -54,7 +54,7 @@ class PaginatrixErrorView extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: PaginatrixSpacing.titleBottom),
+          const SizedBox(height: PaginatrixSpacing.titleBottom),
           Text(
             customDescription ?? _getErrorDescription(),
             style: textTheme.bodyMedium?.copyWith(
@@ -62,7 +62,7 @@ class PaginatrixErrorView extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: PaginatrixSpacing.descriptionBottom),
+          const SizedBox(height: PaginatrixSpacing.descriptionBottom),
           _buildActionButtons(context, colorScheme),
         ],
       ),
@@ -178,8 +178,10 @@ class PaginatrixErrorView extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: buttons
-          .expand((button) =>
-              [button, SizedBox(width: PaginatrixSpacing.horizontalStandard)])
+          .expand((button) => [
+                button,
+                const SizedBox(width: PaginatrixSpacing.horizontalStandard)
+              ])
           .take(buttons.length * 2 - 1)
           .toList(),
     );

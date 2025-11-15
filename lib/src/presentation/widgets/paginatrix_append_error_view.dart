@@ -38,7 +38,7 @@ class PaginatrixAppendErrorView extends StatelessWidget {
             color: colorScheme.error,
             size: PaginatrixIconSizes.small,
           ),
-          SizedBox(width: PaginatrixSpacing.horizontalSmall),
+          const SizedBox(width: PaginatrixSpacing.horizontalSmall),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,7 +52,7 @@ class PaginatrixAppendErrorView extends StatelessWidget {
                   ),
                 ),
                 if (error.userMessage.isNotEmpty) ...[
-                  SizedBox(height: PaginatrixSpacing.small),
+                  const SizedBox(height: PaginatrixSpacing.small),
                   Text(
                     error.userMessage,
                     style: textTheme.bodySmall?.copyWith(
@@ -64,7 +64,7 @@ class PaginatrixAppendErrorView extends StatelessWidget {
             ),
           ),
           if (onRetry != null && error.isRetryable) ...[
-            SizedBox(width: PaginatrixSpacing.horizontalSmall),
+            const SizedBox(width: PaginatrixSpacing.horizontalSmall),
             TextButton(
               onPressed: onRetry,
               style: TextButton.styleFrom(
