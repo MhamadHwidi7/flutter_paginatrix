@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_paginatrix/src/core/constants/paginatrix_icon_sizes.dart';
 
 /// Mixin that provides convenient access to theme-related properties
 ///
@@ -35,8 +36,7 @@ mixin ThemeAccessMixin on Widget {
   /// Gets the text theme from the current theme
   ///
   /// Convenience getter that extracts textTheme from theme.
-  TextTheme getTextTheme(BuildContext context) =>
-      Theme.of(context).textTheme;
+  TextTheme getTextTheme(BuildContext context) => Theme.of(context).textTheme;
 }
 
 /// Extension on BuildContext for convenient theme access
@@ -62,5 +62,32 @@ extension ThemeAccessExtension on BuildContext {
 
   /// Gets the text theme from the current theme
   TextTheme get textTheme => Theme.of(this).textTheme;
-}
 
+  /// Builds a standardized empty state icon with consistent styling.
+  ///
+  /// This helper method eliminates code duplication by providing a standardized
+  /// way to create empty state icons with consistent size and color.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// icon: context.buildEmptyStateIcon(Icons.search_off),
+  /// ```
+  ///
+  /// **Parameters:**
+  /// - [icon] - The icon data to display
+  /// - [size] - Optional icon size (defaults to [PaginatrixIconSizes.large])
+  /// - [alpha] - Optional alpha value for color opacity (defaults to 0.4)
+  ///
+  /// **Returns:** An [Icon] widget with standardized empty state styling
+  Widget buildEmptyStateIcon(
+    IconData icon, {
+    double size = PaginatrixIconSizes.large,
+    double alpha = 0.4,
+  }) {
+    return Icon(
+      icon,
+      size: size,
+      color: colorScheme.onSurface.withValues(alpha: alpha),
+    );
+  }
+}
