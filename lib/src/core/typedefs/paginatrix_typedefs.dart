@@ -1,4 +1,4 @@
-import 'package:flutter_paginatrix/src/presentation/controllers/paginated_cubit.dart';
+import 'package:flutter_paginatrix/src/presentation/controllers/paginatrix_cubit.dart';
 
 /// Public API for managing paginated data
 ///
@@ -29,4 +29,3 @@ import 'package:flutter_paginatrix/src/presentation/controllers/paginated_cubit.
 /// **Note:** For advanced usage with `BlocProvider` and `BlocBuilder`, you can
 /// still use `PaginatrixCubit` directly, which this type aliases to.
 typedef PaginatrixController<T> = PaginatrixCubit<T>;
-
