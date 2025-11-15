@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:flutter_paginatrix/src/core/constants/paginatrix_skeleton_constants.dart';
+import 'package:flutter_paginatrix/src/core/constants/paginatrix_spacing.dart';
 
 /// Creates a CustomScrollView wrapped in Skeletonizer with common properties
 /// This helper reduces duplication between PaginatrixSkeletonizer and PaginatrixGridSkeletonizer
@@ -31,7 +33,7 @@ Widget _createSkeletonizedScrollView({
 class PaginatrixSkeletonizer extends StatelessWidget {
   const PaginatrixSkeletonizer({
     super.key,
-    this.itemCount = 10,
+    this.itemCount = PaginatrixSkeletonConstants.defaultItemCount,
     this.itemBuilder,
     this.padding,
     this.physics,
@@ -88,7 +90,7 @@ class _DefaultSkeletonItem extends StatelessWidget {
           Bone.circle(
             size: 48,
           ),
-          SizedBox(width: 16),
+          SizedBox(width: PaginatrixSpacing.horizontalStandard),
           // Content placeholder
           Expanded(
             child: Column(
@@ -98,7 +100,7 @@ class _DefaultSkeletonItem extends StatelessWidget {
                   words: 3,
                   fontSize: 16,
                 ),
-                SizedBox(height: 8),
+                SizedBox(height: PaginatrixSpacing.medium),
                 Bone.text(
                   words: 5,
                   fontSize: 14,
@@ -116,7 +118,7 @@ class _DefaultSkeletonItem extends StatelessWidget {
 class PaginatrixGridSkeletonizer extends StatelessWidget {
   const PaginatrixGridSkeletonizer({
     super.key,
-    this.itemCount = 10,
+    this.itemCount = PaginatrixSkeletonConstants.defaultItemCount,
     this.itemBuilder,
     this.padding,
     this.physics,
@@ -169,7 +171,7 @@ class _DefaultGridSkeletonItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(8),
+      margin: EdgeInsets.all(PaginatrixSpacing.medium),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -180,12 +182,12 @@ class _DefaultGridSkeletonItem extends StatelessWidget {
           Bone.circle(
             size: 60,
           ),
-          SizedBox(height: 12),
+          SizedBox(height: PaginatrixSpacing.horizontalSmall),
           Bone.text(
             words: 2,
             fontSize: 16,
           ),
-          SizedBox(height: 8),
+          SizedBox(height: PaginatrixSpacing.medium),
           Bone.text(
             words: 1,
             fontSize: 14,

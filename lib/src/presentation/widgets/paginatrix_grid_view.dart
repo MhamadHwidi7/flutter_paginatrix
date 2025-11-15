@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
+import 'package:flutter_paginatrix/src/core/constants/paginatrix_skeleton_constants.dart';
 import 'package:flutter_paginatrix/src/core/mixins/paginatrix_state_builder_mixin.dart';
 
 /// GridView adapter for Paginatrix using BlocBuilder
@@ -235,7 +236,7 @@ class PaginatrixGridView<T> extends StatelessWidget
           SliverGrid(
             delegate: createSliverDelegate(
               builder: skeletonizerBuilder!,
-              childCount: 10, // Default skeletonizer count
+              childCount: PaginatrixSkeletonConstants.defaultItemCount,
             ),
             gridDelegate: gridDelegate,
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
+import 'package:flutter_paginatrix/src/core/constants/paginatrix_skeleton_constants.dart';
 import 'package:flutter_paginatrix/src/core/mixins/paginatrix_state_builder_mixin.dart';
 
 /// ListView adapter for Paginatrix using BlocBuilder
@@ -230,7 +231,7 @@ class PaginatrixListView<T> extends StatelessWidget
           SliverList(
             delegate: createSliverDelegate(
               builder: skeletonizerBuilder!,
-              childCount: 10,
+              childCount: PaginatrixSkeletonConstants.defaultItemCount,
             ),
           ),
         ],
