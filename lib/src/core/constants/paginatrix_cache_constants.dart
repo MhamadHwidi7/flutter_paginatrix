@@ -20,6 +20,17 @@ class PaginatrixCacheConstants {
   /// - Preventing unbounded memory growth
   /// - FIFO cache management
   static const int maxMetaCacheSize = 100;
+
+  /// Maximum data structure size for caching (default: 50)
+  ///
+  /// Used for:
+  /// - Determining if a data structure is small enough to cache
+  /// - Preventing memory issues with large data structures
+  /// - Only caching reasonably sized data to avoid memory bloat
+  ///
+  /// **Note:** This is the maximum number of top-level keys/items in a Map/List
+  /// that will be considered for caching. Larger structures are not cached.
+  static const int maxDataSizeForCaching = 50;
 }
 
 
