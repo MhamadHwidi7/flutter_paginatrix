@@ -3,11 +3,36 @@
 [![pub package](https://img.shields.io/pub/v/flutter_paginatrix.svg)](https://pub.dev/packages/flutter_paginatrix)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Flutter](https://img.shields.io/badge/Flutter-3.22+-blue.svg)](https://flutter.dev)
-[![CI/CD](https://github.com/mhamadhwidi/flutter_paginatrix/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/mhamadhwidi/flutter_paginatrix/actions/workflows/ci-cd.yml)
+[![CI/CD](https://github.com/MhamadHwidi7/flutter_paginatrix/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/MhamadHwidi7/flutter_paginatrix/actions/workflows/ci-cd.yml)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/mohammadihwidi)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/mhamad-hwidi-563915237)
 
 **A simple, flexible, and backend-agnostic pagination package for Flutter applications.**
 
 Flutter Paginatrix provides everything you need for pagination with clean architecture, comprehensive error handling, and beautiful UI components built with Slivers for optimal performance.
+
+---
+
+## 📋 Table of Contents
+
+- [Features](#-features)
+- [Installation](#-installation)
+- [Quick Start](#-quick-start)
+- [Core Concepts](#-core-concepts)
+- [Usage Examples](#-usage-examples)
+- [API Reference](#-api-reference)
+- [Configuration](#-configuration)
+- [UI Components](#-ui-components)
+- [Examples](#-examples)
+- [Error Handling](#️-error-handling)
+- [Performance](#-performance)
+- [Testing](#-testing)
+- [CI/CD](#-cicd)
+- [Documentation](#-documentation)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Links](#-links)
+- [Support](#-support)
 
 ---
 
@@ -24,6 +49,12 @@ Flutter Paginatrix provides everything you need for pagination with clean archit
 - ✅ **Stale Response Prevention** - Generation-based guards prevent race conditions
 - ✅ **Zero External Dependencies** - flutter_bloc is bundled, no need to add it to your pubspec.yaml
 - ✅ **171+ Tests** - Comprehensive test coverage
+- ✅ **Multiple Pagination Strategies** - Page-based, offset-based, and cursor-based pagination
+- ✅ **Flexible Meta Parsers** - Pre-configured and custom parsers for any API format
+- ✅ **Web Support** - Page selector widgets optimized for web applications
+- ✅ **Pull-to-Refresh** - Built-in pull-to-refresh functionality
+- ✅ **Skeleton Loading** - Beautiful skeleton loading effects
+- ✅ **Empty States** - Pre-built empty state widgets for various scenarios
 
 ---
 
@@ -42,6 +73,11 @@ Then run:
 ```bash
 flutter pub get
 ```
+
+### Requirements
+
+- **Flutter SDK**: `>=3.22.0`
+- **Dart SDK**: `>=3.2.0 <4.0.0`
 
 ---
 
@@ -262,6 +298,14 @@ Meta parsers transform API responses into the expected format:
 
 - **ConfigMetaParser** - Pre-configured parsers for common API formats
 - **CustomMetaParser** - Flexible parser for custom API response structures
+
+### Pagination Types
+
+Flutter Paginatrix supports three main pagination strategies:
+
+1. **Page-based** - Traditional page/perPage pagination (e.g., `page=1&per_page=20`)
+2. **Offset-based** - Offset/limit pagination (e.g., `offset=0&limit=20`)
+3. **Cursor-based** - Cursor/token pagination (e.g., `cursor=abc123`)
 
 ---
 
@@ -745,6 +789,9 @@ ConfigMetaParser(MetaConfig.pageBased)
 
 // Offset-based: {data: [], offset, limit, ...}
 ConfigMetaParser(MetaConfig.offsetBased)
+
+// Cursor-based: {data: [], meta: {next_cursor, has_more, ...}}
+ConfigMetaParser(MetaConfig.cursorBased)
 ```
 
 #### CustomMetaParser
@@ -830,6 +877,14 @@ PaginatrixEmptyView(
 )
 ```
 
+### Pre-built Empty Views
+
+The package includes several pre-built empty view widgets:
+
+- `PaginatrixGenericEmptyView` - Generic empty state
+- `PaginatrixSearchEmptyView` - Search-specific empty state
+- `PaginatrixNetworkEmptyView` - Network error empty state
+
 ### PaginationSkeletonizer
 
 Skeleton loading effect for initial load:
@@ -847,7 +902,6 @@ PaginationSkeletonizer(
 
 The package includes comprehensive examples:
 
-- **example_basic_controller** - Basic usage with `PaginatrixController` (no flutter_bloc import required)
 - **example_list_view** - `PaginatrixListView` with performance monitoring
 - **example_grid_view** - `PaginatrixGridView` pagination
 - **example_bloc_pattern** - BLoC pattern integration with custom events (Pokemon API)
@@ -858,7 +912,7 @@ The package includes comprehensive examples:
 Run any example:
 
 ```bash
-cd examples/example_basic_controller
+cd examples/example_list_view
 flutter run
 ```
 
@@ -877,6 +931,15 @@ The library provides comprehensive error handling with 6 error types:
 
 All errors are retryable where appropriate and provide user-friendly messages.
 
+### Error Recovery
+
+The package includes automatic retry mechanisms:
+
+- **Exponential Backoff** - Retries with increasing delays
+- **Max Retries** - Configurable maximum retry attempts
+- **Retry Reset** - Automatic reset after successful operations
+- **Manual Retry** - `retry()` method for user-initiated retries
+
 ---
 
 ## ⚡ Performance
@@ -888,6 +951,16 @@ All errors are retryable where appropriate and provide user-friendly messages.
 - **Memory-efficient** - Proper disposal and cleanup
 - **Debounced refresh** - Prevents rapid successive refresh calls
 - **Prefetch threshold** - Configurable distance from end to trigger load
+- **Metadata caching** - Intelligent caching of parsed metadata
+- **Request deduplication** - Prevents duplicate requests
+
+### Performance Tips
+
+1. **Use appropriate page sizes** - Balance between too many requests and too much data
+2. **Enable debug logging in development** - Use `enableDebugLogging: true` to monitor performance
+3. **Configure prefetch threshold** - Adjust `defaultPrefetchThreshold` based on your item sizes
+4. **Use skeleton loaders** - Provide visual feedback during loading
+5. **Implement proper disposal** - Always call `controller.close()` in `dispose()`
 
 ---
 
@@ -914,6 +987,13 @@ Run tests with coverage:
 flutter test --coverage
 ```
 
+View coverage report:
+
+```bash
+genhtml coverage/lcov.info -o coverage/html
+open coverage/html/index.html
+```
+
 ---
 
 ## 🔄 CI/CD
@@ -934,6 +1014,12 @@ The CI/CD pipeline is configured in `.github/workflows/ci-cd.yml`.
 
 All documentation is included in this README. For changelog, see [CHANGELOG.md](CHANGELOG.md).
 
+### Additional Resources
+
+- **API Documentation** - Generated documentation available on pub.dev
+- **Example Apps** - See the `examples/` directory for complete working examples
+- **GitHub Issues** - Report bugs or request features on GitHub
+
 ---
 
 ## 🤝 Contributing
@@ -946,6 +1032,37 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+### Development Setup
+
+1. Clone the repository:
+```bash
+git clone https://github.com/MhamadHwidi7/flutter_paginatrix.git
+cd flutter_paginatrix
+```
+
+2. Install dependencies:
+```bash
+flutter pub get
+```
+
+3. Run tests:
+```bash
+flutter test
+```
+
+4. Run example apps:
+```bash
+cd examples/example_list_view
+flutter run
+```
+
+### Code Style
+
+- Follow the [Effective Dart](https://dart.dev/guides/language/effective-dart) style guide
+- Run `dart format .` before committing
+- Ensure all tests pass
+- Update documentation for new features
+
 ---
 
 ## 📝 License
@@ -957,14 +1074,27 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔗 Links
 
 - **Package**: [pub.dev/packages/flutter_paginatrix](https://pub.dev/packages/flutter_paginatrix)
-- **Repository**: [github.com/mhamadhwidi/flutter_paginatrix](https://github.com/mhamadhwidi/flutter_paginatrix)
-- **Issues**: [github.com/mhamadhwidi/flutter_paginatrix/issues](https://github.com/mhamadhwidi/flutter_paginatrix/issues)
+- **Repository**: [github.com/MhamadHwidi7/flutter_paginatrix](https://github.com/MhamadHwidi7/flutter_paginatrix)
+- **Issues**: [github.com/MhamadHwidi7/flutter_paginatrix/issues](https://github.com/MhamadHwidi7/flutter_paginatrix/issues)
+- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
 
 ---
 
-## ⭐ Show Your Support
+## 💚 Support
 
-If you find this package useful, please consider giving it a ⭐ on GitHub!
+If you find this package useful, please consider:
+
+- ⭐ **Starring the repository** on GitHub
+- 🐛 **Reporting bugs** or suggesting features
+- 💬 **Sharing your feedback** and use cases
+- 📢 **Spreading the word** about Flutter Paginatrix
+
+### Author
+
+**Mohammad Hwidi**
+
+- 💼 [LinkedIn](https://www.linkedin.com/in/mhamad-hwidi-563915237)
+- ☕ [Buy Me a Coffee](https://buymeacoffee.com/mohammadihwidi)
 
 ---
 
