@@ -54,7 +54,6 @@ LoaderFn<T> createMockLoader<T>({
     }
 
     final startIndex = (currentPage - 1) * pageSize;
-    final endIndex = startIndex + pageSize;
     final pageItems = mockData.skip(startIndex).take(pageSize).toList();
     final totalPages = (mockData.length / pageSize).ceil();
 

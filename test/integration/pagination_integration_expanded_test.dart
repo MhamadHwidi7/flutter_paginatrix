@@ -44,7 +44,6 @@ void main() {
             String? cursor,
             CancelToken? cancelToken,
           }) async {
-            final cursorValue = cursor ?? currentCursor;
             final items = mockData.take(20).toList();
             currentCursor = 'cursor_${items.length}';
 

@@ -358,7 +358,6 @@ void main() {
     });
 
     test('refresh while loading: should cancel and restart', () async {
-      var loadCount = 0;
       controller = PaginatrixCubit<Map<String, dynamic>>(
         loader: ({
           int? page,
@@ -368,7 +367,6 @@ void main() {
           String? cursor,
           CancelToken? cancelToken,
         }) async {
-          loadCount++;
           await Future.delayed(const Duration(milliseconds: 200));
           if (cancelToken?.isCancelled ?? false) {
             throw const PaginationError.cancelled(message: 'Cancelled');

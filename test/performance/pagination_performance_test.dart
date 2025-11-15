@@ -58,8 +58,7 @@ void main() {
         expect(stopwatch.elapsedMilliseconds, lessThan(2000),
             reason: 'Loading 5000 items should complete within 2 seconds');
 
-        // Memory usage verification
-        final memoryBefore = controller.state.items.length;
+        // Refresh verification
         await controller.refresh();
         // After refresh, should have first page (refresh replaces all items with first page)
         // Note: The actual behavior depends on refresh implementation
