@@ -9,7 +9,7 @@ import 'pagination_state.dart';
 
 /// BLoC for managing pagination using flutter_paginatrix
 ///
-/// This BLoC wraps the PaginatedCubit and ensures all state changes
+/// This BLoC wraps the PaginatrixCubit and ensures all state changes
 /// flow through the BLoC pattern, maintaining a single source of truth.
 ///
 /// The BLoC listens to controller state changes (including automatic pagination)
@@ -17,14 +17,14 @@ import 'pagination_state.dart';
 /// the current state through BlocBuilder.
 ///
 /// Architecture:
-/// - Follows the same consolidated pattern as PaginatedCubit
+/// - Follows the same consolidated pattern as PaginatrixCubit
 /// - Uses enum-based action dispatching to reduce code duplication
 /// - All event handlers delegate to a single _executeAction method
 ///
 /// Best Practices:
-/// - Uses emit.onEach for automatic stream subscription cleanup
-/// - No manual subscription management needed
-/// - Prevents memory leaks automatically
+/// - Uses StreamSubscription with proper cleanup in close()
+/// - Manual subscription management with cancellation
+/// - Prevents memory leaks by canceling subscription
 /// - DRY principle: single execution path for all actions
 class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
   /// Creates a new PaginationBloc with the given cubit
@@ -32,7 +32,7 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
   /// The cubit is used internally and should not be accessed directly
   /// from outside the BLoC. Use BLoC events and state instead.
   PaginationBloc({
-    required PaginatedCubit<T> cubit,
+    required PaginatrixCubit<T> cubit,
   })  : _cubit = cubit,
         super(PaginationBlocState<T>(
           paginationState: cubit.state,
@@ -59,25 +59,23 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
           emit,
         ));
 
-    // Listen to controller state changes using emit.onEach (BEST PRACTICE)
-    // This is the recommended way by flutter_bloc team:
-    // - Automatic subscription management
-    // - Automatic cleanup when bloc closes
-    // - No manual cancel() needed
-    // - No risk of memory leaks
-    // - Clean and declarative code
-    on<ControllerStateChanged>(
-      _onControllerStateChanged,
-      transformer: (events, mapper) {
-        // Use emit.onEach pattern: listen to external stream and map to events
-        return _cubit.stream
-            .map((state) => ControllerStateChanged(state))
-            .asyncExpand(mapper);
+    // Register handler for controller state changes
+    on<ControllerStateChanged>(_onControllerStateChanged);
+
+    // Listen to controller state changes
+    // This ensures that all controller state changes (including automatic
+    // pagination triggered by scroll) are reflected in the BLoC state.
+    _subscription = _cubit.stream.listen(
+      (state) {
+        // Use add() to trigger an event that will emit the new state
+        // This ensures proper BLoC pattern with event-driven state updates
+        add(ControllerStateChanged(state));
       },
     );
   }
 
-  final PaginatedCubit<T> _cubit;
+  final PaginatrixCubit<T> _cubit;
+  StreamSubscription<PaginationState<T>>? _subscription;
 
   /// Get the underlying controller
   ///
@@ -86,24 +84,24 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
   /// be private, but we need it for the widgets to function properly.
   ///
   /// Prefer using BLoC events and state instead of calling controller methods directly.
-  PaginatedCubit<T> get controller => _cubit;
+  PaginatrixCubit<T> get controller => _cubit;
 
   /// Unified action execution method that handles all pagination actions
   ///
   /// This method consolidates the common logic for executing pagination actions,
-  /// following the same pattern as PaginatedCubit._loadData.
+  /// following the same pattern as PaginatrixCubit.
   /// All event handlers delegate to this method with the appropriate action type.
   ///
   /// Benefits:
   /// - DRY: No code duplication across event handlers
   /// - Maintainability: Single place to modify action execution logic
-  /// - Consistency: Same pattern as PaginatedCubit
+  /// - Consistency: Same pattern as PaginatrixCubit
   Future<void> _executeAction(
     PaginatrixBlocAction action,
     Emitter<PaginationBlocState<T>> emit,
   ) async {
     // Controller will emit state changes through its stream,
-    // which will be handled by _onControllerStateChanged
+    // which will be handled by ControllerStateChanged event
     switch (action) {
       case PaginatrixBlocAction.loadFirst:
         await _cubit.loadFirstPage();
@@ -144,8 +142,9 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
 
   @override
   Future<void> close() {
-    // No need to manually cancel subscription - bloc handles it automatically
-    // Just close the cubit
+    // Cancel the stream subscription to prevent memory leaks
+    _subscription?.cancel();
+    // Close the cubit
     _cubit.close();
     return super.close();
   }
