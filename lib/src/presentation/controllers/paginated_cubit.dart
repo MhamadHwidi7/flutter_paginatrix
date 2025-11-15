@@ -516,13 +516,24 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
   }
 
   /// Fetches data from the loader with timeout
-  Future<Map<String, dynamic>> _fetchData(
-    int page,
-    CancelToken cancelToken,
-  ) {
+  ///
+  /// Supports multiple pagination types:
+  /// - Page-based: uses [page] parameter
+  /// - Cursor-based: uses [cursor] parameter
+  /// - Offset-based: uses [offset] and [limit] parameters
+  Future<Map<String, dynamic>> _fetchData({
+    int? page,
+    String? cursor,
+    int? offset,
+    int? limit,
+    required CancelToken cancelToken,
+  }) {
     return _loader(
       page: page,
       perPage: _options.defaultPageSize,
+      offset: offset,
+      limit: limit,
+      cursor: cursor,
       cancelToken: cancelToken,
     ).timeout(
       _options.requestTimeout,
@@ -549,10 +560,10 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     } on PaginationError {
       rethrow;
     } catch (e) {
-      throw PaginationError.parse(
+      throw ErrorUtils.createParseError(
         message: 'Failed to process response data: ${e.toString()}',
         expectedFormat: 'Expected valid items array and metadata structure',
-        actualData: ErrorUtils.truncateData(data),
+        actualData: data,
       );
     }
   }
@@ -652,13 +663,42 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
 
     // 4. Execution Block
     try {
-      final page = (type == PaginatrixLoadType.next) ? _getNextPageNumber() : 1;
+      // Determine pagination parameters based on metadata type
+      int? page;
+      String? cursor;
+      int? offset;
+      int? limit;
 
-      if (page < 1) {
-        throw ArgumentError('Page number must be positive, got: $page');
+      if (type == PaginatrixLoadType.next && currentMeta != null) {
+        // For next page, determine pagination type from metadata
+        if (currentMeta.page != null) {
+          // Page-based pagination
+          page = _getNextPageNumber();
+        } else if (currentMeta.nextCursor != null) {
+          // Cursor-based pagination
+          cursor = _getNextCursor();
+        } else if (currentMeta.offset != null && currentMeta.limit != null) {
+          // Offset-based pagination
+          offset = (currentMeta.offset ?? 0) + (currentMeta.limit ?? 0);
+          limit = currentMeta.limit;
+        } else {
+          throw StateError(
+            'Cannot determine pagination type from metadata. '
+            'Metadata must contain page, nextCursor, or offset/limit.',
+          );
+        }
+      } else {
+        // For first page or refresh, use default page 1
+        page = 1;
       }
 
-      final data = await _fetchData(page, cancelToken);
+      final data = await _fetchData(
+        page: page,
+        cursor: cursor,
+        offset: offset,
+        limit: limit,
+        cancelToken: cancelToken,
+      );
 
       if (!_generationGuard.isValid(requestContext)) {
         return; // Stale response
@@ -689,16 +729,79 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     }
   }
 
+  /// Gets the next page number from current metadata.
+  ///
+  /// Validates that metadata exists and contains a valid page number
+  /// before calculating the next page. Throws [StateError] if metadata
+  /// is invalid or missing, preventing silent failures.
+  ///
+  /// **Preconditions:**
+  /// - This method should only be called after [_validateMetaForOperation]
+  ///   has confirmed metadata exists for next page loads.
+  /// - [canLoadMore] should be checked before calling this method.
+  /// - Only use for page-based pagination (not cursor-based or offset-based)
+  ///
+  /// **Returns:** The next page number (current page + 1)
+  ///
+  /// **Throws:** [StateError] if metadata is null or page number is invalid
   int _getNextPageNumber() {
     final meta = state.meta;
-    final page = meta?.page;
-    if (page != null && page > 0) {
-      return page + 1;
+    if (meta == null) {
+      throw StateError(
+        'Cannot load next page: no metadata available. '
+        'Load first page before attempting to load next page.',
+      );
     }
-    // Default fallback to page 2 if no valid page found
-    return 2;
+
+    final page = meta.page;
+    if (page == null) {
+      throw StateError(
+        'Cannot load next page: page number is null in metadata. '
+        'This may indicate cursor-based or offset-based pagination. '
+        'Use appropriate method for the pagination type.',
+      );
+    }
+
+    if (page < 1) {
+      throw StateError(
+        'Cannot load next page: invalid page number in metadata. '
+        'Expected positive integer, got: $page',
+      );
+    }
+
+    return page + 1;
   }
 
+  /// Gets the next cursor from current metadata for cursor-based pagination.
+  ///
+  /// Validates that metadata exists and contains a valid next cursor
+  /// before returning it. Throws [StateError] if metadata is invalid or missing.
+  ///
+  /// **Preconditions:**
+  /// - This method should only be called after [_validateMetaForOperation]
+  ///   has confirmed metadata exists for next page loads.
+  /// - [canLoadMore] should be checked before calling this method.
+  /// - Only use for cursor-based pagination
+  ///
+  /// **Returns:** The next cursor string
+  ///
+  /// **Throws:** [StateError] if metadata is null or next cursor is invalid
+  String? _getNextCursor() {
+    final meta = state.meta;
+    if (meta == null) {
+      throw StateError(
+        'Cannot load next page: no metadata available. '
+        'Load first page before attempting to load next page.',
+      );
+    }
+
+    return meta.nextCursor;
+  }
+
+  /// Converts various error types to [PaginationError].
+  ///
+  /// Handles conversion of different error types to appropriate
+  /// [PaginationError] variants for consistent error handling.
   PaginationError _convertToPaginationError(dynamic error) {
     if (error is PaginationError) return error;
     if (error is DioException) {
@@ -706,6 +809,22 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
         message: error.message ?? 'Network error',
         statusCode: error.response?.statusCode,
         originalError: error.toString(),
+      );
+    }
+    if (error is StateError) {
+      // StateError indicates invalid state (e.g., missing metadata)
+      // Treat as parse error since it's related to data structure issues
+      return PaginationError.parse(
+        message: error.message,
+        expectedFormat: 'Valid pagination metadata with page number',
+      );
+    }
+    if (error is ArgumentError) {
+      // ArgumentError indicates invalid arguments (e.g., invalid page number)
+      return PaginationError.parse(
+        message: error.message ?? 'Invalid argument',
+        expectedFormat: 'Valid pagination parameters',
+        actualData: error.invalidValue?.toString(),
       );
     }
     return PaginationError.unknown(
