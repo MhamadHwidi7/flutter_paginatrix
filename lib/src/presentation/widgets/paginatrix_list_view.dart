@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
-import 'package:flutter_paginatrix/src/core/constants/paginatrix_skeleton_constants.dart';
 import 'package:flutter_paginatrix/src/core/mixins/paginatrix_state_builder_mixin.dart';
 
 /// ListView adapter for Paginatrix using BlocBuilder
 ///
-/// This widget uses [PaginatrixCubit] with [BlocBuilder] for reactive UI updates.
+/// This widget uses [PaginatrixCubit] with BlocBuilder for reactive UI updates.
 ///
 /// ## Scroll Direction & Reverse
 ///
@@ -37,7 +36,7 @@ import 'package:flutter_paginatrix/src/core/mixins/paginatrix_state_builder_mixi
 ///
 /// ## Parameters
 ///
-/// - [controller] or [cubit] - The pagination controller (required, one of them)
+/// - `controller` or `cubit` - The pagination controller (required, one of them)
 /// - [itemBuilder] - Function to build each item widget (required)
 /// - [keyBuilder] - Optional function to generate keys for items
 /// - [prefetchThreshold] - Number of items from end to trigger next page load
@@ -225,12 +224,13 @@ class PaginatrixListView<T> extends StatelessWidget
 
   @override
   Widget buildLoadingState(BuildContext context) {
-    if (skeletonizerBuilder != null) {
+    final builder = skeletonizerBuilder;
+    if (builder != null) {
       return createCustomScrollView(
         slivers: [
           SliverList(
             delegate: createSliverDelegate(
-              builder: skeletonizerBuilder!,
+              builder: builder,
               childCount: PaginatrixSkeletonConstants.defaultItemCount,
             ),
           ),
@@ -271,10 +271,15 @@ class PaginatrixListView<T> extends StatelessWidget
               builder: (context, index) {
                 if (hasSeparator && index > 0) {
                   // Return separator before item (except first item)
+                  final separator = separatorBuilder;
+                  if (separator == null) {
+                    return buildItem(
+                        context, items[index], index, itemBuilder, keyBuilder);
+                  }
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      separatorBuilder!(context, index - 1),
+                      separator(context, index - 1),
                       buildItem(context, items[index], index, itemBuilder,
                           keyBuilder),
                     ],

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
-import 'package:flutter_paginatrix/src/core/constants/paginatrix_skeleton_constants.dart';
 import 'package:flutter_paginatrix/src/core/mixins/paginatrix_state_builder_mixin.dart';
 
 /// GridView adapter for Paginatrix using BlocBuilder
 ///
-/// This widget uses [PaginatrixCubit] with [BlocBuilder] for reactive UI updates.
+/// This widget uses [PaginatrixCubit] with BlocBuilder for reactive UI updates.
 ///
 /// ## Scroll Direction & Reverse
 ///
@@ -42,7 +41,7 @@ import 'package:flutter_paginatrix/src/core/mixins/paginatrix_state_builder_mixi
 ///
 /// ## Parameters
 ///
-/// - [controller] or [cubit] - The pagination controller (required, one of them)
+/// - `controller` or `cubit` - The pagination controller (required, one of them)
 /// - [itemBuilder] - Function to build each item widget (required)
 /// - [gridDelegate] - Grid layout configuration (required)
 /// - [keyBuilder] - Optional function to generate keys for items
@@ -230,12 +229,13 @@ class PaginatrixGridView<T> extends StatelessWidget
 
   @override
   Widget buildLoadingState(BuildContext context) {
-    if (skeletonizerBuilder != null) {
+    final builder = skeletonizerBuilder;
+    if (builder != null) {
       return createCustomScrollView(
         slivers: [
           SliverGrid(
             delegate: createSliverDelegate(
-              builder: skeletonizerBuilder!,
+              builder: builder,
               childCount: PaginatrixSkeletonConstants.defaultItemCount,
             ),
             gridDelegate: gridDelegate,

@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
-import 'package:flutter_paginatrix/src/core/extensions/validation_null_check_extension.dart';
 
 /// Cubit for managing pagination validation logic and UI state
 ///
@@ -155,14 +154,14 @@ class PaginatrixValidatorCubit extends Cubit<PaginatrixValidationState> {
     }
 
     // Check bounds if metadata is provided
-    if (meta != null && meta.lastPage != null && page > meta.lastPage!) {
+    final lastPage = meta?.lastPage;
+    if (meta != null && lastPage != null && page > lastPage) {
       _emitInvalid(
         [
-          PaginatrixValidationErrorMessages.pageOutOfBounds(
-              page, meta.lastPage!),
+          PaginatrixValidationErrorMessages.pageOutOfBounds(page, lastPage),
         ],
         PaginatrixValidationErrorCodes.pageOutOfBounds,
-        {'page': page, 'lastPage': meta.lastPage},
+        {'page': page, 'lastPage': lastPage},
       );
       return false;
     }
@@ -212,14 +211,14 @@ class PaginatrixValidatorCubit extends Cubit<PaginatrixValidationState> {
     final nextPage = currentPage + 1;
 
     // Check bounds
-    if (validatedMeta.lastPage != null && nextPage > validatedMeta.lastPage!) {
+    final lastPage = validatedMeta.lastPage;
+    if (lastPage != null && nextPage > lastPage) {
       _emitInvalid(
         [
-          PaginatrixValidationErrorMessages.noMorePages(
-              nextPage, validatedMeta.lastPage!),
+          PaginatrixValidationErrorMessages.noMorePages(nextPage, lastPage),
         ],
         PaginatrixValidationErrorCodes.noMorePages,
-        {'nextPage': nextPage, 'lastPage': validatedMeta.lastPage},
+        {'nextPage': nextPage, 'lastPage': lastPage},
       );
       return null;
     }
@@ -308,14 +307,14 @@ class PaginatrixValidatorCubit extends Cubit<PaginatrixValidationState> {
     final nextOffset = currentOffset + limit;
 
     // Check bounds if total is provided
-    if (validatedMeta.total != null && nextOffset >= validatedMeta.total!) {
+    final total = validatedMeta.total;
+    if (total != null && nextOffset >= total) {
       _emitInvalid(
         [
-          PaginatrixValidationErrorMessages.noMoreItems(
-              nextOffset, validatedMeta.total!),
+          PaginatrixValidationErrorMessages.noMoreItems(nextOffset, total),
         ],
         PaginatrixValidationErrorCodes.noMoreItems,
-        {'nextOffset': nextOffset, 'total': validatedMeta.total},
+        {'nextOffset': nextOffset, 'total': total},
       );
       return null;
     }
