@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_paginatrix/src/core/constants/paginatrix_icon_sizes.dart';
+import 'package:flutter_paginatrix/src/core/constants/paginatrix_spacing.dart';
 import 'package:flutter_paginatrix/src/core/entities/pagination_error.dart';
 import 'package:flutter_paginatrix/src/core/mixins/theme_access_mixin.dart';
 
@@ -32,17 +34,17 @@ class PaginatrixErrorView extends StatelessWidget {
     final textTheme = context.textTheme;
 
     return Padding(
-      padding: padding ?? const EdgeInsets.all(32),
+      padding: padding ?? PaginatrixSpacing.largePaddingAll,
       child: Column(
         mainAxisAlignment: mainAxisAlignment,
         crossAxisAlignment: crossAxisAlignment,
         children: [
           if (customIcon != null) ...[
             customIcon!,
-            const SizedBox(height: 24),
+            SizedBox(height: PaginatrixSpacing.iconBottom),
           ] else ...[
             _buildErrorIcon(colorScheme),
-            const SizedBox(height: 24),
+            SizedBox(height: PaginatrixSpacing.iconBottom),
           ],
           Text(
             customTitle ?? _getErrorTitle(),
@@ -52,7 +54,7 @@ class PaginatrixErrorView extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: PaginatrixSpacing.titleBottom),
           Text(
             customDescription ?? _getErrorDescription(),
             style: textTheme.bodyMedium?.copyWith(
@@ -60,7 +62,7 @@ class PaginatrixErrorView extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: PaginatrixSpacing.descriptionBottom),
           _buildActionButtons(context, colorScheme),
         ],
       ),
@@ -71,32 +73,32 @@ class PaginatrixErrorView extends StatelessWidget {
     return error.when(
       network: (_, __, ___) => Icon(
         Icons.wifi_off,
-        size: 64,
+        size: PaginatrixIconSizes.large,
         color: colorScheme.error,
       ),
       parse: (_, __, ___) => Icon(
         Icons.error_outline,
-        size: 64,
+        size: PaginatrixIconSizes.large,
         color: colorScheme.error,
       ),
       cancelled: (_) => Icon(
         Icons.cancel_outlined,
-        size: 64,
+        size: PaginatrixIconSizes.large,
         color: colorScheme.onSurface.withValues(alpha: 0.4),
       ),
       rateLimited: (_, __) => Icon(
         Icons.speed_outlined,
-        size: 64,
+        size: PaginatrixIconSizes.large,
         color: colorScheme.error,
       ),
       circuitBreaker: (_, __) => Icon(
         Icons.power_off,
-        size: 64,
+        size: PaginatrixIconSizes.large,
         color: colorScheme.error,
       ),
       unknown: (_, __) => Icon(
         Icons.help_outline,
-        size: 64,
+        size: PaginatrixIconSizes.large,
         color: colorScheme.error,
       ),
     );
@@ -176,10 +178,10 @@ class PaginatrixErrorView extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: buttons
-          .expand((button) => [button, const SizedBox(width: 16)])
+          .expand((button) =>
+              [button, SizedBox(width: PaginatrixSpacing.horizontalStandard)])
           .take(buttons.length * 2 - 1)
           .toList(),
     );
   }
 }
-

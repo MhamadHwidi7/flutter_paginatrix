@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_paginatrix/src/core/constants/paginatrix_icon_sizes.dart';
+import 'package:flutter_paginatrix/src/core/constants/paginatrix_spacing.dart';
 import 'package:flutter_paginatrix/src/core/entities/pagination_error.dart';
 import 'package:flutter_paginatrix/src/core/mixins/theme_access_mixin.dart';
 
@@ -20,8 +22,8 @@ class PaginatrixAppendErrorView extends StatelessWidget {
     final textTheme = context.textTheme;
 
     return Container(
-      padding: padding ?? const EdgeInsets.all(16),
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: padding ?? PaginatrixSpacing.defaultPaddingAll,
+      margin: PaginatrixSpacing.standardSymmetric,
       decoration: BoxDecoration(
         color: colorScheme.errorContainer.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
@@ -34,9 +36,9 @@ class PaginatrixAppendErrorView extends StatelessWidget {
           Icon(
             Icons.error_outline,
             color: colorScheme.error,
-            size: 20,
+            size: PaginatrixIconSizes.small,
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: PaginatrixSpacing.horizontalSmall),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,7 +52,7 @@ class PaginatrixAppendErrorView extends StatelessWidget {
                   ),
                 ),
                 if (error.userMessage.isNotEmpty) ...[
-                  const SizedBox(height: 4),
+                  SizedBox(height: PaginatrixSpacing.small),
                   Text(
                     error.userMessage,
                     style: textTheme.bodySmall?.copyWith(
@@ -62,12 +64,11 @@ class PaginatrixAppendErrorView extends StatelessWidget {
             ),
           ),
           if (onRetry != null && error.isRetryable) ...[
-            const SizedBox(width: 12),
+            SizedBox(width: PaginatrixSpacing.horizontalSmall),
             TextButton(
               onPressed: onRetry,
               style: TextButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: PaginatrixSpacing.standardSymmetric,
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
