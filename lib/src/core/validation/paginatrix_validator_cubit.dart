@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
+import 'package:flutter_paginatrix/src/core/extensions/validation_null_check_extension.dart';
 
 /// Cubit for managing pagination validation logic and UI state
 ///
@@ -39,6 +40,43 @@ class PaginatrixValidatorCubit extends Cubit<PaginatrixValidationState> {
   /// Creates a new PaginatrixValidatorCubit
   PaginatrixValidatorCubit() : super(const PaginatrixValidationState.initial());
 
+  // Helper methods to reduce code duplication in validation methods
+
+  /// Emits validating state
+  void _emitValidating() {
+    emit(const PaginatrixValidationState.validating());
+  }
+
+  /// Emits valid state with optional parameters
+  void _emitValid({
+    PageMeta? meta,
+    int? pageNumber,
+    String? cursor,
+    int? offset,
+    int? limit,
+  }) {
+    emit(PaginatrixValidationState.valid(
+      meta: meta,
+      pageNumber: pageNumber,
+      cursor: cursor,
+      offset: offset,
+      limit: limit,
+    ));
+  }
+
+  /// Emits invalid state with errors and error code
+  void _emitInvalid(
+    List<String> errors,
+    String errorCode, [
+    Map<String, dynamic>? context,
+  ]) {
+    emit(PaginatrixValidationState.invalid(
+      errors: errors,
+      errorCode: errorCode,
+      context: context ?? {},
+    ));
+  }
+
   /// Validates metadata for a specific operation
   ///
   /// Checks if metadata exists and is valid for the requested operation.
@@ -52,29 +90,29 @@ class PaginatrixValidatorCubit extends Cubit<PaginatrixValidationState> {
     PageMeta? meta,
     required PaginatrixLoadType operation,
   }) {
-    emit(const PaginatrixValidationState.validating());
+    _emitValidating();
 
     // First page doesn't require existing metadata
     if (operation == PaginatrixLoadType.first) {
-      emit(const PaginatrixValidationState.valid());
+      _emitValid();
       return true;
     }
 
     // Next and refresh require existing metadata
-    if (meta == null) {
+    final validatedMeta = meta.requireNotNull(() {
       final errorMessage = operation == PaginatrixLoadType.next
           ? PaginatrixValidationErrorMessages.cannotAppendWithoutMeta
           : PaginatrixValidationErrorMessages.cannotRefreshWithoutMeta;
 
-      emit(PaginatrixValidationState.invalid(
-        errors: [errorMessage],
-        errorCode: PaginatrixValidationErrorCodes.missingMeta,
-        context: {'operation': operation.toString()},
-      ));
-      return false;
-    }
+      _emitInvalid(
+        [errorMessage],
+        PaginatrixValidationErrorCodes.missingMeta,
+        {'operation': operation.toString()},
+      );
+    });
+    if (validatedMeta == null) return false;
 
-    emit(PaginatrixValidationState.valid(meta: meta));
+    _emitValid(meta: validatedMeta);
     return true;
   }
 
@@ -93,43 +131,43 @@ class PaginatrixValidatorCubit extends Cubit<PaginatrixValidationState> {
     PageMeta? meta,
     bool allowNull = false,
   }) {
-    emit(const PaginatrixValidationState.validating());
+    _emitValidating();
 
     if (page == null) {
       if (allowNull) {
-        emit(const PaginatrixValidationState.valid());
+        _emitValid();
         return true;
       }
-      emit(const PaginatrixValidationState.invalid(
-        errors: [PaginatrixValidationErrorMessages.nullPage],
-        errorCode: PaginatrixValidationErrorCodes.nullPage,
-      ));
+      _emitInvalid(
+        [PaginatrixValidationErrorMessages.nullPage],
+        PaginatrixValidationErrorCodes.nullPage,
+      );
       return false;
     }
 
     if (page < 1) {
-      emit(PaginatrixValidationState.invalid(
-        errors: [PaginatrixValidationErrorMessages.invalidPage(page)],
-        errorCode: PaginatrixValidationErrorCodes.invalidPage,
-        context: {'page': page},
-      ));
+      _emitInvalid(
+        [PaginatrixValidationErrorMessages.invalidPage(page)],
+        PaginatrixValidationErrorCodes.invalidPage,
+        {'page': page},
+      );
       return false;
     }
 
     // Check bounds if metadata is provided
     if (meta != null && meta.lastPage != null && page > meta.lastPage!) {
-      emit(PaginatrixValidationState.invalid(
-        errors: [
+      _emitInvalid(
+        [
           PaginatrixValidationErrorMessages.pageOutOfBounds(
               page, meta.lastPage!),
         ],
-        errorCode: PaginatrixValidationErrorCodes.pageOutOfBounds,
-        context: {'page': page, 'lastPage': meta.lastPage},
-      ));
+        PaginatrixValidationErrorCodes.pageOutOfBounds,
+        {'page': page, 'lastPage': meta.lastPage},
+      );
       return false;
     }
 
-    emit(PaginatrixValidationState.valid(pageNumber: page));
+    _emitValid(pageNumber: page);
     return true;
   }
 
@@ -142,55 +180,54 @@ class PaginatrixValidatorCubit extends Cubit<PaginatrixValidationState> {
   ///
   /// **Returns:** The validated next page number, or null if invalid
   int? validateNextPageNumber(PageMeta? meta) {
-    emit(const PaginatrixValidationState.validating());
+    _emitValidating();
 
-    if (meta == null) {
-      emit(const PaginatrixValidationState.invalid(
-        errors: [PaginatrixValidationErrorMessages.missingMeta],
-        errorCode: PaginatrixValidationErrorCodes.missingMeta,
-      ));
-      return null;
-    }
+    final validatedMeta = meta.requireNotNull(() {
+      _emitInvalid(
+        [PaginatrixValidationErrorMessages.missingMeta],
+        PaginatrixValidationErrorCodes.missingMeta,
+      );
+    });
+    if (validatedMeta == null) return null;
 
-    final currentPage = meta.page;
-    if (currentPage == null) {
-      emit(const PaginatrixValidationState.invalid(
-        errors: [PaginatrixValidationErrorMessages.nullPageInMeta],
-        errorCode: PaginatrixValidationErrorCodes.nullPageInMeta,
-      ));
-      return null;
-    }
+    final currentPage = validatedMeta.page.requireNotNull(() {
+      _emitInvalid(
+        [PaginatrixValidationErrorMessages.nullPageInMeta],
+        PaginatrixValidationErrorCodes.nullPageInMeta,
+      );
+    });
+    if (currentPage == null) return null;
 
     if (currentPage < 1) {
-      emit(PaginatrixValidationState.invalid(
-        errors: [
+      _emitInvalid(
+        [
           PaginatrixValidationErrorMessages.invalidPageInMeta(currentPage),
         ],
-        errorCode: PaginatrixValidationErrorCodes.invalidPageInMeta,
-        context: {'currentPage': currentPage},
-      ));
+        PaginatrixValidationErrorCodes.invalidPageInMeta,
+        {'currentPage': currentPage},
+      );
       return null;
     }
 
     final nextPage = currentPage + 1;
 
     // Check bounds
-    if (meta.lastPage != null && nextPage > meta.lastPage!) {
-      emit(PaginatrixValidationState.invalid(
-        errors: [
+    if (validatedMeta.lastPage != null && nextPage > validatedMeta.lastPage!) {
+      _emitInvalid(
+        [
           PaginatrixValidationErrorMessages.noMorePages(
-              nextPage, meta.lastPage!),
+              nextPage, validatedMeta.lastPage!),
         ],
-        errorCode: PaginatrixValidationErrorCodes.noMorePages,
-        context: {'nextPage': nextPage, 'lastPage': meta.lastPage},
-      ));
+        PaginatrixValidationErrorCodes.noMorePages,
+        {'nextPage': nextPage, 'lastPage': validatedMeta.lastPage},
+      );
       return null;
     }
 
-    emit(PaginatrixValidationState.valid(
-      meta: meta,
+    _emitValid(
+      meta: validatedMeta,
       pageNumber: nextPage,
-    ));
+    );
     return nextPage;
   }
 
@@ -201,29 +238,28 @@ class PaginatrixValidatorCubit extends Cubit<PaginatrixValidationState> {
   ///
   /// **Returns:** The validated next cursor, or null if invalid
   String? validateNextCursor(PageMeta? meta) {
-    emit(const PaginatrixValidationState.validating());
+    _emitValidating();
 
-    if (meta == null) {
-      emit(const PaginatrixValidationState.invalid(
-        errors: [PaginatrixValidationErrorMessages.missingMeta],
-        errorCode: PaginatrixValidationErrorCodes.missingMeta,
-      ));
-      return null;
-    }
+    final validatedMeta = meta.requireNotNull(() {
+      _emitInvalid(
+        [PaginatrixValidationErrorMessages.missingMeta],
+        PaginatrixValidationErrorCodes.missingMeta,
+      );
+    });
+    if (validatedMeta == null) return null;
 
-    final nextCursor = meta.nextCursor;
-    if (nextCursor == null || nextCursor.isEmpty) {
-      emit(const PaginatrixValidationState.invalid(
-        errors: [PaginatrixValidationErrorMessages.noNextCursor],
-        errorCode: PaginatrixValidationErrorCodes.noNextCursor,
-      ));
-      return null;
-    }
+    final nextCursor = validatedMeta.nextCursor.requireNotEmpty(() {
+      _emitInvalid(
+        [PaginatrixValidationErrorMessages.noNextCursor],
+        PaginatrixValidationErrorCodes.noNextCursor,
+      );
+    });
+    if (nextCursor == null) return null;
 
-    emit(PaginatrixValidationState.valid(
-      meta: meta,
+    _emitValid(
+      meta: validatedMeta,
       cursor: nextCursor,
-    ));
+    );
     return nextCursor;
   }
 
@@ -234,61 +270,61 @@ class PaginatrixValidatorCubit extends Cubit<PaginatrixValidationState> {
   ///
   /// **Returns:** A tuple of (offset, limit) if valid, null otherwise
   ({int offset, int limit})? validateNextOffset(PageMeta? meta) {
-    emit(const PaginatrixValidationState.validating());
+    _emitValidating();
 
-    if (meta == null) {
-      emit(const PaginatrixValidationState.invalid(
-        errors: [PaginatrixValidationErrorMessages.missingMeta],
-        errorCode: PaginatrixValidationErrorCodes.missingMeta,
-      ));
-      return null;
-    }
+    final validatedMeta = meta.requireNotNull(() {
+      _emitInvalid(
+        [PaginatrixValidationErrorMessages.missingMeta],
+        PaginatrixValidationErrorCodes.missingMeta,
+      );
+    });
+    if (validatedMeta == null) return null;
 
-    final currentOffset = meta.offset;
-    final limit = meta.limit;
+    final currentOffset = validatedMeta.offset;
+    final limit = validatedMeta.limit;
 
     if (currentOffset == null || limit == null) {
-      emit(const PaginatrixValidationState.invalid(
-        errors: [PaginatrixValidationErrorMessages.nullOffsetOrLimit],
-        errorCode: PaginatrixValidationErrorCodes.nullOffsetOrLimit,
-      ));
+      _emitInvalid(
+        [PaginatrixValidationErrorMessages.nullOffsetOrLimit],
+        PaginatrixValidationErrorCodes.nullOffsetOrLimit,
+      );
       return null;
     }
 
     if (currentOffset < 0 || limit < 1) {
-      emit(PaginatrixValidationState.invalid(
-        errors: [
+      _emitInvalid(
+        [
           PaginatrixValidationErrorMessages.invalidOffsetOrLimit(
             currentOffset,
             limit,
           ),
         ],
-        errorCode: PaginatrixValidationErrorCodes.invalidOffsetOrLimit,
-        context: {'offset': currentOffset, 'limit': limit},
-      ));
+        PaginatrixValidationErrorCodes.invalidOffsetOrLimit,
+        {'offset': currentOffset, 'limit': limit},
+      );
       return null;
     }
 
     final nextOffset = currentOffset + limit;
 
     // Check bounds if total is provided
-    if (meta.total != null && nextOffset >= meta.total!) {
-      emit(PaginatrixValidationState.invalid(
-        errors: [
+    if (validatedMeta.total != null && nextOffset >= validatedMeta.total!) {
+      _emitInvalid(
+        [
           PaginatrixValidationErrorMessages.noMoreItems(
-              nextOffset, meta.total!),
+              nextOffset, validatedMeta.total!),
         ],
-        errorCode: PaginatrixValidationErrorCodes.noMoreItems,
-        context: {'nextOffset': nextOffset, 'total': meta.total},
-      ));
+        PaginatrixValidationErrorCodes.noMoreItems,
+        {'nextOffset': nextOffset, 'total': validatedMeta.total},
+      );
       return null;
     }
 
-    emit(PaginatrixValidationState.valid(
-      meta: meta,
+    _emitValid(
+      meta: validatedMeta,
       offset: nextOffset,
       limit: limit,
-    ));
+    );
     return (offset: nextOffset, limit: limit);
   }
 
@@ -301,45 +337,45 @@ class PaginatrixValidatorCubit extends Cubit<PaginatrixValidationState> {
   ///
   /// **Returns:** True if valid, false otherwise
   bool validatePath(String? path) {
-    emit(const PaginatrixValidationState.validating());
+    _emitValidating();
 
-    if (path == null || path.isEmpty) {
-      emit(const PaginatrixValidationState.invalid(
-        errors: [PaginatrixValidationErrorMessages.emptyPath],
-        errorCode: PaginatrixValidationErrorCodes.emptyPath,
-      ));
-      return false;
-    }
+    final validatedPath = path.requireNotEmpty(() {
+      _emitInvalid(
+        [PaginatrixValidationErrorMessages.emptyPath],
+        PaginatrixValidationErrorCodes.emptyPath,
+      );
+    });
+    if (validatedPath == null) return false;
 
     // Check for empty segments (e.g., "a..b" or ".a" or "a.")
-    final segments = path.split('.');
+    final segments = validatedPath.split('.');
     if (segments.any((segment) => segment.isEmpty)) {
-      emit(PaginatrixValidationState.invalid(
-        errors: [
-          PaginatrixValidationErrorMessages.invalidPathSegments(path),
+      _emitInvalid(
+        [
+          PaginatrixValidationErrorMessages.invalidPathSegments(validatedPath),
         ],
-        errorCode: PaginatrixValidationErrorCodes.invalidPathSegments,
-        context: {'path': path},
-      ));
+        PaginatrixValidationErrorCodes.invalidPathSegments,
+        {'path': validatedPath},
+      );
       return false;
     }
 
     // Check for valid characters (alphanumeric, underscore, hyphen)
     for (final segment in segments) {
       if (!RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(segment)) {
-        emit(PaginatrixValidationState.invalid(
-          errors: [
+        _emitInvalid(
+          [
             PaginatrixValidationErrorMessages.invalidPathCharacters(
-                segment, path),
+                segment, validatedPath),
           ],
-          errorCode: PaginatrixValidationErrorCodes.invalidPathCharacters,
-          context: {'path': path, 'segment': segment},
-        ));
+          PaginatrixValidationErrorCodes.invalidPathCharacters,
+          {'path': validatedPath, 'segment': segment},
+        );
         return false;
       }
     }
 
-    emit(const PaginatrixValidationState.valid());
+    _emitValid();
     return true;
   }
 
@@ -350,42 +386,45 @@ class PaginatrixValidatorCubit extends Cubit<PaginatrixValidationState> {
   ///
   /// **Returns:** The determined pagination type, or null if cannot be determined
   PaginatrixType? validatePaginationType(PageMeta? meta) {
-    emit(const PaginatrixValidationState.validating());
+    _emitValidating();
 
-    if (meta == null) {
-      emit(const PaginatrixValidationState.invalid(
-        errors: [PaginatrixValidationErrorMessages.nullMeta],
-        errorCode: PaginatrixValidationErrorCodes.nullMeta,
-      ));
-      return null;
-    }
+    final validatedMeta = meta.requireNotNull(() {
+      _emitInvalid(
+        [PaginatrixValidationErrorMessages.nullMeta],
+        PaginatrixValidationErrorCodes.nullMeta,
+      );
+    });
+    if (validatedMeta == null) return null;
 
-    if (meta.page != null) {
-      emit(PaginatrixValidationState.valid(meta: meta));
+    if (validatedMeta.page != null) {
+      _emitValid(meta: validatedMeta);
       return PaginatrixType.pageBased;
     }
 
-    if (meta.nextCursor != null || meta.previousCursor != null) {
-      emit(PaginatrixValidationState.valid(meta: meta));
+    if (validatedMeta.nextCursor != null ||
+        validatedMeta.previousCursor != null) {
+      _emitValid(meta: validatedMeta);
       return PaginatrixType.cursorBased;
     }
 
-    if (meta.offset != null && meta.limit != null) {
-      emit(PaginatrixValidationState.valid(meta: meta));
+    if (validatedMeta.offset != null && validatedMeta.limit != null) {
+      _emitValid(meta: validatedMeta);
       return PaginatrixType.offsetBased;
     }
 
-    emit(PaginatrixValidationState.invalid(
-      errors: const [
+    _emitInvalid(
+      const [
         PaginatrixValidationErrorMessages.unknownPaginationType,
       ],
-      errorCode: PaginatrixValidationErrorCodes.unknownPaginationType,
-      context: {
-        'hasPage': meta.page != null,
-        'hasCursor': (meta.nextCursor != null || meta.previousCursor != null),
-        'hasOffset': (meta.offset != null && meta.limit != null),
+      PaginatrixValidationErrorCodes.unknownPaginationType,
+      {
+        'hasPage': validatedMeta.page != null,
+        'hasCursor': (validatedMeta.nextCursor != null ||
+            validatedMeta.previousCursor != null),
+        'hasOffset':
+            (validatedMeta.offset != null && validatedMeta.limit != null),
       },
-    ));
+    );
     return null;
   }
 
