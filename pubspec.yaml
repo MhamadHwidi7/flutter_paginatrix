@@ -24,7 +24,7 @@ dependencies:
   json_annotation: ^4.9.0
   
   # State management
-  flutter_bloc: ^8.1.6
+  flutter_bloc: ^9.1.1
   
   # Skeleton loading effect
   skeletonizer: ^2.1.0
