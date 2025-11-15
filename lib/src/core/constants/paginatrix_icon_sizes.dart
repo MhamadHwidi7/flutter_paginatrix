@@ -32,3 +32,4 @@ class PaginatrixIconSizes {
   static const double small = 20;
 }
 
+

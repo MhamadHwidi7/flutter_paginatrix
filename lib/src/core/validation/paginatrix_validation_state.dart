@@ -45,3 +45,4 @@ class PaginatrixValidationState with _$PaginatrixValidationState {
     Map<String, dynamic>? context,
   }) = _Invalid;
 }
+
