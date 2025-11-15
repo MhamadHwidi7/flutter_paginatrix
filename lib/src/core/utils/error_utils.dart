@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_paginatrix/src/core/entities/pagination_error.dart';
 
 /// Utility class for safe error logging / formatting
 class ErrorUtils {
@@ -234,5 +235,37 @@ class ErrorUtils {
 
     // Safety fallback: if we've exceeded max iterations, return ellipsis
     return ellipsis;
+  }
+
+  /// Creates a parse error with consistent formatting and data truncation.
+  ///
+  /// This helper method eliminates code duplication by providing a standardized
+  /// way to create parse errors with truncated actual data.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// throw ErrorUtils.createParseError(
+  ///   message: 'Failed to parse pagination metadata: $e',
+  ///   expectedFormat: 'Expected paths: ${_config.toString()}',
+  ///   actualData: data,
+  /// );
+  /// ```
+  ///
+  /// **Parameters:**
+  /// - [message] - Error message describing what went wrong
+  /// - [expectedFormat] - Description of the expected data format
+  /// - [actualData] - The actual data that failed to parse (will be truncated)
+  ///
+  /// **Returns:** A [PaginationError.parse] with properly formatted and truncated data
+  static PaginationError createParseError({
+    required String message,
+    required String expectedFormat,
+    required dynamic actualData,
+  }) {
+    return PaginationError.parse(
+      message: message,
+      expectedFormat: expectedFormat,
+      actualData: truncateData(actualData),
+    );
   }
 }
