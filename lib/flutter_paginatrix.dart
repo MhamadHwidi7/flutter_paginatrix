@@ -45,13 +45,17 @@ export 'src/core/utils/error_utils.dart';
 export 'src/core/utils/generation_guard.dart';
 // Core helpers
 export 'src/core/helpers/paginatrix_helpers.dart';
+// Core validation
+export 'src/core/validation/paginatrix_validation_state.dart';
+export 'src/core/validation/paginatrix_validation_error_messages.dart';
+export 'src/core/validation/paginatrix_validation_error_codes.dart';
 // Data layer - Meta parsers
 export 'src/data/meta_parser/config_meta_parser.dart';
 export 'src/data/meta_parser/custom_meta_parser.dart';
 // Dependency injection
 export 'src/di/paginatrix_dependency_injection.dart';
 // Presentation layer - Controllers
-export 'src/presentation/controllers/paginated_cubit.dart';
+export 'src/presentation/controllers/paginatrix_cubit.dart';
 // Paginatrix typedefs (must be exported after controllers)
 export 'src/core/typedefs/paginatrix_typedefs.dart';
 // Presentation layer - UI widgets
