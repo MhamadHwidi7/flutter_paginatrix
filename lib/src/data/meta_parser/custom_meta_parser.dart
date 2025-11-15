@@ -2,6 +2,7 @@ import 'package:flutter_paginatrix/src/core/contracts/meta_parser.dart';
 import 'package:flutter_paginatrix/src/core/entities/page_meta.dart';
 import 'package:flutter_paginatrix/src/core/entities/pagination_error.dart';
 import 'package:flutter_paginatrix/src/core/typedefs/typedefs.dart';
+import 'package:flutter_paginatrix/src/core/utils/error_utils.dart';
 
 /// Meta parser that uses custom transform functions
 class CustomMetaParser implements MetaParser {
@@ -21,29 +22,29 @@ class CustomMetaParser implements MetaParser {
       final transformed = _transform(data);
 
       if (!transformed.containsKey(_metaKey)) {
-        throw PaginationError.parse(
+        throw ErrorUtils.createParseError(
           message: 'Transform result missing meta key "$_metaKey"',
           expectedFormat: 'Expected keys: $_metaKey',
-          actualData: transformed.toString(),
+          actualData: transformed,
         );
       }
 
       final metaData = transformed[_metaKey] as Map<String, dynamic>?;
       if (metaData == null) {
-        throw PaginationError.parse(
+        throw ErrorUtils.createParseError(
           message: 'Meta data is null',
           expectedFormat: 'Expected non-null meta data',
-          actualData: transformed.toString(),
+          actualData: transformed,
         );
       }
 
       return PageMeta.fromJson(metaData);
     } catch (e) {
       if (e is PaginationError) rethrow;
-      throw PaginationError.parse(
+      throw ErrorUtils.createParseError(
         message: 'Failed to parse meta from transform result: $e',
         expectedFormat: 'Expected valid PageMeta data',
-        actualData: data.toString(),
+        actualData: data,
       );
     }
   }
@@ -54,10 +55,10 @@ class CustomMetaParser implements MetaParser {
       final transformed = _transform(data);
 
       if (!transformed.containsKey(_itemsKey)) {
-        throw PaginationError.parse(
+        throw ErrorUtils.createParseError(
           message: 'Transform result missing items key "$_itemsKey"',
           expectedFormat: 'Expected keys: $_itemsKey',
-          actualData: transformed.toString(),
+          actualData: transformed,
         );
       }
 
@@ -65,18 +66,18 @@ class CustomMetaParser implements MetaParser {
       if (items is List) {
         return items.cast<Map<String, dynamic>>();
       } else {
-        throw PaginationError.parse(
+        throw ErrorUtils.createParseError(
           message: 'Items key "$_itemsKey" does not contain a list',
           expectedFormat: 'Expected a list of items',
-          actualData: items.toString(),
+          actualData: items,
         );
       }
     } catch (e) {
       if (e is PaginationError) rethrow;
-      throw PaginationError.parse(
+      throw ErrorUtils.createParseError(
         message: 'Failed to extract items from transform result: $e',
         expectedFormat: 'Expected items list',
-        actualData: data.toString(),
+        actualData: data,
       );
     }
   }

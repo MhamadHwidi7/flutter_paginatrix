@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:flutter_paginatrix/src/core/constants/paginatrix_cache_constants.dart';
 import 'package:flutter_paginatrix/src/core/contracts/meta_parser.dart';
 import 'package:flutter_paginatrix/src/core/entities/page_meta.dart';
 import 'package:flutter_paginatrix/src/core/entities/pagination_error.dart';
@@ -104,10 +105,8 @@ class ConfigMetaParser implements MetaParser {
 
   // Cache for parsed metadata to avoid re-parsing same data structures
   // Uses a simple hash of the data structure as key
+  // Maintains insertion order for FIFO eviction
   final Map<int, PageMeta> _metaCache = {};
-
-  // Maximum cache size to prevent memory issues
-  static const int _maxCacheSize = 100;
 
   @override
   PageMeta parseMeta(Map<String, dynamic> data) {
@@ -187,18 +186,36 @@ class ConfigMetaParser implements MetaParser {
         );
       }
 
-      // Cache the parsed metadata if cache is not too large
-      if (_metaCache.length < _maxCacheSize && data.length < 50) {
+      // Cache the parsed metadata if data structure is reasonably small
+      if (data.length < 50) {
+        _evictCacheIfNeeded();
         _metaCache[dataHash] = result;
       }
 
       return result;
     } catch (e) {
-      throw PaginationError.parse(
+      throw ErrorUtils.createParseError(
         message: 'Failed to parse pagination metadata: $e',
         expectedFormat: 'Expected paths: ${_config.toString()}',
-        actualData: ErrorUtils.truncateData(data),
+        actualData: data,
       );
+    }
+  }
+
+  /// Evicts the oldest cache entry if cache is at maximum size.
+  ///
+  /// Implements FIFO (First In First Out) eviction strategy to prevent
+  /// unbounded memory growth. When the cache reaches the maximum size,
+  /// the oldest entry (first inserted) is removed before adding a new one.
+  ///
+  /// This ensures the cache never exceeds [PaginatrixCacheConstants.maxMetaCacheSize] entries while
+  /// maintaining reasonable performance for frequently accessed data.
+  void _evictCacheIfNeeded() {
+    if (_metaCache.length >= PaginatrixCacheConstants.maxMetaCacheSize) {
+      // Remove the oldest entry (first key in insertion order)
+      // Dart's Map maintains insertion order, so we can safely remove the first key
+      final firstKey = _metaCache.keys.first;
+      _metaCache.remove(firstKey);
     }
   }
 
@@ -238,25 +255,25 @@ class ConfigMetaParser implements MetaParser {
         if (items.every((item) => item is Map<String, dynamic>)) {
           return items.cast<Map<String, dynamic>>();
         } else {
-          throw PaginationError.parse(
+          throw ErrorUtils.createParseError(
             message: 'Items path "${_config.itemsPath}" contains non-map items',
             expectedFormat: 'Expected a list of map objects',
-            actualData: ErrorUtils.truncateData(items),
+            actualData: items,
           );
         }
       } else {
-        throw PaginationError.parse(
+        throw ErrorUtils.createParseError(
           message: 'Items path "${_config.itemsPath}" does not contain a list',
           expectedFormat: 'Expected a list of items',
-          actualData: items.toString(),
+          actualData: items,
         );
       }
     } catch (e) {
       if (e is PaginationError) rethrow;
-      throw PaginationError.parse(
+      throw ErrorUtils.createParseError(
         message: 'Failed to extract items: $e',
         expectedFormat: 'Expected items at path: ${_config.itemsPath}',
-        actualData: ErrorUtils.truncateData(data),
+        actualData: data,
       );
     }
   }
