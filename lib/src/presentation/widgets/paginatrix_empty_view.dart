@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_paginatrix/src/core/constants/paginatrix_icon_sizes.dart';
+import 'package:flutter_paginatrix/src/core/constants/paginatrix_spacing.dart';
 import 'package:flutter_paginatrix/src/core/mixins/theme_access_mixin.dart';
 
 /// Empty state view for when no data is available
@@ -29,21 +31,21 @@ class PaginatrixEmptyView extends StatelessWidget {
     final textTheme = context.textTheme;
 
     return Padding(
-      padding: padding ?? const EdgeInsets.all(32),
+      padding: padding ?? PaginatrixSpacing.largePaddingAll,
       child: Column(
         mainAxisAlignment: mainAxisAlignment,
         crossAxisAlignment: crossAxisAlignment,
         children: [
           if (icon != null) ...[
             icon!,
-            const SizedBox(height: 24),
+            SizedBox(height: PaginatrixSpacing.iconBottom),
           ] else ...[
             Icon(
               Icons.inbox_outlined,
-              size: 64,
+              size: PaginatrixIconSizes.large,
               color: colorScheme.onSurface.withValues(alpha: 0.4),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: PaginatrixSpacing.iconBottom),
           ],
           if (title != null) ...[
             Text(
@@ -54,7 +56,7 @@ class PaginatrixEmptyView extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: PaginatrixSpacing.titleBottom),
           ],
           if (description != null) ...[
             Text(
@@ -64,7 +66,7 @@ class PaginatrixEmptyView extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: PaginatrixSpacing.descriptionBottom),
           ],
           if (action != null) ...[
             Builder(

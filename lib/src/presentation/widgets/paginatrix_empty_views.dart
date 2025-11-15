@@ -15,13 +15,7 @@ class PaginatrixSearchEmptyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PaginatrixEmptyView(
-      icon: Builder(
-        builder: (context) => Icon(
-          Icons.search_off,
-          size: 64,
-          color: context.colorScheme.onSurface.withValues(alpha: 0.4),
-        ),
-      ),
+      icon: context.buildEmptyStateIcon(Icons.search_off),
       title: 'No results found',
       description: query != null
           ? 'No results found for "$query"'
@@ -48,13 +42,7 @@ class PaginatrixNetworkEmptyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PaginatrixEmptyView(
-      icon: Builder(
-        builder: (context) => Icon(
-          Icons.wifi_off,
-          size: 64,
-          color: context.colorScheme.onSurface.withValues(alpha: 0.4),
-        ),
-      ),
+      icon: context.buildEmptyStateIcon(Icons.wifi_off),
       title: 'No connection',
       description: 'Check your internet connection and try again',
       action: onRetry != null
@@ -81,13 +69,7 @@ class PaginatrixGenericEmptyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PaginatrixEmptyView(
-      icon: Builder(
-        builder: (context) => Icon(
-          Icons.inbox_outlined,
-          size: 64,
-          color: context.colorScheme.onSurface.withValues(alpha: 0.4),
-        ),
-      ),
+      icon: context.buildEmptyStateIcon(Icons.inbox_outlined),
       title: 'No data available',
       description: message ?? 'There\'s nothing to show here yet',
       action: onRefresh != null
