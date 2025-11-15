@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../models/pokemon.dart';
+import '../utils/string_extensions.dart';
 
 /// Reusable Pokemon card widget
 ///
@@ -168,7 +169,7 @@ class _PokemonInfo extends StatelessWidget {
         children: [
           // Pokemon Name
           Text(
-            _capitalizeFirst(name),
+            name.capitalizeFirst(),
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -184,11 +185,6 @@ class _PokemonInfo extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _capitalizeFirst(String text) {
-    if (text.isEmpty) return text;
-    return text[0].toUpperCase() + text.substring(1);
   }
 }
 
@@ -223,7 +219,7 @@ class _PokemonTypes extends StatelessWidget {
             ),
           ),
           child: Text(
-            _capitalizeFirst(type),
+            type.capitalizeFirst(),
             style: theme.textTheme.labelSmall?.copyWith(
               color: typeColor,
               fontWeight: FontWeight.w500,
@@ -232,11 +228,6 @@ class _PokemonTypes extends StatelessWidget {
         );
       }).toList(),
     );
-  }
-
-  String _capitalizeFirst(String text) {
-    if (text.isEmpty) return text;
-    return text[0].toUpperCase() + text.substring(1);
   }
 
   Color _getTypeColor(String type) {

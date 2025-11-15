@@ -3,6 +3,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
 
+import 'utils/string_extensions.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -240,7 +242,7 @@ class _PokemonCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _capitalizeFirst(pokemon.name),
+                  pokemon.name.capitalizeFirst(),
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -253,11 +255,6 @@ class _PokemonCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _capitalizeFirst(String text) {
-    if (text.isEmpty) return text;
-    return text[0].toUpperCase() + text.substring(1);
   }
 }
 
