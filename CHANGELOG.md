@@ -93,5 +93,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[1.0.0]: https://github.com/mhamadhwidi/flutter_paginatrix/releases/tag/v1.0.0
+[1.0.0]: https://github.com/MhamadHwidi7/flutter_paginatrix/releases/tag/v1.0.0
 
