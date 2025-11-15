@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_paginatrix/src/core/constants/paginatrix_icon_sizes.dart';
+import 'package:flutter_paginatrix/src/core/constants/paginatrix_spacing.dart';
 import 'package:flutter_paginatrix/src/core/enums/paginatrix_loader_type.dart';
 import 'package:flutter_paginatrix/src/presentation/widgets/modern_loaders.dart';
 import 'package:flutter_paginatrix/src/core/mixins/theme_access_mixin.dart';
@@ -60,7 +62,7 @@ class _AppendLoaderState extends State<AppendLoader>
 
     if (widget.customLoader != null) {
       return Container(
-        padding: widget.padding ?? const EdgeInsets.all(16),
+        padding: widget.padding ?? PaginatrixSpacing.defaultPaddingAll,
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -120,7 +122,7 @@ class _AppendLoaderState extends State<AppendLoader>
         );
       case LoaderType.traditional:
         return Container(
-          padding: widget.padding ?? const EdgeInsets.all(16),
+          padding: widget.padding ?? PaginatrixSpacing.defaultPaddingAll,
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -176,11 +178,11 @@ class MinimalAppendLoader extends StatelessWidget {
     final colorScheme = context.colorScheme;
 
     return Container(
-      padding: padding ?? const EdgeInsets.all(16),
+      padding: padding ?? PaginatrixSpacing.defaultPaddingAll,
       child: Center(
         child: SizedBox(
-          width: size ?? 20,
-          height: size ?? 20,
+          width: size ?? PaginatrixIconSizes.small,
+          height: size ?? PaginatrixIconSizes.small,
           child: CircularProgressIndicator(
             strokeWidth: 2,
             color: color ?? colorScheme.primary,

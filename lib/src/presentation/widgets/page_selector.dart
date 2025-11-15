@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_paginatrix/src/core/constants/paginatrix_icon_sizes.dart';
+import 'package:flutter_paginatrix/src/core/constants/paginatrix_spacing.dart';
 import 'package:flutter_paginatrix/src/core/mixins/theme_access_mixin.dart';
 
 /// A container widget for page selection with multiple display styles
@@ -243,7 +245,7 @@ class PageSelector extends StatelessWidget {
         if (showPreviousNext)
           IconButton(
             icon: const Icon(Icons.chevron_left),
-            iconSize: 20,
+            iconSize: PaginatrixIconSizes.small,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
             onPressed: isLoading || currentPage == 1
@@ -251,18 +253,18 @@ class PageSelector extends StatelessWidget {
                 : () => onPageSelected(currentPage - 1),
             tooltip: 'Previous',
           ),
-        const SizedBox(width: 12),
+        SizedBox(width: PaginatrixSpacing.horizontalSmall),
         Text(
           '$currentPage / $totalPages',
           style: theme.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: PaginatrixSpacing.horizontalSmall),
         if (showPreviousNext)
           IconButton(
             icon: const Icon(Icons.chevron_right),
-            iconSize: 20,
+            iconSize: PaginatrixIconSizes.small,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
             onPressed: isLoading || currentPage == totalPages

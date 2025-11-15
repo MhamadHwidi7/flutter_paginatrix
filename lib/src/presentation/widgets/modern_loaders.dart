@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_paginatrix/src/core/constants/paginatrix_spacing.dart';
 import 'package:flutter_paginatrix/src/presentation/widgets/pagination_skeletonizer.dart';
 import 'package:flutter_paginatrix/src/core/mixins/theme_access_mixin.dart';
 
@@ -65,7 +66,7 @@ class _BouncingDotsLoaderState extends State<BouncingDotsLoader>
     final color = widget.color ?? colorScheme.primary;
 
     return Container(
-      padding: widget.padding ?? const EdgeInsets.all(16),
+      padding: widget.padding ?? PaginatrixSpacing.defaultPaddingAll,
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -95,7 +96,7 @@ class _BouncingDotsLoaderState extends State<BouncingDotsLoader>
               }),
             ),
             if (widget.message != null) ...[
-              const SizedBox(height: 16),
+              SizedBox(height: PaginatrixSpacing.standard),
               Text(
                 widget.message!,
                 style: textTheme.bodySmall?.copyWith(
@@ -174,7 +175,7 @@ class _WaveLoaderState extends State<WaveLoader> with TickerProviderStateMixin {
     final color = widget.color ?? colorScheme.primary;
 
     return Container(
-      padding: widget.padding ?? const EdgeInsets.all(16),
+      padding: widget.padding ?? PaginatrixSpacing.defaultPaddingAll,
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -203,7 +204,7 @@ class _WaveLoaderState extends State<WaveLoader> with TickerProviderStateMixin {
               ),
             ),
             if (widget.message != null) ...[
-              const SizedBox(height: 16),
+              SizedBox(height: PaginatrixSpacing.standard),
               Text(
                 widget.message!,
                 style: textTheme.bodySmall?.copyWith(
@@ -278,7 +279,7 @@ class _RotatingSquaresLoaderState extends State<RotatingSquaresLoader>
     final color = widget.color ?? colorScheme.primary;
 
     return Container(
-      padding: widget.padding ?? const EdgeInsets.all(16),
+      padding: widget.padding ?? PaginatrixSpacing.defaultPaddingAll,
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -320,7 +321,7 @@ class _RotatingSquaresLoaderState extends State<RotatingSquaresLoader>
               },
             ),
             if (widget.message != null) ...[
-              const SizedBox(height: 16),
+              SizedBox(height: PaginatrixSpacing.standard),
               Text(
                 widget.message!,
                 style: textTheme.bodySmall?.copyWith(
@@ -404,7 +405,7 @@ class _PulseLoaderState extends State<PulseLoader>
     final color = widget.color ?? colorScheme.primary;
 
     return Container(
-      padding: widget.padding ?? const EdgeInsets.all(16),
+      padding: widget.padding ?? PaginatrixSpacing.defaultPaddingAll,
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -453,7 +454,7 @@ class _PulseLoaderState extends State<PulseLoader>
               },
             ),
             if (widget.message != null) ...[
-              const SizedBox(height: 16),
+              SizedBox(height: PaginatrixSpacing.standard),
               Text(
                 widget.message!,
                 style: textTheme.bodySmall?.copyWith(
@@ -494,7 +495,7 @@ class SkeletonLoader extends StatelessWidget {
     final textTheme = context.textTheme;
 
     return Container(
-      padding: padding ?? const EdgeInsets.all(16),
+      padding: padding ?? PaginatrixSpacing.defaultPaddingAll,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
