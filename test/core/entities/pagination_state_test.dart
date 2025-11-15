@@ -68,7 +68,7 @@ void main() {
 
     test('error state should have error and preserve items', () {
       final previousItems = [1, 2, 3];
-      final error = const PaginationError.network(message: 'Network error');
+      const error = PaginationError.network(message: 'Network error');
       final requestContext = RequestContext.create(
         generation: 1,
         cancelToken: CancelToken(),
@@ -150,7 +150,7 @@ void main() {
         'per_page': 20,
         'total': 100,
       });
-      final appendError = const PaginationError.network(
+      const appendError = PaginationError.network(
         message: 'Failed to load next page',
       );
       final requestContext = RequestContext.create(
@@ -215,7 +215,7 @@ void main() {
       test('canLoadMore should return true when hasMore is true', () {
         final state = PaginationState.success(
           items: [1, 2, 3],
-          meta: PageMeta(hasMore: true),
+          meta: const PageMeta(hasMore: true),
           requestContext: RequestContext.create(
             generation: 1,
             cancelToken: CancelToken(),
@@ -228,7 +228,7 @@ void main() {
       test('canLoadMore should return false when hasMore is false', () {
         final state = PaginationState.success(
           items: [1, 2, 3],
-          meta: PageMeta(hasMore: false),
+          meta: const PageMeta(hasMore: false),
           requestContext: RequestContext.create(
             generation: 1,
             cancelToken: CancelToken(),
