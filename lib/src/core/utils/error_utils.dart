@@ -263,9 +263,224 @@ class ErrorUtils {
     required dynamic actualData,
   }) {
     return PaginationError.parse(
-      message: message,
+      message: formatErrorMessage(
+        message: message,
+        context: 'Parse Error',
+        details: {'Expected format': expectedFormat},
+      ),
       expectedFormat: expectedFormat,
       actualData: truncateData(actualData),
+    );
+  }
+
+  /// Formats error messages with consistent structure.
+  ///
+  /// Creates standardized error messages following the format:
+  /// "Context: Message (Details)"
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// final message = ErrorUtils.formatErrorMessage(
+  ///   message: 'Connection failed',
+  ///   context: 'Network Error',
+  ///   details: {'Status Code': '404'},
+  /// );
+  /// // Result: "Network Error: Connection failed (Status Code: 404)"
+  /// ```
+  ///
+  /// **Parameters:**
+  /// - [message] - The main error message
+  /// - [context] - Optional context/error type (e.g., "Network Error", "Parse Error")
+  /// - [details] - Optional map of additional details to include
+  ///
+  /// **Returns:** A formatted error message string
+  static String formatErrorMessage({
+    required String message,
+    String? context,
+    Map<String, String?>? details,
+  }) {
+    final buffer = StringBuffer();
+
+    // Add context prefix if provided
+    if (context != null && context.isNotEmpty) {
+      buffer.write('$context: ');
+    }
+
+    // Add main message
+    buffer.write(message);
+
+    // Add details if provided
+    if (details != null && details.isNotEmpty) {
+      final detailParts = <String>[];
+      details.forEach((key, value) {
+        if (value != null && value.isNotEmpty) {
+          detailParts.add('$key: $value');
+        }
+      });
+
+      if (detailParts.isNotEmpty) {
+        buffer.write(' (${detailParts.join(', ')})');
+      }
+    }
+
+    return buffer.toString();
+  }
+
+  /// Creates a network error with standardized message formatting.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// throw ErrorUtils.createNetworkError(
+  ///   message: 'Connection failed',
+  ///   statusCode: 404,
+  ///   originalError: dioException.toString(),
+  /// );
+  /// ```
+  ///
+  /// **Parameters:**
+  /// - [message] - The main error message
+  /// - [statusCode] - Optional HTTP status code
+  /// - [originalError] - Optional original error string
+  ///
+  /// **Returns:** A [PaginationError.network] with standardized message format
+  static PaginationError createNetworkError({
+    required String message,
+    int? statusCode,
+    String? originalError,
+  }) {
+    final details = <String, String?>{};
+    if (statusCode != null) {
+      details['Status Code'] = statusCode.toString();
+    }
+
+    return PaginationError.network(
+      message: formatErrorMessage(
+        message: message,
+        context: 'Network Error',
+        details: details.isNotEmpty ? details : null,
+      ),
+      statusCode: statusCode,
+      originalError: originalError,
+    );
+  }
+
+  /// Creates an unknown error with standardized message formatting.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// throw ErrorUtils.createUnknownError(
+  ///   message: 'Unexpected error occurred',
+  ///   originalError: exception.toString(),
+  /// );
+  /// ```
+  ///
+  /// **Parameters:**
+  /// - [message] - The main error message
+  /// - [originalError] - Optional original error string
+  ///
+  /// **Returns:** A [PaginationError.unknown] with standardized message format
+  static PaginationError createUnknownError({
+    required String message,
+    String? originalError,
+  }) {
+    return PaginationError.unknown(
+      message: formatErrorMessage(
+        message: message,
+        context: 'Unknown Error',
+      ),
+      originalError: originalError,
+    );
+  }
+
+  /// Creates a cancelled error with standardized message formatting.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// throw ErrorUtils.createCancelledError(
+  ///   message: 'Request was cancelled',
+  /// );
+  /// ```
+  ///
+  /// **Parameters:**
+  /// - [message] - The main error message
+  ///
+  /// **Returns:** A [PaginationError.cancelled] with standardized message format
+  static PaginationError createCancelledError({
+    required String message,
+  }) {
+    return PaginationError.cancelled(
+      message: formatErrorMessage(
+        message: message,
+        context: 'Cancelled',
+      ),
+    );
+  }
+
+  /// Creates a rate limited error with standardized message formatting.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// throw ErrorUtils.createRateLimitedError(
+  ///   message: 'Too many requests',
+  ///   retryAfter: Duration(seconds: 60),
+  /// );
+  /// ```
+  ///
+  /// **Parameters:**
+  /// - [message] - The main error message
+  /// - [retryAfter] - Optional duration to wait before retrying
+  ///
+  /// **Returns:** A [PaginationError.rateLimited] with standardized message format
+  static PaginationError createRateLimitedError({
+    required String message,
+    Duration? retryAfter,
+  }) {
+    final details = <String, String?>{};
+    if (retryAfter != null) {
+      details['Retry After'] = '${retryAfter.inSeconds}s';
+    }
+
+    return PaginationError.rateLimited(
+      message: formatErrorMessage(
+        message: message,
+        context: 'Rate Limited',
+        details: details.isNotEmpty ? details : null,
+      ),
+      retryAfter: retryAfter,
+    );
+  }
+
+  /// Creates a circuit breaker error with standardized message formatting.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// throw ErrorUtils.createCircuitBreakerError(
+  ///   message: 'Service unavailable',
+  ///   retryAfter: Duration(seconds: 30),
+  /// );
+  /// ```
+  ///
+  /// **Parameters:**
+  /// - [message] - The main error message
+  /// - [retryAfter] - Optional duration to wait before retrying
+  ///
+  /// **Returns:** A [PaginationError.circuitBreaker] with standardized message format
+  static PaginationError createCircuitBreakerError({
+    required String message,
+    Duration? retryAfter,
+  }) {
+    final details = <String, String?>{};
+    if (retryAfter != null) {
+      details['Retry After'] = '${retryAfter.inSeconds}s';
+    }
+
+    return PaginationError.circuitBreaker(
+      message: formatErrorMessage(
+        message: message,
+        context: 'Circuit Breaker',
+        details: details.isNotEmpty ? details : null,
+      ),
+      retryAfter: retryAfter,
     );
   }
 }
