@@ -114,7 +114,8 @@ class ConfigMetaParser implements MetaParser {
       // Try to get from cache first (simple hash-based caching)
       // Only cache if data structure is reasonably small to avoid memory issues
       final dataHash = _computeSimpleHash(data);
-      if (_metaCache.containsKey(dataHash) && data.length < 50) {
+      if (_metaCache.containsKey(dataHash) &&
+          data.length < PaginatrixCacheConstants.maxDataSizeForCaching) {
         return _metaCache[dataHash]!;
       }
 
@@ -187,7 +188,7 @@ class ConfigMetaParser implements MetaParser {
       }
 
       // Cache the parsed metadata if data structure is reasonably small
-      if (data.length < 50) {
+      if (data.length < PaginatrixCacheConstants.maxDataSizeForCaching) {
         _evictCacheIfNeeded();
         _metaCache[dataHash] = result;
       }

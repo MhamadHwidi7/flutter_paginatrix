@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_paginatrix/src/core/constants/paginatrix_error_constants.dart';
 import 'package:flutter_paginatrix/src/core/entities/pagination_error.dart';
 
 /// Utility class for safe error logging / formatting
@@ -24,11 +25,11 @@ class ErrorUtils {
   /// - Truncates by chars or bytes, with middle or end truncation.
   static String truncateData(
     dynamic data, {
-    int maxChars = 200,
+    int maxChars = PaginatrixErrorConstants.defaultMaxChars,
     int? maxBytes, // If set, enforces a UTF-8 byte ceiling
     bool middle = true, // Keep head+tail instead of tail-only
-    int headChars = 140, // Used for middle truncation
-    int tailChars = 40, // Used for middle truncation
+    int headChars = PaginatrixErrorConstants.defaultHeadChars, // Used for middle truncation
+    int tailChars = PaginatrixErrorConstants.defaultTailChars, // Used for middle truncation
     bool prettyJson = true,
     bool redactSecrets = true,
     String ellipsis = '…',

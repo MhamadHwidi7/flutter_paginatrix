@@ -143,7 +143,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
 
     // Use provided threshold or default from options
     final threshold = prefetchThreshold ?? _options.defaultPrefetchThreshold;
-    final thresholdPixels = threshold * 100.0;
+    final thresholdPixels = threshold * PaginatrixScrollConstants.thresholdPixelMultiplier;
 
     // Calculate remaining scroll distance
     final remainingScroll = metrics.maxScrollExtent - metrics.pixels;
