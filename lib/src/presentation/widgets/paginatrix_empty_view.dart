@@ -38,14 +38,14 @@ class PaginatrixEmptyView extends StatelessWidget {
         children: [
           if (icon != null) ...[
             icon!,
-            SizedBox(height: PaginatrixSpacing.iconBottom),
+            const SizedBox(height: PaginatrixSpacing.iconBottom),
           ] else ...[
             Icon(
               Icons.inbox_outlined,
               size: PaginatrixIconSizes.large,
               color: colorScheme.onSurface.withValues(alpha: 0.4),
             ),
-            SizedBox(height: PaginatrixSpacing.iconBottom),
+            const SizedBox(height: PaginatrixSpacing.iconBottom),
           ],
           if (title != null) ...[
             Text(
@@ -56,7 +56,7 @@ class PaginatrixEmptyView extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: PaginatrixSpacing.titleBottom),
+            const SizedBox(height: PaginatrixSpacing.titleBottom),
           ],
           if (description != null) ...[
             Text(
@@ -66,19 +66,22 @@ class PaginatrixEmptyView extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: PaginatrixSpacing.descriptionBottom),
+            const SizedBox(height: PaginatrixSpacing.descriptionBottom),
           ],
           if (action != null) ...[
             Builder(
               builder: (context) {
-                final widget = action!;
+                final actionWidget = action;
+                if (actionWidget == null) {
+                  return const SizedBox.shrink();
+                }
                 if (onActionTap != null) {
                   return GestureDetector(
                     onTap: onActionTap,
-                    child: widget,
+                    child: actionWidget,
                   );
                 }
-                return widget;
+                return actionWidget;
               },
             ),
           ],

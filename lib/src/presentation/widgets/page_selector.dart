@@ -253,14 +253,14 @@ class PageSelector extends StatelessWidget {
                 : () => onPageSelected(currentPage - 1),
             tooltip: 'Previous',
           ),
-        SizedBox(width: PaginatrixSpacing.horizontalSmall),
+        const SizedBox(width: PaginatrixSpacing.horizontalSmall),
         Text(
           '$currentPage / $totalPages',
           style: theme.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w500,
           ),
         ),
-        SizedBox(width: PaginatrixSpacing.horizontalSmall),
+        const SizedBox(width: PaginatrixSpacing.horizontalSmall),
         if (showPreviousNext)
           IconButton(
             icon: const Icon(Icons.chevron_right),

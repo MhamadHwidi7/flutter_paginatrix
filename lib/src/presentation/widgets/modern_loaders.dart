@@ -96,7 +96,7 @@ class _BouncingDotsLoaderState extends State<BouncingDotsLoader>
               }),
             ),
             if (widget.message != null) ...[
-              SizedBox(height: PaginatrixSpacing.standard),
+              const SizedBox(height: PaginatrixSpacing.standard),
               Text(
                 widget.message!,
                 style: textTheme.bodySmall?.copyWith(
@@ -204,7 +204,7 @@ class _WaveLoaderState extends State<WaveLoader> with TickerProviderStateMixin {
               ),
             ),
             if (widget.message != null) ...[
-              SizedBox(height: PaginatrixSpacing.standard),
+              const SizedBox(height: PaginatrixSpacing.standard),
               Text(
                 widget.message!,
                 style: textTheme.bodySmall?.copyWith(
@@ -321,7 +321,7 @@ class _RotatingSquaresLoaderState extends State<RotatingSquaresLoader>
               },
             ),
             if (widget.message != null) ...[
-              SizedBox(height: PaginatrixSpacing.standard),
+              const SizedBox(height: PaginatrixSpacing.standard),
               Text(
                 widget.message!,
                 style: textTheme.bodySmall?.copyWith(
@@ -454,7 +454,7 @@ class _PulseLoaderState extends State<PulseLoader>
               },
             ),
             if (widget.message != null) ...[
-              SizedBox(height: PaginatrixSpacing.standard),
+              const SizedBox(height: PaginatrixSpacing.standard),
               Text(
                 widget.message!,
                 style: textTheme.bodySmall?.copyWith(

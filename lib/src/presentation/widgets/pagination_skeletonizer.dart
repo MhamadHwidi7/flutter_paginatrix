@@ -65,8 +65,9 @@ class PaginatrixSkeletonizer extends StatelessWidget {
         SliverList.builder(
           itemCount: itemCount,
           itemBuilder: (context, index) {
-            if (itemBuilder != null) {
-              return itemBuilder!(context, index);
+            final builder = itemBuilder;
+            if (builder != null) {
+              return builder(context, index);
             }
             return const _DefaultSkeletonItem();
           },
@@ -153,8 +154,9 @@ class PaginatrixGridSkeletonizer extends StatelessWidget {
           gridDelegate: gridDelegate,
           itemCount: itemCount,
           itemBuilder: (context, index) {
-            if (itemBuilder != null) {
-              return itemBuilder!(context, index);
+            final builder = itemBuilder;
+            if (builder != null) {
+              return builder(context, index);
             }
             return const _DefaultGridSkeletonItem();
           },
@@ -171,7 +173,7 @@ class _DefaultGridSkeletonItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.all(PaginatrixSpacing.medium),
+      margin: const EdgeInsets.all(PaginatrixSpacing.medium),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
