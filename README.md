@@ -953,6 +953,8 @@ The package includes automatic retry mechanisms:
 - **Prefetch threshold** - Configurable distance from end to trigger load
 - **Metadata caching** - Intelligent caching of parsed metadata
 - **Request deduplication** - Prevents duplicate requests
+- **Optimized widgets** - Const constructors for better performance
+- **Clean code quality** - Zero linting issues in library code
 
 ### Performance Tips
 
@@ -1062,6 +1064,8 @@ flutter run
 - Run `dart format .` before committing
 - Ensure all tests pass
 - Update documentation for new features
+- Maintain zero linting issues in library code
+- Use const constructors where possible for performance
 
 ---
 
