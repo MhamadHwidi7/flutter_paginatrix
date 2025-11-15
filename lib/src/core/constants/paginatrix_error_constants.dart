@@ -40,4 +40,3 @@ class PaginatrixErrorConstants {
   /// - Providing meaningful error information even when truncated
   static const int defaultTailChars = 40;
 }
-

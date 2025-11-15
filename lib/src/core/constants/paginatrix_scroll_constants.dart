@@ -23,4 +23,3 @@ class PaginatrixScrollConstants {
   /// a reasonable default for most use cases.
   static const double thresholdPixelMultiplier = 100;
 }
-

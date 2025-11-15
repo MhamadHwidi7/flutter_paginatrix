@@ -29,7 +29,8 @@ class PaginatrixValidationErrorMessages {
       'Cannot determine pagination type from metadata. Metadata must contain page, nextCursor, or offset/limit.';
 
   /// Error message when metadata is null
-  static const String nullMeta = 'Cannot determine pagination type: metadata is null';
+  static const String nullMeta =
+      'Cannot determine pagination type: metadata is null';
 
   // Page number validation errors
   /// Error message when page number is null
@@ -85,5 +86,3 @@ class PaginatrixValidationErrorMessages {
   static String invalidPathCharacters(String segment, String path) =>
       'Invalid path segment: "$segment" in path "$path". Segments must contain only alphanumeric characters, underscores, or hyphens.';
 }
-
-

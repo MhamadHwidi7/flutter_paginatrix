@@ -81,4 +81,3 @@ class PaginatrixGenericEmptyView extends StatelessWidget {
     );
   }
 }
-

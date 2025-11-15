@@ -18,4 +18,3 @@ enum LoaderType {
   /// Traditional spinner
   traditional,
 }
-

@@ -86,4 +86,3 @@ class PaginatrixAppendErrorView extends StatelessWidget {
     );
   }
 }
-

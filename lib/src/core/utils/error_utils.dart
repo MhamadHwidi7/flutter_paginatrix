@@ -28,8 +28,10 @@ class ErrorUtils {
     int maxChars = PaginatrixErrorConstants.defaultMaxChars,
     int? maxBytes, // If set, enforces a UTF-8 byte ceiling
     bool middle = true, // Keep head+tail instead of tail-only
-    int headChars = PaginatrixErrorConstants.defaultHeadChars, // Used for middle truncation
-    int tailChars = PaginatrixErrorConstants.defaultTailChars, // Used for middle truncation
+    int headChars =
+        PaginatrixErrorConstants.defaultHeadChars, // Used for middle truncation
+    int tailChars =
+        PaginatrixErrorConstants.defaultTailChars, // Used for middle truncation
     bool prettyJson = true,
     bool redactSecrets = true,
     String ellipsis = '…',

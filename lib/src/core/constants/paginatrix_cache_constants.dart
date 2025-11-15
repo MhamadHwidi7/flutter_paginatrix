@@ -32,5 +32,3 @@ class PaginatrixCacheConstants {
   /// that will be considered for caching. Larger structures are not cached.
   static const int maxDataSizeForCaching = 50;
 }
-
-
