@@ -21,7 +21,7 @@ dependencies:
   dio: ^5.4.0
   
   # JSON serialization
-  json_annotation: ^4.8.1
+  json_annotation: ^4.9.0
   
   # State management
   flutter_bloc: ^8.1.6
