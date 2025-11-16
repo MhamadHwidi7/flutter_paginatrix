@@ -1,0 +1,37 @@
+name: cubit_direct
+description: Direct PaginatrixCubit usage with BlocBuilder
+version: 1.0.0
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+  flutter: '>=3.22.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Pagination package
+  flutter_paginatrix:
+    path: ../../
+
+  # HTTP client
+  dio: ^5.4.0
+  
+  # Image caching
+  cached_network_image: ^3.3.1
+  
+  # State management
+  flutter_bloc: ^9.1.1
+  equatable: ^2.0.7
+  shared:
+    path: ../shared
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
+
