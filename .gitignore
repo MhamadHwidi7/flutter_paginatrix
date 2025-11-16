@@ -38,3 +38,6 @@ examples/*/build/
 # GitHub templates and workflows documentation
 .github/PULL_REQUEST_TEMPLATE.md
 .github/workflows/README.md
+CODE_REVIEW.md
+PRODUCTION_READINESS_ASSESSMENT.md
+PUBLISHING.md
