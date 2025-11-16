@@ -23,10 +23,12 @@ library flutter_paginatrix;
 // Core contracts
 export 'src/core/contracts/meta_parser.dart';
 // Core entities
+export 'src/core/entities/filter_value.dart';
 export 'src/core/entities/page_meta.dart';
 export 'src/core/entities/pagination_error.dart';
 export 'src/core/entities/pagination_state.dart';
 export 'src/core/entities/pagination_status.dart';
+export 'src/core/entities/query_criteria.dart';
 export 'src/core/entities/request_context.dart';
 // Core enums
 export 'src/core/enums/paginatrix_load_type.dart';
@@ -34,6 +36,7 @@ export 'src/core/enums/paginatrix_loader_type.dart';
 export 'src/core/enums/paginatrix_type.dart';
 // Core extensions
 export 'src/core/extensions/pagination_state_extension.dart';
+export 'src/core/extensions/query_criteria_extension.dart';
 export 'src/core/extensions/validation_null_check_extension.dart';
 // Core models
 export 'src/core/models/pagination_options.dart';
@@ -50,6 +53,7 @@ export 'src/core/config/build_config.dart';
 export 'src/core/typedefs/typedefs.dart';
 // Core utilities
 export 'src/core/utils/error_utils.dart';
+export 'src/core/utils/error_notification_helper.dart';
 export 'src/core/utils/generation_guard.dart';
 // Core helpers
 export 'src/core/helpers/paginatrix_helpers.dart';
