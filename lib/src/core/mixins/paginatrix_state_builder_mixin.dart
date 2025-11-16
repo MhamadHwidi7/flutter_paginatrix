@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
+import 'package:flutter_paginatrix/src/presentation/widgets/paginatrix_empty_views.dart';
 
 /// Mixin that provides shared pagination state building logic
 /// for PaginatrixListView and PaginatrixGridView.
@@ -49,17 +50,93 @@ mixin PaginatrixStateBuilderMixin<T> on StatelessWidget {
   VoidCallback? get onRetryInitial;
   VoidCallback? get onRetryAppend;
 
+  /// Callback when an error occurs during initial load
+  ///
+  /// This is called when the state transitions to error state.
+  /// Use this to show toast notifications or handle errors.
+  void Function(BuildContext context, PaginationError error)? get onError;
+
+  /// Callback when an error occurs during append operation
+  ///
+  /// This is called when the state transitions to appendError state.
+  /// Use this to show toast notifications or handle append errors.
+  void Function(BuildContext context, PaginationError error)? get onAppendError;
+
+  // Footer message
+  String? get endOfListMessage;
+
   // Abstract method that must be implemented by each widget
   // (ListView and GridView have different implementations)
   Widget buildScrollableContent(BuildContext context, PaginationState<T> state);
 
-  /// Build method that wraps content with BlocBuilder
+  /// Build method that wraps content with BlocBuilder and BlocListener
   /// This eliminates duplication between ListView and GridView
+  ///
+  /// Uses `buildWhen` for fine-grained rebuild control, preventing unnecessary
+  /// rebuilds when state changes don't affect the UI. Since PaginationState uses
+  /// Freezed (which provides value equality), we can safely compare states.
+  ///
+  /// Uses BlocListener to detect error state changes and trigger callbacks (e.g., toast notifications).
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<PaginatrixCubit<T>, PaginationState<T>>(
+    return BlocListener<PaginatrixCubit<T>, PaginationState<T>>(
       bloc: cubit,
-      builder: buildContent,
+      listenWhen: (previous, current) {
+        // Listen for error state changes to trigger callbacks
+        final previousError = previous.error;
+        final currentError = current.error;
+        final previousAppendError = previous.appendError;
+        final currentAppendError = current.appendError;
+
+        // Trigger callback when error appears (was null, now has error)
+        if (previousError == null && currentError != null) {
+          return true;
+        }
+
+        // Trigger callback when append error appears (was null, now has error)
+        if (previousAppendError == null && currentAppendError != null) {
+          return true;
+        }
+
+        return false;
+      },
+      listener: (context, state) {
+        // Handle initial load error
+        final error = state.error;
+        if (error != null) {
+          final onErrorCallback = onError;
+          if (onErrorCallback != null) {
+            onErrorCallback(context, error);
+          }
+          // If no callback provided, errors are only shown via errorBuilder
+          // This gives users full control over error notifications
+        }
+
+        // Handle append error
+        final appendError = state.appendError;
+        if (appendError != null) {
+          final onAppendErrorCallback = onAppendError;
+          if (onAppendErrorCallback != null) {
+            onAppendErrorCallback(context, appendError);
+          }
+          // If no callback provided, errors are only shown via appendErrorBuilder
+          // This gives users full control over error notifications
+        }
+      },
+      child: BlocBuilder<PaginatrixCubit<T>, PaginationState<T>>(
+        bloc: cubit,
+        buildWhen: (previous, current) {
+          // Only rebuild if status changed or items changed
+          // This prevents unnecessary rebuilds when only query or other non-UI-affecting fields change
+          if (previous.status != current.status) return true;
+          if (previous.items.length != current.items.length) return true;
+          if (previous.error != current.error) return true;
+          if (previous.appendError != current.appendError) return true;
+          // Don't rebuild for query changes if items haven't changed
+          return false;
+        },
+        builder: buildContent,
+      ),
     );
   }
 
@@ -129,6 +206,21 @@ mixin PaginatrixStateBuilderMixin<T> on StatelessWidget {
       return builder(context);
     }
 
+    // Check if there's an active search query
+    final query = cubit.state.query;
+    final hasSearch = query?.hasSearchTerm ?? false;
+    final searchTerm = query?.searchTerm ?? '';
+
+    // Show search-specific empty view if there's a search term
+    if (hasSearch && searchTerm.isNotEmpty) {
+      return PaginatrixSearchEmptyView(
+        query: searchTerm,
+        onClearSearch: () {
+          cubit.updateSearchTerm('');
+        },
+      );
+    }
+
     return PaginatrixGenericEmptyView(
       onRefresh: onRetryInitial ?? cubit.loadFirstPage,
     );
@@ -165,7 +257,7 @@ mixin PaginatrixStateBuilderMixin<T> on StatelessWidget {
     return buildScrollableContent(context, state);
   }
 
-  /// Builds footer item (append loader or error)
+  /// Builds footer item (append loader, error, or end of list message)
   @protected
   Widget buildFooterItem(
     BuildContext context, {
@@ -174,6 +266,12 @@ mixin PaginatrixStateBuilderMixin<T> on StatelessWidget {
     required bool hasAppendError,
     required PaginationState<T> state,
   }) {
+    // Don't show footer if there are no items and no more pages
+    // This prevents showing loading indicator when search returns empty results
+    if (!state.hasData && !hasMore) {
+      return const SizedBox.shrink();
+    }
+
     if (hasAppendError) {
       final appendError = state.appendError;
       if (appendError == null) {
@@ -190,12 +288,31 @@ mixin PaginatrixStateBuilderMixin<T> on StatelessWidget {
         onRetry: onRetryAppend ?? cubit.loadNextPage,
       );
     } else if (isAppending) {
+      // Only show loading if there are items or more pages available
+      if (!state.hasData && !hasMore) {
+        return const SizedBox.shrink();
+      }
+
       final builder = appendLoaderBuilder;
       if (builder != null) {
         return builder(context);
       }
 
       return const AppendLoader();
+    } else if (!hasMore && state.hasData) {
+      // Show "end of list" message when there's no more data but we have items
+      final message = endOfListMessage ?? 'No more items to load';
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: Text(
+            message,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+          ),
+        ),
+      );
     }
 
     return const SizedBox.shrink();
