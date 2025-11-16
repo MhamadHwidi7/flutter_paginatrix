@@ -59,6 +59,9 @@ import 'package:flutter_paginatrix/src/core/mixins/paginatrix_state_builder_mixi
 /// - [onPullToRefresh] - Callback when user pulls to refresh
 /// - [onRetryInitial] - Callback for retrying initial load
 /// - [onRetryAppend] - Callback for retrying append operation
+/// - [onError] - Callback when an error occurs during initial load
+/// - [onAppendError] - Callback when an error occurs during append operation
+/// - [endOfListMessage] - Custom message when no more items are available
 /// - [addAutomaticKeepAlives] - Whether to add automatic keep-alives
 /// - [addRepaintBoundaries] - Whether to add repaint boundaries
 /// - [addSemanticIndexes] - Whether to add semantic indexes
@@ -90,10 +93,13 @@ class PaginatrixGridView<T> extends StatelessWidget
     this.onPullToRefresh,
     this.onRetryInitial,
     this.onRetryAppend,
+    this.onError,
+    this.onAppendError,
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
     this.addSemanticIndexes = true,
     this.cacheExtent,
+    this.endOfListMessage,
   }) : cubit = validateAndInitializeCubit<T>(
           cubit: cubit,
           controller: controller,
@@ -200,6 +206,69 @@ class PaginatrixGridView<T> extends StatelessWidget
   @override
   final VoidCallback? onRetryAppend;
 
+  /// Callback when an error occurs during initial load.
+  ///
+  /// This is called when the state transitions to error state.
+  /// Use this to show toast notifications, dialogs, or handle errors in any way you want.
+  ///
+  /// If not provided, errors are only shown via [errorBuilder] (no automatic notifications).
+  ///
+  /// **Examples:**
+  ///
+  /// ```dart
+  /// // Using SnackBar (from ErrorNotificationHelper)
+  /// onError: (context, error) {
+  ///   ErrorNotificationHelper.showSnackBar(
+  ///     context,
+  ///     error,
+  ///     isAppendError: false,
+  ///     onRetry: () => _cubit.loadFirstPage(),
+  ///   );
+  /// },
+  ///
+  /// // Using Dialog
+  /// onError: ErrorNotificationHelper.showErrorDialog,
+  ///
+  /// // Custom implementation
+  /// onError: (context, error) {
+  ///   showCustomNotification(context, error);
+  /// },
+  /// ```
+  @override
+  final void Function(BuildContext context, PaginationError error)? onError;
+
+  /// Callback when an error occurs during append operation.
+  ///
+  /// This is called when the state transitions to appendError state.
+  /// Use this to show toast notifications, dialogs, or handle append errors in any way you want.
+  ///
+  /// If not provided, errors are only shown via [appendErrorBuilder] (no automatic notifications).
+  ///
+  /// **Examples:**
+  ///
+  /// ```dart
+  /// // Using SnackBar (from ErrorNotificationHelper)
+  /// onAppendError: (context, error) {
+  ///   ErrorNotificationHelper.showSnackBar(
+  ///     context,
+  ///     error,
+  ///     isAppendError: true,
+  ///     onRetry: () => _cubit.loadNextPage(),
+  ///   );
+  /// },
+  ///
+  /// // Using Bottom Sheet
+  /// onAppendError: ErrorNotificationHelper.showBottomSheet,
+  /// ```
+  @override
+  final void Function(BuildContext context, PaginationError error)? onAppendError;
+
+  /// Custom message to display when there are no more items to load.
+  ///
+  /// If not provided, defaults to "No more items to load".
+  @override
+  final String? endOfListMessage;
+
   // GridView performance options
   /// Whether to add automatic keep-alives to grid items.
   ///
@@ -284,8 +353,11 @@ class PaginatrixGridView<T> extends StatelessWidget
             ),
             gridDelegate: gridDelegate,
           ),
-          // Always show footer when appending or has error, even if no more items
-          if (isAppending || hasAppendError)
+          // Show footer when:
+          // 1. Appending or has error (with items or more pages)
+          // 2. No more data but we have items (show "end of list" message)
+          if (((isAppending || hasAppendError) && (itemCount > 0 || hasMore)) ||
+              (!hasMore && itemCount > 0 && !isAppending && !hasAppendError))
             SliverToBoxAdapter(
               child: buildFooterItem(
                 context,
