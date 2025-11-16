@@ -63,15 +63,31 @@ class CustomMetaParser implements MetaParser {
       }
 
       final items = transformed[_itemsKey];
-      if (items is List) {
-        return items.cast<Map<String, dynamic>>();
-      } else {
+      if (items is! List) {
         throw ErrorUtils.createParseError(
           message: 'Items key "$_itemsKey" does not contain a list',
           expectedFormat: 'Expected a list of items',
           actualData: items,
         );
       }
+
+      // Validate all items are Maps before casting
+      // This prevents runtime errors from unsafe type casting
+      final List<Map<String, dynamic>> validatedItems = [];
+      for (var i = 0; i < items.length; i++) {
+        final item = items[i];
+        if (item is Map<String, dynamic>) {
+          validatedItems.add(item);
+        } else {
+          throw ErrorUtils.createParseError(
+            message: 'Item at index $i is not a Map<String, dynamic>. '
+                'Got ${item.runtimeType} instead.',
+            expectedFormat: 'Expected all items to be Map<String, dynamic>',
+            actualData: item,
+          );
+        }
+      }
+      return validatedItems;
     } catch (e) {
       if (e is PaginationError) rethrow;
       throw ErrorUtils.createParseError(

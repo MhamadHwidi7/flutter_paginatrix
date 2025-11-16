@@ -64,6 +64,7 @@ class _BouncingDotsLoaderState extends State<BouncingDotsLoader>
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
     final color = widget.color ?? colorScheme.primary;
+    final message = widget.message;
 
     return Container(
       padding: widget.padding ?? PaginatrixSpacing.defaultPaddingAll,
@@ -95,10 +96,10 @@ class _BouncingDotsLoaderState extends State<BouncingDotsLoader>
                 );
               }),
             ),
-            if (widget.message != null) ...[
+            if (message != null) ...[
               const SizedBox(height: PaginatrixSpacing.standard),
               Text(
-                widget.message!,
+                message,
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurface.withValues(alpha: 0.7),
                   fontWeight: FontWeight.w500,
@@ -173,6 +174,7 @@ class _WaveLoaderState extends State<WaveLoader> with TickerProviderStateMixin {
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
     final color = widget.color ?? colorScheme.primary;
+    final message = widget.message;
 
     return Container(
       padding: widget.padding ?? PaginatrixSpacing.defaultPaddingAll,
@@ -203,10 +205,10 @@ class _WaveLoaderState extends State<WaveLoader> with TickerProviderStateMixin {
                 }),
               ),
             ),
-            if (widget.message != null) ...[
+            if (message != null) ...[
               const SizedBox(height: PaginatrixSpacing.standard),
               Text(
-                widget.message!,
+                message,
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurface.withValues(alpha: 0.7),
                   fontWeight: FontWeight.w500,
@@ -277,6 +279,7 @@ class _RotatingSquaresLoaderState extends State<RotatingSquaresLoader>
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
     final color = widget.color ?? colorScheme.primary;
+    final message = widget.message;
 
     return Container(
       padding: widget.padding ?? PaginatrixSpacing.defaultPaddingAll,
@@ -320,10 +323,10 @@ class _RotatingSquaresLoaderState extends State<RotatingSquaresLoader>
                 );
               },
             ),
-            if (widget.message != null) ...[
+            if (message != null) ...[
               const SizedBox(height: PaginatrixSpacing.standard),
               Text(
-                widget.message!,
+                message,
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurface.withValues(alpha: 0.7),
                   fontWeight: FontWeight.w500,
@@ -403,6 +406,7 @@ class _PulseLoaderState extends State<PulseLoader>
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
     final color = widget.color ?? colorScheme.primary;
+    final message = widget.message;
 
     return Container(
       padding: widget.padding ?? PaginatrixSpacing.defaultPaddingAll,
@@ -453,10 +457,10 @@ class _PulseLoaderState extends State<PulseLoader>
                 );
               },
             ),
-            if (widget.message != null) ...[
+            if (message != null) ...[
               const SizedBox(height: PaginatrixSpacing.standard),
               Text(
-                widget.message!,
+                message,
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurface.withValues(alpha: 0.7),
                   fontWeight: FontWeight.w500,
@@ -493,6 +497,7 @@ class SkeletonLoader extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
+    final messageText = message;
 
     return Container(
       padding: padding ?? PaginatrixSpacing.defaultPaddingAll,
@@ -507,10 +512,10 @@ class SkeletonLoader extends StatelessWidget {
               shrinkWrap: true,
             ),
           ),
-          if (message != null) ...[
+          if (messageText != null) ...[
             const SizedBox(height: 16),
             Text(
-              message!,
+              messageText,
               style: textTheme.bodySmall?.copyWith(
                 color: color ?? colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w500,

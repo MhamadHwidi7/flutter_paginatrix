@@ -1,4 +1,5 @@
 import 'package:flutter_paginatrix/src/core/entities/pagination_state.dart';
+import 'package:flutter_paginatrix/src/core/entities/query_criteria.dart';
 
 extension PaginationStateExtension<T> on PaginationState<T> {
   /// Whether the state has data
@@ -19,10 +20,7 @@ extension PaginationStateExtension<T> on PaginationState<T> {
   bool get hasAppendError => appendError != null;
 
   /// Whether more data can be loaded
-  bool get canLoadMore {
-    if (meta == null) return false;
-    return meta?.hasMore ?? false;
-  }
+  bool get canLoadMore => meta?.hasMore ?? false;
 
   /// Whether the state is in a stable state (not loading)
   bool get isStable => !isLoading;
@@ -44,4 +42,7 @@ extension PaginationStateExtension<T> on PaginationState<T> {
         success: () => true,
         orElse: () => false,
       );
+
+  /// Gets the current query criteria, or empty criteria if null
+  QueryCriteria get currentQuery => query ?? QueryCriteria.empty();
 }

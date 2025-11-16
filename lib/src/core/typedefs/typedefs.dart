@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_paginatrix/src/core/entities/query_criteria.dart';
 
 /// Function type for loading a page of paginated data
 ///
@@ -12,9 +13,15 @@ import 'package:dio/dio.dart';
 /// [limit] - Limit for offset/limit pagination (alternative to perPage)
 /// [cursor] - Cursor for cursor-based pagination
 /// [cancelToken] - Cancel token for request cancellation
+/// [query] - Optional QueryCriteria containing search, filters, and sorting.
+///           If provided, use this for type-safe access to all query parameters.
+///           If not provided, you can access query via closure from state.
 ///
 /// Returns a Future that resolves to a map with 'data' (list of items to add)
 /// and 'meta' (pagination metadata)
+///
+/// **Note:** The [query] parameter is optional for backward compatibility.
+/// New implementations should use [query] instead of accessing state via closure.
 typedef LoaderFn<T> = Future<Map<String, dynamic>> Function({
   int? page,
   int? perPage,
@@ -22,6 +29,7 @@ typedef LoaderFn<T> = Future<Map<String, dynamic>> Function({
   int? limit,
   String? cursor,
   CancelToken? cancelToken,
+  QueryCriteria? query,
 });
 
 /// Function type for decoding individual items from raw data

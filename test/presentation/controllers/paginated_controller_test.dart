@@ -264,6 +264,7 @@ void main() {
             int? limit,
             String? cursor,
             CancelToken? cancelToken,
+            QueryCriteria? query,
           }) async {
             if (shouldFail) {
               shouldFail = false;
@@ -273,6 +274,7 @@ void main() {
               page: page,
               perPage: perPage,
               cancelToken: cancelToken,
+              query: query,
             );
           },
           itemDecoder: (json) => json,
@@ -298,6 +300,7 @@ void main() {
             int? limit,
             String? cursor,
             CancelToken? cancelToken,
+            QueryCriteria? query,
           }) async {
             if (page == 2 && !shouldFail) {
               shouldFail = true;
@@ -309,6 +312,7 @@ void main() {
               page: page,
               perPage: perPage,
               cancelToken: cancelToken,
+              query: query,
             );
           },
           itemDecoder: (json) => json,
@@ -333,6 +337,7 @@ void main() {
             int? limit,
             String? cursor,
             CancelToken? cancelToken,
+            QueryCriteria? query,
           }) async {
             if (page == 2 && failCount < 1) {
               failCount++;
@@ -344,6 +349,7 @@ void main() {
               page: page,
               perPage: perPage,
               cancelToken: cancelToken,
+              query: query,
             );
           },
           itemDecoder: (json) => json,

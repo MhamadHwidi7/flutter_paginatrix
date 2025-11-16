@@ -3,6 +3,7 @@ import 'package:flutter_paginatrix/src/core/entities/page_meta.dart';
 import 'package:flutter_paginatrix/src/core/entities/pagination_error.dart';
 import 'package:flutter_paginatrix/src/core/entities/pagination_status.dart';
 import 'package:flutter_paginatrix/src/core/entities/request_context.dart';
+import 'package:flutter_paginatrix/src/core/entities/query_criteria.dart';
 
 part 'pagination_state.freezed.dart';
 
@@ -33,12 +34,17 @@ class PaginationState<T> with _$PaginationState<T> {
 
     /// Last successful load timestamp
     DateTime? lastLoadedAt,
+
+    /// Current search and filter criteria
+    /// Defaults to empty criteria (no search, filters, or sorting)
+    QueryCriteria? query,
   }) = _PaginationState<T>;
 
   /// Creates initial state
   factory PaginationState.initial() {
     return const PaginationState(
       status: PaginationStatus.initial(),
+      query: QueryCriteria(),
     );
   }
 
@@ -47,12 +53,14 @@ class PaginationState<T> with _$PaginationState<T> {
     required RequestContext requestContext,
     List<T>? previousItems,
     PageMeta? previousMeta,
+    QueryCriteria? query,
   }) {
     return PaginationState(
       status: const PaginationStatus.loading(),
-      items: previousItems ?? [],
+      items: previousItems ?? const [],
       meta: previousMeta,
       requestContext: requestContext,
+      query: query ?? const QueryCriteria(),
     );
   }
 
@@ -61,6 +69,7 @@ class PaginationState<T> with _$PaginationState<T> {
     required List<T> items,
     required PageMeta meta,
     required RequestContext requestContext,
+    QueryCriteria? query,
   }) {
     return PaginationState(
       status: const PaginationStatus.success(),
@@ -68,18 +77,21 @@ class PaginationState<T> with _$PaginationState<T> {
       meta: meta,
       requestContext: requestContext,
       lastLoadedAt: DateTime.now(),
+      query: query ?? const QueryCriteria(),
     );
   }
 
   /// Creates empty state
   factory PaginationState.empty({
     required RequestContext requestContext,
+    QueryCriteria? query,
   }) {
     return PaginationState(
       status: const PaginationStatus.empty(),
-      items: [],
+      items: const [],
       requestContext: requestContext,
       lastLoadedAt: DateTime.now(),
+      query: query ?? const QueryCriteria(),
     );
   }
 
@@ -89,13 +101,15 @@ class PaginationState<T> with _$PaginationState<T> {
     required RequestContext requestContext,
     List<T>? previousItems,
     PageMeta? previousMeta,
+    QueryCriteria? query,
   }) {
     return PaginationState(
       status: const PaginationStatus.error(),
-      items: previousItems ?? [],
+      items: previousItems ?? const [],
       meta: previousMeta,
       error: error,
       requestContext: requestContext,
+      query: query ?? const QueryCriteria(),
     );
   }
 
@@ -104,12 +118,14 @@ class PaginationState<T> with _$PaginationState<T> {
     required RequestContext requestContext,
     required List<T> currentItems,
     required PageMeta currentMeta,
+    QueryCriteria? query,
   }) {
     return PaginationState(
       status: const PaginationStatus.refreshing(),
       items: currentItems,
       meta: currentMeta,
       requestContext: requestContext,
+      query: query ?? const QueryCriteria(),
     );
   }
 
@@ -118,12 +134,14 @@ class PaginationState<T> with _$PaginationState<T> {
     required RequestContext requestContext,
     required List<T> currentItems,
     required PageMeta currentMeta,
+    QueryCriteria? query,
   }) {
     return PaginationState(
       status: const PaginationStatus.appending(),
       items: currentItems,
       meta: currentMeta,
       requestContext: requestContext,
+      query: query ?? const QueryCriteria(),
     );
   }
 
@@ -133,6 +151,7 @@ class PaginationState<T> with _$PaginationState<T> {
     required RequestContext requestContext,
     required List<T> currentItems,
     required PageMeta currentMeta,
+    QueryCriteria? query,
   }) {
     return PaginationState(
       status: const PaginationStatus.appendError(),
@@ -140,6 +159,7 @@ class PaginationState<T> with _$PaginationState<T> {
       meta: currentMeta,
       appendError: appendError,
       requestContext: requestContext,
+      query: query ?? const QueryCriteria(),
     );
   }
 }

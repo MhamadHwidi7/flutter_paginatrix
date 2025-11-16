@@ -32,6 +32,7 @@ LoaderFn<T> createMockLoader<T>({
     int? limit,
     String? cursor,
     CancelToken? cancelToken,
+    QueryCriteria? query,
   }) async {
     if (delay > Duration.zero) {
       await Future.delayed(delay);
@@ -95,6 +96,7 @@ LoaderFn<T> createFailingLoader<T>({
     int? limit,
     String? cursor,
     CancelToken? cancelToken,
+    QueryCriteria? query,
   }) async {
     if (errorFactory != null) {
       throw errorFactory();

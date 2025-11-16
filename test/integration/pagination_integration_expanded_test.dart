@@ -43,6 +43,7 @@ void main() {
             int? limit,
             String? cursor,
             CancelToken? cancelToken,
+            QueryCriteria? query,
           }) async {
             final items = mockData.take(20).toList();
             currentCursor = 'cursor_${items.length}';
@@ -76,6 +77,7 @@ void main() {
             int? limit,
             String? cursor,
             CancelToken? cancelToken,
+            QueryCriteria? query,
           }) async {
             final start = offset ?? 0;
             final size = limit ?? 20;
@@ -148,6 +150,7 @@ void main() {
             int? limit,
             String? cursor,
             CancelToken? cancelToken,
+            QueryCriteria? query,
           }) async {
             return {'invalid': 'structure'}; // Missing required fields
           },
@@ -180,6 +183,7 @@ void main() {
             int? limit,
             String? cursor,
             CancelToken? cancelToken,
+            QueryCriteria? query,
           }) async {
             throw const PaginationError.rateLimited(
               message: 'Too many requests',
@@ -215,6 +219,7 @@ void main() {
             int? limit,
             String? cursor,
             CancelToken? cancelToken,
+            QueryCriteria? query,
           }) async {
             throw const PaginationError.circuitBreaker(
               message: 'Service unavailable',
@@ -241,6 +246,7 @@ void main() {
             int? limit,
             String? cursor,
             CancelToken? cancelToken,
+            QueryCriteria? query,
           }) async {
             if (page == 2 && failOnce) {
               failOnce = false;
@@ -250,6 +256,7 @@ void main() {
               page: page,
               perPage: perPage,
               cancelToken: cancelToken,
+              query: query,
             );
           },
           itemDecoder: (json) => json,
@@ -332,6 +339,7 @@ void main() {
             int? limit,
             String? cursor,
             CancelToken? cancelToken,
+            QueryCriteria? query,
           }) async {
             await Future.delayed(const Duration(milliseconds: 100));
             if (cancelToken?.isCancelled ?? false) {
@@ -340,6 +348,7 @@ void main() {
             return createMockLoader(mockData: mockData)(
               page: page,
               cancelToken: cancelToken,
+              query: query,
             );
           },
           itemDecoder: (json) => json,
@@ -383,6 +392,7 @@ void main() {
             int? limit,
             String? cursor,
             CancelToken? cancelToken,
+            QueryCriteria? query,
           }) async {
             attemptCount++;
             if (attemptCount < 2) {
@@ -391,6 +401,7 @@ void main() {
             return createMockLoader(mockData: mockData)(
               page: page,
               cancelToken: cancelToken,
+              query: query,
             );
           },
           itemDecoder: (json) => json,
@@ -415,6 +426,7 @@ void main() {
             int? limit,
             String? cursor,
             CancelToken? cancelToken,
+            QueryCriteria? query,
           }) async {
             if (page == 2) {
               attemptCount++;
@@ -426,6 +438,7 @@ void main() {
               page: page,
               perPage: perPage,
               cancelToken: cancelToken,
+              query: query,
             );
           },
           itemDecoder: (json) => json,
@@ -471,6 +484,7 @@ void main() {
             int? limit,
             String? cursor,
             CancelToken? cancelToken,
+            QueryCriteria? query,
           }) async {
             attemptCount++;
             if (attemptCount == 1) {
@@ -479,6 +493,7 @@ void main() {
             return createMockLoader(mockData: mockData)(
               page: page,
               cancelToken: cancelToken,
+              query: query,
             );
           },
           itemDecoder: (json) => json,
@@ -508,11 +523,13 @@ void main() {
             int? limit,
             String? cursor,
             CancelToken? cancelToken,
+            QueryCriteria? query,
           }) async {
             loadCount++;
             return createMockLoader(mockData: mockData)(
               page: page,
               cancelToken: cancelToken,
+              query: query,
             );
           },
           itemDecoder: (json) => json,
@@ -547,11 +564,13 @@ void main() {
             int? limit,
             String? cursor,
             CancelToken? cancelToken,
+            QueryCriteria? query,
           }) async {
             loadCount++;
             return createMockLoader(mockData: mockData)(
               page: page,
               cancelToken: cancelToken,
+              query: query,
             );
           },
           itemDecoder: (json) => json,

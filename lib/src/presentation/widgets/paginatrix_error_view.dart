@@ -33,14 +33,15 @@ class PaginatrixErrorView extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
 
+    final iconWidget = customIcon;
     return Padding(
       padding: padding ?? PaginatrixSpacing.largePaddingAll,
       child: Column(
         mainAxisAlignment: mainAxisAlignment,
         crossAxisAlignment: crossAxisAlignment,
         children: [
-          if (customIcon != null) ...[
-            customIcon!,
+          if (iconWidget != null) ...[
+            iconWidget,
             const SizedBox(height: PaginatrixSpacing.iconBottom),
           ] else ...[
             _buildErrorIcon(colorScheme),

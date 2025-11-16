@@ -51,6 +51,10 @@ mixin _$PaginationOptions {
   /// Debounce duration for refresh calls to prevent rapid successive refreshes
   Duration get refreshDebounceDuration => throw _privateConstructorUsedError;
 
+  /// Debounce duration for search term updates to prevent excessive API calls
+  /// while user is typing
+  Duration get searchDebounceDuration => throw _privateConstructorUsedError;
+
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $PaginationOptionsCopyWith<PaginationOptions> get copyWith =>
@@ -73,7 +77,8 @@ abstract class $PaginationOptionsCopyWith<$Res> {
       int maxRetries,
       Duration initialBackoff,
       Duration retryResetTimeout,
-      Duration refreshDebounceDuration});
+      Duration refreshDebounceDuration,
+      Duration searchDebounceDuration});
 }
 
 /// @nodoc
@@ -99,6 +104,7 @@ class _$PaginationOptionsCopyWithImpl<$Res, $Val extends PaginationOptions>
     Object? initialBackoff = null,
     Object? retryResetTimeout = null,
     Object? refreshDebounceDuration = null,
+    Object? searchDebounceDuration = null,
   }) {
     return _then(_value.copyWith(
       defaultPageSize: null == defaultPageSize
@@ -141,6 +147,10 @@ class _$PaginationOptionsCopyWithImpl<$Res, $Val extends PaginationOptions>
           ? _value.refreshDebounceDuration
           : refreshDebounceDuration // ignore: cast_nullable_to_non_nullable
               as Duration,
+      searchDebounceDuration: null == searchDebounceDuration
+          ? _value.searchDebounceDuration
+          : searchDebounceDuration // ignore: cast_nullable_to_non_nullable
+              as Duration,
     ) as $Val);
   }
 }
@@ -163,7 +173,8 @@ abstract class _$$PaginationOptionsImplCopyWith<$Res>
       int maxRetries,
       Duration initialBackoff,
       Duration retryResetTimeout,
-      Duration refreshDebounceDuration});
+      Duration refreshDebounceDuration,
+      Duration searchDebounceDuration});
 }
 
 /// @nodoc
@@ -187,6 +198,7 @@ class __$$PaginationOptionsImplCopyWithImpl<$Res>
     Object? initialBackoff = null,
     Object? retryResetTimeout = null,
     Object? refreshDebounceDuration = null,
+    Object? searchDebounceDuration = null,
   }) {
     return _then(_$PaginationOptionsImpl(
       defaultPageSize: null == defaultPageSize
@@ -229,6 +241,10 @@ class __$$PaginationOptionsImplCopyWithImpl<$Res>
           ? _value.refreshDebounceDuration
           : refreshDebounceDuration // ignore: cast_nullable_to_non_nullable
               as Duration,
+      searchDebounceDuration: null == searchDebounceDuration
+          ? _value.searchDebounceDuration
+          : searchDebounceDuration // ignore: cast_nullable_to_non_nullable
+              as Duration,
     ));
   }
 }
@@ -246,7 +262,8 @@ class _$PaginationOptionsImpl implements _PaginationOptions {
       this.maxRetries = 5,
       this.initialBackoff = const Duration(milliseconds: 500),
       this.retryResetTimeout = const Duration(seconds: 60),
-      this.refreshDebounceDuration = const Duration(milliseconds: 300)});
+      this.refreshDebounceDuration = const Duration(milliseconds: 300),
+      this.searchDebounceDuration = const Duration(milliseconds: 400)});
 
   factory _$PaginationOptionsImpl.fromJson(Map<String, dynamic> json) =>
       _$$PaginationOptionsImplFromJson(json);
@@ -301,9 +318,15 @@ class _$PaginationOptionsImpl implements _PaginationOptions {
   @JsonKey()
   final Duration refreshDebounceDuration;
 
+  /// Debounce duration for search term updates to prevent excessive API calls
+  /// while user is typing
+  @override
+  @JsonKey()
+  final Duration searchDebounceDuration;
+
   @override
   String toString() {
-    return 'PaginationOptions(defaultPageSize: $defaultPageSize, maxPageSize: $maxPageSize, requestTimeout: $requestTimeout, enableDebugLogging: $enableDebugLogging, defaultPrefetchThreshold: $defaultPrefetchThreshold, defaultPrefetchThresholdPixels: $defaultPrefetchThresholdPixels, maxRetries: $maxRetries, initialBackoff: $initialBackoff, retryResetTimeout: $retryResetTimeout, refreshDebounceDuration: $refreshDebounceDuration)';
+    return 'PaginationOptions(defaultPageSize: $defaultPageSize, maxPageSize: $maxPageSize, requestTimeout: $requestTimeout, enableDebugLogging: $enableDebugLogging, defaultPrefetchThreshold: $defaultPrefetchThreshold, defaultPrefetchThresholdPixels: $defaultPrefetchThresholdPixels, maxRetries: $maxRetries, initialBackoff: $initialBackoff, retryResetTimeout: $retryResetTimeout, refreshDebounceDuration: $refreshDebounceDuration, searchDebounceDuration: $searchDebounceDuration)';
   }
 
   @override
@@ -334,7 +357,9 @@ class _$PaginationOptionsImpl implements _PaginationOptions {
                 other.retryResetTimeout == retryResetTimeout) &&
             (identical(
                     other.refreshDebounceDuration, refreshDebounceDuration) ||
-                other.refreshDebounceDuration == refreshDebounceDuration));
+                other.refreshDebounceDuration == refreshDebounceDuration) &&
+            (identical(other.searchDebounceDuration, searchDebounceDuration) ||
+                other.searchDebounceDuration == searchDebounceDuration));
   }
 
   @JsonKey(ignore: true)
@@ -350,7 +375,8 @@ class _$PaginationOptionsImpl implements _PaginationOptions {
       maxRetries,
       initialBackoff,
       retryResetTimeout,
-      refreshDebounceDuration);
+      refreshDebounceDuration,
+      searchDebounceDuration);
 
   @JsonKey(ignore: true)
   @override
@@ -378,7 +404,8 @@ abstract class _PaginationOptions implements PaginationOptions {
       final int maxRetries,
       final Duration initialBackoff,
       final Duration retryResetTimeout,
-      final Duration refreshDebounceDuration}) = _$PaginationOptionsImpl;
+      final Duration refreshDebounceDuration,
+      final Duration searchDebounceDuration}) = _$PaginationOptionsImpl;
 
   factory _PaginationOptions.fromJson(Map<String, dynamic> json) =
       _$PaginationOptionsImpl.fromJson;
@@ -423,6 +450,11 @@ abstract class _PaginationOptions implements PaginationOptions {
 
   /// Debounce duration for refresh calls to prevent rapid successive refreshes
   Duration get refreshDebounceDuration;
+  @override
+
+  /// Debounce duration for search term updates to prevent excessive API calls
+  /// while user is typing
+  Duration get searchDebounceDuration;
   @override
   @JsonKey(ignore: true)
   _$$PaginationOptionsImplCopyWith<_$PaginationOptionsImpl> get copyWith =>

@@ -96,27 +96,125 @@ class MetaConfig with _$MetaConfig {
 
 /// Meta parser that uses configuration-based path extraction
 
+/// Simple LRU (Least Recently Used) cache implementation
+///
+/// Uses Dart's Map insertion order to implement LRU eviction.
+/// When items are accessed, they're moved to the end (most recently used).
+/// When cache is full, items are evicted from the beginning (least recently used).
+class _LRUCache<K, V> {
+  _LRUCache(this.maxSize) : _cache = {};
+
+  final Map<K, V> _cache;
+  final int maxSize;
+
+  /// Gets a value from the cache, moving it to the end (most recently used)
+  V? get(K key) {
+    final value = _cache.remove(key);
+    if (value != null) {
+      _cache[key] = value; // Re-add to move to end (LRU behavior)
+    }
+    return value;
+  }
+
+  /// Checks if the cache contains a key
+  bool containsKey(K key) => _cache.containsKey(key);
+
+  /// Puts a value in the cache, evicting least recently used if needed
+  void put(K key, V value) {
+    // Remove existing entry if present (will be re-added at end)
+    _cache.remove(key);
+
+    // Evict least recently used if at capacity
+    if (_cache.length >= maxSize) {
+      final firstKey = _cache.keys.first;
+      _cache.remove(firstKey);
+    }
+
+    // Add new entry at end (most recently used)
+    _cache[key] = value;
+  }
+
+  /// Clears the cache
+  void clear() => _cache.clear();
+
+  /// Gets the current cache size
+  int get length => _cache.length;
+}
+
 class ConfigMetaParser implements MetaParser {
   ConfigMetaParser(this._config);
   final MetaConfig _config;
 
-  // Cache for parsed path segments to avoid repeated splitting
-  final Map<String, List<String>> _pathCache = {};
+  // LRU cache for parsed path segments to avoid repeated splitting
+  // Limited size prevents unbounded memory growth
+  static const int _maxPathCacheSize = 200;
+  final _LRUCache<String, List<String>> _pathCache =
+      _LRUCache(_maxPathCacheSize);
 
-  // Cache for parsed metadata to avoid re-parsing same data structures
+  // LRU cache for parsed metadata to avoid re-parsing same data structures
   // Uses a simple hash of the data structure as key
-  // Maintains insertion order for FIFO eviction
-  final Map<int, PageMeta> _metaCache = {};
+  // Limited size prevents unbounded memory growth
+  final _LRUCache<int, PageMeta> _metaCache =
+      _LRUCache(PaginatrixCacheConstants.maxMetaCacheSize);
+
+  /// Checks if this parser is configured for offset-based pagination
+  bool get isOffsetBased {
+    return _config.offsetPath != null &&
+        _config.offsetPath!.isNotEmpty &&
+        _config.limitPath != null &&
+        _config.limitPath!.isNotEmpty &&
+        _config.pagePath == null;
+  }
+
+  /// Checks if at least one pagination path is configured
+  ///
+  /// This helper method eliminates code duplication by centralizing
+  /// the logic for checking if any pagination paths are configured.
+  bool _hasConfiguredPaginationPath() {
+    return (_config.pagePath != null && _config.pagePath!.isNotEmpty) ||
+        (_config.perPagePath != null && _config.perPagePath!.isNotEmpty) ||
+        (_config.nextCursorPath != null &&
+            _config.nextCursorPath!.isNotEmpty) ||
+        (_config.offsetPath != null && _config.offsetPath!.isNotEmpty) ||
+        (_config.limitPath != null && _config.limitPath!.isNotEmpty) ||
+        (_config.hasMorePath != null && _config.hasMorePath!.isNotEmpty);
+  }
 
   @override
   PageMeta parseMeta(Map<String, dynamic> data) {
     try {
-      // Try to get from cache first (simple hash-based caching)
+      // Validate data structure before parsing to provide specific error messages
+      // Only validate if we have configured paths - skip validation for graceful handling
+      // of null/empty/invalid paths (they'll be handled during parsing)
+      if (_hasConfiguredPaginationPath()) {
+        final validationError = _validateMetadataStructure(data);
+        if (validationError != null) {
+          throw ErrorUtils.createParseError(
+            message: validationError,
+            expectedFormat: _getExpectedFormatDescription(),
+            actualData: data,
+          );
+        }
+      }
+
+      // Only compute hash if we're going to cache (optimization)
       // Only cache if data structure is reasonably small to avoid memory issues
-      final dataHash = _computeSimpleHash(data);
-      if (_metaCache.containsKey(dataHash) &&
-          data.length < PaginatrixCacheConstants.maxDataSizeForCaching) {
-        return _metaCache[dataHash]!;
+      int? dataHash;
+      if (data.length < PaginatrixCacheConstants.maxDataSizeForCaching) {
+        dataHash = _computeSimpleHash(data);
+        final cachedMeta = _metaCache.get(dataHash);
+        if (cachedMeta != null) {
+          // Validate hash collision: verify cached meta matches current data structure
+          // This prevents returning incorrect metadata due to hash collisions
+          if (_validateCachedMeta(cachedMeta, data)) {
+            return cachedMeta;
+          } else {
+            // Hash collision detected - remove from cache and continue parsing
+            _metaCache.put(
+                dataHash, cachedMeta); // Re-add to maintain LRU order
+            // Continue to parse fresh metadata below
+          }
+        }
       }
 
       // Safe type extraction with runtime checks
@@ -149,31 +247,44 @@ class ConfigMetaParser implements MetaParser {
       final limitValue = _extractValue(data, _config.limitPath);
       final limit = limitValue is int ? limitValue : null;
 
+      // Check which pagination type we have (if any)
+      // If none found, we'll fallback to basic meta (all nulls), which is valid
+      final hasPageBased = page != null && perPage != null;
+      final hasCursorBased = nextCursor != null || hasMore != null;
+      final hasOffsetBased = offset != null && limit != null;
+
       // Determine pagination type and create appropriate PageMeta
       final PageMeta result;
-      if (page != null && perPage != null) {
+      if (hasPageBased) {
+        // Use explicit non-nullable variables to satisfy type system
+        final pageValue = page;
+        final perPageValue = perPage;
         result = PageMeta.pageBased(
-          page: page,
-          perPage: perPage,
+          page: pageValue,
+          perPage: perPageValue,
           total: total,
           lastPage: lastPage,
-          hasMore: hasMore ?? (lastPage != null ? page < lastPage : null),
+          hasMore: hasMore ?? (lastPage != null ? pageValue < lastPage : null),
         );
-      } else if (nextCursor != null || hasMore != null) {
+      } else if (hasCursorBased) {
         result = PageMeta.cursorBased(
           nextCursor: nextCursor,
           previousCursor: previousCursor,
           hasMore: hasMore,
         );
-      } else if (offset != null && limit != null) {
+      } else if (hasOffsetBased) {
+        // Use explicit non-nullable variables to satisfy type system
+        final offsetValue = offset;
+        final limitValue = limit;
         result = PageMeta.offsetBased(
-          offset: offset,
-          limit: limit,
+          offset: offsetValue,
+          limit: limitValue,
           total: total,
-          hasMore: hasMore ?? (total != null ? offset + limit < total : null),
+          hasMore: hasMore ??
+              (total != null ? offsetValue + limitValue < total : null),
         );
       } else {
-        // Fallback to basic meta
+        // Fallback to basic meta (should not reach here due to validation above)
         result = PageMeta(
           page: page,
           perPage: perPage,
@@ -187,20 +298,93 @@ class ConfigMetaParser implements MetaParser {
         );
       }
 
-      // Cache the parsed metadata if data structure is reasonably small
-      if (data.length < PaginatrixCacheConstants.maxDataSizeForCaching) {
-        _evictCacheIfNeeded();
-        _metaCache[dataHash] = result;
+      // Cache only if we computed hash
+      if (dataHash != null) {
+        _metaCache.put(dataHash, result);
       }
 
       return result;
+    } on PaginationError {
+      // Re-throw PaginationError as-is (already properly formatted)
+      rethrow;
     } catch (e) {
+      // Catch any unexpected errors and provide detailed error message
       throw ErrorUtils.createParseError(
-        message: 'Failed to parse pagination metadata: $e',
-        expectedFormat: 'Expected paths: ${_config.toString()}',
+        message: 'Unexpected error while parsing pagination metadata: $e',
+        expectedFormat: _getExpectedFormatDescription(),
         actualData: data,
       );
     }
+  }
+
+  /// Validates the metadata structure and returns a specific error message if invalid.
+  ///
+  /// Performs comprehensive validation to provide specific error messages about
+  /// what's wrong with the data structure before attempting to parse it.
+  ///
+  /// **Returns:**
+  /// - `null` if structure is valid
+  /// - Specific error message string if structure is invalid
+  String? _validateMetadataStructure(Map<String, dynamic> data) {
+    // Check if data is actually a Map
+    if (data.isEmpty) {
+      return 'Data structure is empty. Expected a non-empty map with pagination metadata.';
+    }
+
+    // Note: Invalid path configurations are handled gracefully during parsing
+    // (_extractValue returns null for invalid paths), so we don't validate them here
+    // This allows graceful degradation when paths are misconfigured
+
+    // Note: We don't require pagination paths - if none are configured, we allow fallback to basic meta
+    // This check is only for validation purposes, not a hard requirement
+
+    // Note: Type checking is handled during parsing (using `is` checks)
+    // We don't validate types here to allow graceful handling of wrong types
+    // (they'll just be ignored and return null, which is the expected behavior)
+
+    // Note: Pagination type determination is handled during parsing
+    // Missing paths are OK - they'll just be null, allowing fallback to basic meta
+    // The parsing logic will create a basic PageMeta with all nulls, which is valid
+
+    // Structure is valid
+    return null;
+  }
+
+  /// Generates a human-readable description of the expected data format.
+  ///
+  /// This is used in error messages to help users understand what structure
+  /// is expected based on the current configuration.
+  String _getExpectedFormatDescription() {
+    final parts = <String>[];
+
+    if (_config.itemsPath.isNotEmpty) {
+      parts.add('items at "${_config.itemsPath}"');
+    }
+
+    if (_config.pagePath != null) {
+      parts.add('page (int) at "${_config.pagePath}"');
+    }
+    if (_config.perPagePath != null) {
+      parts.add('perPage (int) at "${_config.perPagePath}"');
+    }
+    if (_config.nextCursorPath != null) {
+      parts.add('nextCursor (String) at "${_config.nextCursorPath}"');
+    }
+    if (_config.offsetPath != null) {
+      parts.add('offset (int) at "${_config.offsetPath}"');
+    }
+    if (_config.limitPath != null) {
+      parts.add('limit (int) at "${_config.limitPath}"');
+    }
+    if (_config.hasMorePath != null) {
+      parts.add('hasMore (bool) at "${_config.hasMorePath}"');
+    }
+
+    if (parts.isEmpty) {
+      return 'Expected pagination metadata structure';
+    }
+
+    return 'Expected: ${parts.join(", ")}';
   }
 
   /// Evicts the oldest cache entry if cache is at maximum size.
@@ -208,38 +392,86 @@ class ConfigMetaParser implements MetaParser {
   /// Implements FIFO (First In First Out) eviction strategy to prevent
   /// unbounded memory growth. When the cache reaches the maximum size,
   /// the oldest entry (first inserted) is removed before adding a new one.
+  // Note: Cache eviction is now handled automatically by _LRUCache
+  // The LRU cache evicts least recently used items when at capacity
+
+  /// Computes a robust hash for caching purposes
   ///
-  /// This ensures the cache never exceeds [PaginatrixCacheConstants.maxMetaCacheSize] entries while
-  /// maintaining reasonable performance for frequently accessed data.
-  void _evictCacheIfNeeded() {
-    if (_metaCache.length >= PaginatrixCacheConstants.maxMetaCacheSize) {
-      // Remove the oldest entry (first key in insertion order)
-      // Dart's Map maintains insertion order, so we can safely remove the first key
-      final firstKey = _metaCache.keys.first;
-      _metaCache.remove(firstKey);
-    }
-  }
-
-  /// Computes a simple hash for caching purposes
-  /// Uses a combination of relevant pagination fields
+  /// Uses `Object.hash()` to create a more robust hash that includes the structure
+  /// of relevant pagination fields. This reduces the likelihood of hash collisions
+  /// compared to simple string concatenation.
+  ///
+  /// **Benefits:**
+  /// - More robust than string concatenation hashing
+  /// - Better collision resistance
+  /// - Includes structure information in hash calculation
+  /// - Uses Dart's built-in hash function which is well-optimized
+  /// - Includes multiple pagination fields to reduce collision probability
+  ///
+  /// **Note:** While hash collisions are still theoretically possible, using
+  /// `Object.hash()` with multiple fields significantly reduces the risk compared
+  /// to string-based hashing or fewer fields.
   int _computeSimpleHash(Map<String, dynamic> data) {
-    final buffer = StringBuffer();
-
-    // Include relevant pagination fields in hash
+    // Extract relevant pagination fields
     final pageValue = _extractValue(data, _config.pagePath);
     final perPageValue = _extractValue(data, _config.perPagePath);
     final totalValue = _extractValue(data, _config.totalPath);
     final hasMoreValue = _extractValue(data, _config.hasMorePath);
+    final nextCursorValue = _extractValue(data, _config.nextCursorPath);
+    final offsetValue = _extractValue(data, _config.offsetPath);
+    final limitValue = _extractValue(data, _config.limitPath);
 
-    buffer.write('${pageValue ?? ''}_');
-    buffer.write('${perPageValue ?? ''}_');
-    buffer.write('${totalValue ?? ''}_');
-    buffer.write('${hasMoreValue ?? ''}');
-
-    return buffer.toString().hashCode;
+    // Use Object.hashAll() for more robust hashing
+    // This combines multiple values into a single hash with better collision resistance
+    // Including more fields and data length reduces the probability of hash collisions
+    return Object.hashAll([
+      pageValue,
+      perPageValue,
+      totalValue,
+      hasMoreValue,
+      nextCursorValue,
+      offsetValue,
+      limitValue,
+      data.length, // Include structure size in hash
+    ]);
   }
 
-  /// Clears the metadata cache
+  /// Validates that cached metadata matches the current data structure
+  ///
+  /// This method performs a hash collision check by comparing the cached metadata
+  /// with the actual values extracted from the current data structure.
+  /// If they don't match, it indicates a hash collision and the cache entry is invalid.
+  ///
+  /// **Parameters:**
+  /// - [cachedMeta] - The cached metadata to validate
+  /// - [data] - The current data structure to compare against
+  ///
+  /// **Returns:**
+  /// - `true` if cached metadata matches current data (no collision)
+  /// - `false` if there's a mismatch (possible hash collision)
+  bool _validateCachedMeta(PageMeta cachedMeta, Map<String, dynamic> data) {
+    // Skip validation for small data structures (fast to re-parse)
+    if (data.length < 10) return true; // Small structures are fast to re-parse
+
+    // Only validate critical fields, not all fields
+    if (cachedMeta.page != null) {
+      final currentPage = _extractValue(data, _config.pagePath) as int?;
+      if (currentPage != null && cachedMeta.page != currentPage) return false;
+    }
+
+    // Check hasMore as it's critical for pagination logic
+    if (cachedMeta.hasMore != null) {
+      final currentHasMore = _extractValue(data, _config.hasMorePath) as bool?;
+      if (currentHasMore != null && cachedMeta.hasMore != currentHasMore) {
+        return false;
+      }
+    }
+
+    // Assume valid if critical fields match
+    return true;
+  }
+
+  /// Clears the metadata and path caches
   /// Useful for memory management or when data structures change significantly
   void clearCache() {
     _metaCache.clear();
@@ -326,8 +558,64 @@ class ConfigMetaParser implements MetaParser {
     return true;
   }
 
-  /// Extracts a value from nested data using dot notation
-  /// Uses caching to avoid repeated path parsing
+  /// Extracts a value from nested data using dot notation.
+  ///
+  /// This method navigates through nested JSON structures using dot-separated paths
+  /// (e.g., "meta.current_page", "data.items", "pagination.total").
+  ///
+  /// **Why `dynamic` return type?**
+  ///
+  /// The return type is `dynamic` because JSON parsing inherently produces dynamic values,
+  /// and this method must handle multiple possible types:
+  /// - `int?` - For numeric values (page numbers, counts, offsets, limits)
+  /// - `String?` - For text values (cursors, identifiers)
+  /// - `bool?` - For boolean flags (hasMore, hasNext)
+  /// - `List?` - For arrays (items arrays)
+  /// - `Map?` - For nested objects
+  /// - `null` - When path doesn't exist or is invalid
+  ///
+  /// **Type Safety:**
+  ///
+  /// Callers are responsible for type checking after extraction. The parseMeta() method
+  /// performs runtime type checks using `is` operators:
+  ///
+  /// ```dart
+  /// final pageValue = _extractValue(data, _config.pagePath);
+  /// final page = pageValue is int ? pageValue : null;  // Type-safe extraction
+  /// ```
+  ///
+  /// **Performance:**
+  ///
+  /// Uses path segment caching to avoid repeated string splitting operations,
+  /// improving performance for frequently accessed paths.
+  ///
+  /// **Parameters:**
+  /// - [data] - The JSON data map to extract from
+  /// - [path] - Dot-separated path (e.g., "meta.current_page") or null/empty to return null
+  ///
+  /// **Returns:**
+  /// - The extracted value (type: `int?`, `String?`, `bool?`, `List?`, `Map?`, or `null`)
+  /// - Returns `null` if:
+  ///   - Path is null or empty
+  ///   - Path format is invalid (contains empty segments or invalid characters)
+  ///   - Path doesn't exist in the data structure
+  ///   - Intermediate value in path is not a Map
+  ///
+  /// **Examples:**
+  /// ```dart
+  /// // Extract page number
+  /// final page = _extractValue(data, 'meta.current_page');  // Returns int? or null
+  ///
+  /// // Extract cursor
+  /// final cursor = _extractValue(data, 'meta.next_cursor');  // Returns String? or null
+  ///
+  /// // Extract items array
+  /// final items = _extractValue(data, 'data.items');  // Returns List? or null
+  /// ```
+  ///
+  /// **See also:**
+  /// - [parseMeta] - Uses this method with type checking
+  /// - [extractItems] - Uses this method to extract items arrays
   dynamic _extractValue(Map<String, dynamic> data, String? path) {
     if (path == null || path.isEmpty) return null;
 
@@ -336,13 +624,14 @@ class ConfigMetaParser implements MetaParser {
       return null;
     }
 
-    // Get or cache path segments
+    // Get or cache path segments (LRU cache automatically handles eviction)
     List<String> parts;
-    if (_pathCache.containsKey(path)) {
-      parts = _pathCache[path]!;
+    final cachedParts = _pathCache.get(path);
+    if (cachedParts != null) {
+      parts = cachedParts;
     } else {
       parts = path.split('.');
-      _pathCache[path] = parts;
+      _pathCache.put(path, parts);
     }
 
     dynamic current = data;

@@ -404,6 +404,7 @@ void main() {
           'meta': {
             'pagination': {
               'current_page': 2,
+              'per_page': 20,
             },
           },
         };
@@ -412,11 +413,13 @@ void main() {
           const MetaConfig(
             itemsPath: 'data',
             pagePath: 'meta.pagination.current_page',
+            perPagePath: 'meta.pagination.per_page',
           ),
         );
 
         final meta = customParser.parseMeta(data);
         expect(meta.page, 2);
+        expect(meta.perPage, 20);
       });
     });
 
@@ -495,7 +498,10 @@ void main() {
       test('should clear cache when clearCache is called', () {
         final data = {
           'data': [],
-          'meta': {'current_page': 1},
+          'meta': {
+            'current_page': 1,
+            'per_page': 20, // Add per_page to make it valid page-based
+          },
         };
 
         parser.parseMeta(data);
@@ -554,6 +560,221 @@ void main() {
             ),
           ),
         );
+      });
+    });
+
+    group('Cache eviction edge cases', () {
+      test('should evict oldest cache entry when cache reaches max size', () {
+        // Create parser and fill cache beyond max size
+        final testParser = ConfigMetaParser(MetaConfig.nestedMeta);
+
+        // Generate data structures that will be cached
+        // We need to create enough unique structures to exceed cache limit
+        // Cache max size is typically 100 (check PaginatrixCacheConstants)
+        final dataStructures = <Map<String, dynamic>>[];
+
+        // Create 150 unique data structures to exceed cache
+        for (var i = 0; i < 150; i++) {
+          dataStructures.add({
+            'data': [],
+            'meta': {
+              'current_page': i + 1,
+              'per_page': 20,
+              'total': 100,
+              'last_page': 5,
+            },
+          });
+        }
+
+        // Parse all structures to fill cache
+        for (final data in dataStructures) {
+          testParser.parseMeta(data);
+        }
+
+        // Verify cache is working (should still parse correctly)
+        final lastMeta = testParser.parseMeta(dataStructures.last);
+        expect(lastMeta.page, 150);
+
+        // Clear cache and verify it works
+        testParser.clearCache();
+        final metaAfterClear = testParser.parseMeta(dataStructures.first);
+        expect(metaAfterClear.page, 1);
+      });
+
+      test('should handle cache eviction with identical hash values', () {
+        // Test that cache handles potential hash collisions gracefully
+        final testParser = ConfigMetaParser(MetaConfig.nestedMeta);
+
+        // Create data structures that might have similar hash values
+        final data1 = {
+          'data': [],
+          'meta': {
+            'current_page': 1,
+            'per_page': 20,
+            'total': 100,
+            'has_more': true,
+          },
+        };
+
+        final data2 = {
+          'data': [],
+          'meta': {
+            'current_page': 1,
+            'per_page': 20,
+            'total': 100,
+            'has_more': true,
+          },
+        };
+
+        // Parse both - should use cache for second one
+        final meta1 = testParser.parseMeta(data1);
+        final meta2 = testParser.parseMeta(data2);
+
+        expect(meta1.page, meta2.page);
+        expect(meta1.perPage, meta2.perPage);
+      });
+
+      test('should not cache very large data structures', () {
+        final testParser = ConfigMetaParser(MetaConfig.nestedMeta);
+
+        // Create a large data structure (exceeds maxDataSizeForCaching)
+        final largeData = <String, dynamic>{
+          'data': [],
+          'meta': {
+            'current_page': 1,
+            'per_page': 20,
+          },
+        };
+
+        // Add many fields to make it large
+        for (var i = 0; i < 1000; i++) {
+          largeData['field_$i'] = 'value_$i' * 100; // Large string values
+        }
+
+        // Parse - should work but not cache
+        final meta1 = testParser.parseMeta(largeData);
+        expect(meta1.page, 1);
+
+        // Parse again - should parse again (not from cache)
+        final meta2 = testParser.parseMeta(largeData);
+        expect(meta2.page, 1);
+      });
+    });
+
+    group('Hash collision scenarios', () {
+      test('should handle different data with similar hash values', () {
+        final testParser = ConfigMetaParser(MetaConfig.nestedMeta);
+
+        // Create data structures that might produce similar hashes
+        // but have different actual values
+        final data1 = {
+          'data': [],
+          'meta': {
+            'current_page': 1,
+            'per_page': 20,
+            'total': 100,
+            'has_more': true,
+          },
+        };
+
+        final data2 = {
+          'data': [],
+          'meta': {
+            'current_page': 2, // Different page
+            'per_page': 20,
+            'total': 100,
+            'has_more': true,
+          },
+        };
+
+        // Both should parse correctly even if hash is similar
+        final meta1 = testParser.parseMeta(data1);
+        final meta2 = testParser.parseMeta(data2);
+
+        expect(meta1.page, 1);
+        expect(meta2.page, 2);
+        expect(meta1.perPage, 20);
+        expect(meta2.perPage, 20);
+      });
+
+      test('should correctly distinguish between different pagination types', () {
+        // Page-based parser
+        final pageParser = ConfigMetaParser(MetaConfig.nestedMeta);
+        final pageData = {
+          'data': [],
+          'meta': {
+            'current_page': 1,
+            'per_page': 20,
+          },
+        };
+
+        // Cursor-based parser
+        final cursorParser = ConfigMetaParser(MetaConfig.cursorBased);
+        final cursorData = {
+          'data': [],
+          'meta': {
+            'next_cursor': 'abc123',
+            'has_more': true,
+          },
+        };
+
+        // Offset-based parser
+        final offsetParser = ConfigMetaParser(MetaConfig.offsetBased);
+        final offsetData = {
+          'data': [],
+          'meta': {
+            'offset': 0,
+            'limit': 20,
+          },
+        };
+
+        final pageMeta = pageParser.parseMeta(pageData);
+        final cursorMeta = cursorParser.parseMeta(cursorData);
+        final offsetMeta = offsetParser.parseMeta(offsetData);
+
+        expect(pageMeta.page, 1);
+        expect(cursorMeta.nextCursor, 'abc123');
+        expect(offsetMeta.offset, 0);
+      });
+    });
+
+    group('Very large offset values', () {
+      test('should handle maximum valid offset value', () {
+        final offsetParser = ConfigMetaParser(MetaConfig.offsetBased);
+        final maxOffset = 2147483647; // Max int32
+
+        final data = {
+          'data': [],
+          'meta': {
+            'offset': maxOffset,
+            'limit': 1,
+            'total': maxOffset + 1,
+          },
+        };
+
+        final meta = offsetParser.parseMeta(data);
+        expect(meta.offset, maxOffset);
+        expect(meta.limit, 1);
+        expect(meta.total, maxOffset + 1);
+      });
+
+      test('should handle large offset calculations', () {
+        final offsetParser = ConfigMetaParser(MetaConfig.offsetBased);
+
+        // Test with large but valid offset
+        final largeOffset = 1000000;
+        final data = {
+          'data': [],
+          'meta': {
+            'offset': largeOffset,
+            'limit': 100,
+            'total': largeOffset + 200,
+          },
+        };
+
+        final meta = offsetParser.parseMeta(data);
+        expect(meta.offset, largeOffset);
+        expect(meta.hasMore, true); // largeOffset + 100 < largeOffset + 200
       });
     });
   });

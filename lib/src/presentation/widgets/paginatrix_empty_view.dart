@@ -30,14 +30,17 @@ class PaginatrixEmptyView extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
 
+    final iconWidget = icon;
+    final titleText = title;
+    final descriptionText = description;
     return Padding(
       padding: padding ?? PaginatrixSpacing.largePaddingAll,
       child: Column(
         mainAxisAlignment: mainAxisAlignment,
         crossAxisAlignment: crossAxisAlignment,
         children: [
-          if (icon != null) ...[
-            icon!,
+          if (iconWidget != null) ...[
+            iconWidget,
             const SizedBox(height: PaginatrixSpacing.iconBottom),
           ] else ...[
             Icon(
@@ -47,9 +50,9 @@ class PaginatrixEmptyView extends StatelessWidget {
             ),
             const SizedBox(height: PaginatrixSpacing.iconBottom),
           ],
-          if (title != null) ...[
+          if (titleText != null) ...[
             Text(
-              title!,
+              titleText,
               style: textTheme.headlineSmall?.copyWith(
                 color: colorScheme.onSurface.withValues(alpha: 0.8),
                 fontWeight: FontWeight.w600,
@@ -58,9 +61,9 @@ class PaginatrixEmptyView extends StatelessWidget {
             ),
             const SizedBox(height: PaginatrixSpacing.titleBottom),
           ],
-          if (description != null) ...[
+          if (descriptionText != null) ...[
             Text(
-              description!,
+              descriptionText,
               style: textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurface.withValues(alpha: 0.6),
               ),

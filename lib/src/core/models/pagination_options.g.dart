@@ -30,6 +30,10 @@ _$PaginationOptionsImpl _$$PaginationOptionsImplFromJson(
           ? const Duration(milliseconds: 300)
           : Duration(
               microseconds: (json['refreshDebounceDuration'] as num).toInt()),
+      searchDebounceDuration: json['searchDebounceDuration'] == null
+          ? const Duration(milliseconds: 400)
+          : Duration(
+              microseconds: (json['searchDebounceDuration'] as num).toInt()),
     );
 
 Map<String, dynamic> _$$PaginationOptionsImplToJson(
@@ -46,4 +50,5 @@ Map<String, dynamic> _$$PaginationOptionsImplToJson(
       'retryResetTimeout': instance.retryResetTimeout.inMicroseconds,
       'refreshDebounceDuration':
           instance.refreshDebounceDuration.inMicroseconds,
+      'searchDebounceDuration': instance.searchDebounceDuration.inMicroseconds,
     };

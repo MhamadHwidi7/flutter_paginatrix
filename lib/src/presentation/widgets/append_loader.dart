@@ -61,6 +61,7 @@ class _AppendLoaderState extends State<AppendLoader>
     final textTheme = context.textTheme;
 
     final customLoader = widget.customLoader;
+    final message = widget.message;
     if (customLoader != null) {
       return Container(
         padding: widget.padding ?? PaginatrixSpacing.defaultPaddingAll,
@@ -69,10 +70,10 @@ class _AppendLoaderState extends State<AppendLoader>
             mainAxisSize: MainAxisSize.min,
             children: [
               customLoader,
-              if (widget.message != null) ...[
+              if (message != null) ...[
                 const SizedBox(height: 12),
                 Text(
-                  widget.message!,
+                  message,
                   style: textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
@@ -144,10 +145,10 @@ class _AppendLoaderState extends State<AppendLoader>
                     );
                   },
                 ),
-                if (widget.message != null) ...[
+                if (message != null) ...[
                   const SizedBox(height: 12),
                   Text(
-                    widget.message!,
+                    message,
                     style: textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
@@ -255,6 +256,7 @@ class _PulsingAppendLoaderState extends State<PulsingAppendLoader>
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
+    final message = widget.message;
 
     return Container(
       padding: widget.padding ?? const EdgeInsets.all(16),
@@ -281,10 +283,10 @@ class _PulsingAppendLoaderState extends State<PulsingAppendLoader>
                 );
               },
             ),
-            if (widget.message != null) ...[
+            if (message != null) ...[
               const SizedBox(height: 12),
               Text(
-                widget.message!,
+                message,
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurface.withValues(alpha: 0.6),
                 ),

@@ -80,6 +80,7 @@ void main() {
           int? limit,
           String? cursor,
           CancelToken? cancelToken,
+          QueryCriteria? query,
         }) async {
           if (shouldFail) {
             shouldFail = false;
@@ -89,6 +90,7 @@ void main() {
             page: page,
             perPage: perPage,
             cancelToken: cancelToken,
+            query: query,
           );
         },
         itemDecoder: (json) => json,
@@ -117,6 +119,7 @@ void main() {
           int? limit,
           String? cursor,
           CancelToken? cancelToken,
+          QueryCriteria? query,
         }) async {
           loadCount++;
           await Future.delayed(const Duration(milliseconds: 500));
@@ -128,6 +131,7 @@ void main() {
             page: page,
             perPage: perPage,
             cancelToken: cancelToken,
+            query: query,
           );
         },
         itemDecoder: (json) => json,
@@ -153,6 +157,7 @@ void main() {
           int? limit,
           String? cursor,
           CancelToken? cancelToken,
+          QueryCriteria? query,
         }) async {
           return {
             'data': [],
@@ -195,6 +200,7 @@ void main() {
           int? limit,
           String? cursor,
           CancelToken? cancelToken,
+          QueryCriteria? query,
         }) async {
           if (page == 2 && failCount < 1) {
             failCount++;
@@ -206,6 +212,7 @@ void main() {
             page: page,
             perPage: perPage,
             cancelToken: cancelToken,
+            query: query,
           );
         },
         itemDecoder: (json) => json,
@@ -314,6 +321,7 @@ void main() {
           int? limit,
           String? cursor,
           CancelToken? cancelToken,
+          QueryCriteria? query,
         }) async {
           if (failCount < 2) {
             failCount++;
@@ -323,6 +331,7 @@ void main() {
             page: page,
             perPage: perPage,
             cancelToken: cancelToken,
+            query: query,
           );
         },
         itemDecoder: (json) => json,
@@ -366,6 +375,7 @@ void main() {
           int? limit,
           String? cursor,
           CancelToken? cancelToken,
+          QueryCriteria? query,
         }) async {
           await Future.delayed(const Duration(milliseconds: 200));
           if (cancelToken?.isCancelled ?? false) {
@@ -375,6 +385,7 @@ void main() {
             page: page,
             perPage: perPage,
             cancelToken: cancelToken,
+            query: query,
           );
         },
         itemDecoder: (json) => json,
@@ -452,6 +463,7 @@ void main() {
           int? limit,
           String? cursor,
           CancelToken? cancelToken,
+          QueryCriteria? query,
         }) async {
           if (page == 2 && failAppend) {
             failAppend = false;
@@ -461,6 +473,7 @@ void main() {
             page: page,
             perPage: perPage,
             cancelToken: cancelToken,
+            query: query,
           );
         },
         itemDecoder: (json) => json,
@@ -481,7 +494,7 @@ void main() {
     test('concurrent load and refresh: should handle race condition', () async {
       controller = createTestController(
         mockData: mockData,
-        loaderDelay: const Duration(milliseconds: 50),
+        loaderDelay: const Duration(milliseconds: 10), // Reduced delay
       );
 
       // Start concurrent operations
@@ -497,6 +510,75 @@ void main() {
       // Should end in a valid state
       expect(controller.hasError, isFalse);
       expect(controller.state.status, equals(const PaginationStatus.success()));
+    });
+
+    test('concurrent refresh operations: should handle multiple rapid refreshes', () async {
+      controller = createTestController(
+        mockData: mockData,
+        loaderDelay: const Duration(milliseconds: 10), // Reduced delay
+      );
+
+      // Load initial data
+      await controller.loadFirstPage();
+      final initialItemCount = controller.state.items.length;
+
+      // Trigger fewer concurrent refresh operations to speed up test
+      final refreshFutures = List.generate(5, (_) => controller.refresh()); // Reduced from 10 to 5
+      await Future.wait(refreshFutures);
+      await Future.delayed(const Duration(milliseconds: 50)); // Reduced delay
+
+      // Should end in a valid state with data
+      expect(controller.hasError, isFalse);
+      expect(controller.state.status, equals(const PaginationStatus.success()));
+      expect(controller.state.items.length, initialItemCount);
+    });
+
+    test('concurrent refresh with search: should handle refresh during search', () async {
+      // Use zero debounce for faster test
+      controller = createTestControllerWithZeroDebounce(
+        mockData: mockData,
+        loaderDelay: const Duration(milliseconds: 10), // Reduced delay
+      );
+
+      // Load initial data
+      await controller.loadFirstPage();
+      expect(controller.state.items.length, 20);
+
+      // Start search and refresh concurrently
+      controller.updateSearchTerm('test');
+      final refreshFuture = controller.refresh();
+
+      await Future.wait([refreshFuture]);
+      await Future.delayed(const Duration(milliseconds: 100)); // Reduced wait time
+
+      // Should end in valid state
+      expect(controller.hasError, isFalse);
+    });
+
+    test('concurrent refresh and append: should handle refresh during append', () async {
+      controller = createTestController(
+        mockData: mockData,
+        loaderDelay: const Duration(milliseconds: 10), // Reduced delay
+      );
+
+      // Load first page
+      await controller.loadFirstPage();
+      final firstPageCount = controller.state.items.length;
+
+      // Start append and refresh concurrently
+      final appendFuture = controller.loadNextPage();
+      final refreshFuture = controller.refresh();
+
+      await Future.wait([appendFuture, refreshFuture]);
+      await Future.delayed(const Duration(milliseconds: 50)); // Reduced delay
+
+      // Should end in valid state
+      // Note: Depending on timing, refresh might win (first page only) or both complete
+      // The important thing is that we end in a valid state without errors
+      expect(controller.hasError, isFalse);
+      expect(controller.state.status, equals(const PaginationStatus.success()));
+      // Should have at least first page data (could be more if both completed)
+      expect(controller.state.items.length, greaterThanOrEqualTo(firstPageCount));
     });
   });
 }

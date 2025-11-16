@@ -8,6 +8,8 @@ import 'integration/pagination_integration_expanded_test.dart'
 import 'performance/pagination_performance_test.dart' as performance_test;
 import 'presentation/controllers/paginated_controller_test.dart'
     as controller_test;
+import 'presentation/controllers/paginatrix_cubit_search_filter_test.dart'
+    as search_filter_test;
 import 'presentation/widgets/paginatrix_list_view_test.dart' as list_view_test;
 import 'presentation/widgets/paginatrix_grid_view_test.dart' as grid_view_test;
 
@@ -16,6 +18,7 @@ void main() {
   pagination_state_test.main();
   config_meta_parser_test.main();
   controller_test.main();
+  search_filter_test.main();
   integration_test.main();
   integration_expanded_test.main();
   list_view_test.main();

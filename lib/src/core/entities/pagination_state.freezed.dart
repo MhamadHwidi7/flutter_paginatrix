@@ -40,6 +40,10 @@ mixin _$PaginationState<T> {
   /// Last successful load timestamp
   DateTime? get lastLoadedAt => throw _privateConstructorUsedError;
 
+  /// Current search and filter criteria
+  /// Defaults to empty criteria (no search, filters, or sorting)
+  QueryCriteria? get query => throw _privateConstructorUsedError;
+
   @JsonKey(ignore: true)
   $PaginationStateCopyWith<T, PaginationState<T>> get copyWith =>
       throw _privateConstructorUsedError;
@@ -59,13 +63,15 @@ abstract class $PaginationStateCopyWith<T, $Res> {
       PaginationError? appendError,
       RequestContext? requestContext,
       bool isStale,
-      DateTime? lastLoadedAt});
+      DateTime? lastLoadedAt,
+      QueryCriteria? query});
 
   $PaginationStatusCopyWith<$Res> get status;
   $PageMetaCopyWith<$Res>? get meta;
   $PaginationErrorCopyWith<$Res>? get error;
   $PaginationErrorCopyWith<$Res>? get appendError;
   $RequestContextCopyWith<$Res>? get requestContext;
+  $QueryCriteriaCopyWith<$Res>? get query;
 }
 
 /// @nodoc
@@ -89,6 +95,7 @@ class _$PaginationStateCopyWithImpl<T, $Res, $Val extends PaginationState<T>>
     Object? requestContext = freezed,
     Object? isStale = null,
     Object? lastLoadedAt = freezed,
+    Object? query = freezed,
   }) {
     return _then(_value.copyWith(
       status: null == status
@@ -123,6 +130,10 @@ class _$PaginationStateCopyWithImpl<T, $Res, $Val extends PaginationState<T>>
           ? _value.lastLoadedAt
           : lastLoadedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      query: freezed == query
+          ? _value.query
+          : query // ignore: cast_nullable_to_non_nullable
+              as QueryCriteria?,
     ) as $Val);
   }
 
@@ -181,6 +192,18 @@ class _$PaginationStateCopyWithImpl<T, $Res, $Val extends PaginationState<T>>
       return _then(_value.copyWith(requestContext: value) as $Val);
     });
   }
+
+  @override
+  @pragma('vm:prefer-inline')
+  $QueryCriteriaCopyWith<$Res>? get query {
+    if (_value.query == null) {
+      return null;
+    }
+
+    return $QueryCriteriaCopyWith<$Res>(_value.query!, (value) {
+      return _then(_value.copyWith(query: value) as $Val);
+    });
+  }
 }
 
 /// @nodoc
@@ -199,7 +222,8 @@ abstract class _$$PaginationStateImplCopyWith<T, $Res>
       PaginationError? appendError,
       RequestContext? requestContext,
       bool isStale,
-      DateTime? lastLoadedAt});
+      DateTime? lastLoadedAt,
+      QueryCriteria? query});
 
   @override
   $PaginationStatusCopyWith<$Res> get status;
@@ -211,6 +235,8 @@ abstract class _$$PaginationStateImplCopyWith<T, $Res>
   $PaginationErrorCopyWith<$Res>? get appendError;
   @override
   $RequestContextCopyWith<$Res>? get requestContext;
+  @override
+  $QueryCriteriaCopyWith<$Res>? get query;
 }
 
 /// @nodoc
@@ -232,6 +258,7 @@ class __$$PaginationStateImplCopyWithImpl<T, $Res>
     Object? requestContext = freezed,
     Object? isStale = null,
     Object? lastLoadedAt = freezed,
+    Object? query = freezed,
   }) {
     return _then(_$PaginationStateImpl<T>(
       status: null == status
@@ -266,6 +293,10 @@ class __$$PaginationStateImplCopyWithImpl<T, $Res>
           ? _value.lastLoadedAt
           : lastLoadedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      query: freezed == query
+          ? _value.query
+          : query // ignore: cast_nullable_to_non_nullable
+              as QueryCriteria?,
     ));
   }
 }
@@ -281,7 +312,8 @@ class _$PaginationStateImpl<T> implements _PaginationState<T> {
       this.appendError,
       this.requestContext,
       this.isStale = false,
-      this.lastLoadedAt})
+      this.lastLoadedAt,
+      this.query})
       : _items = items;
 
   /// Current pagination status
@@ -325,9 +357,14 @@ class _$PaginationStateImpl<T> implements _PaginationState<T> {
   @override
   final DateTime? lastLoadedAt;
 
+  /// Current search and filter criteria
+  /// Defaults to empty criteria (no search, filters, or sorting)
+  @override
+  final QueryCriteria? query;
+
   @override
   String toString() {
-    return 'PaginationState<$T>(status: $status, items: $items, meta: $meta, error: $error, appendError: $appendError, requestContext: $requestContext, isStale: $isStale, lastLoadedAt: $lastLoadedAt)';
+    return 'PaginationState<$T>(status: $status, items: $items, meta: $meta, error: $error, appendError: $appendError, requestContext: $requestContext, isStale: $isStale, lastLoadedAt: $lastLoadedAt, query: $query)';
   }
 
   @override
@@ -345,7 +382,8 @@ class _$PaginationStateImpl<T> implements _PaginationState<T> {
                 other.requestContext == requestContext) &&
             (identical(other.isStale, isStale) || other.isStale == isStale) &&
             (identical(other.lastLoadedAt, lastLoadedAt) ||
-                other.lastLoadedAt == lastLoadedAt));
+                other.lastLoadedAt == lastLoadedAt) &&
+            (identical(other.query, query) || other.query == query));
   }
 
   @override
@@ -358,7 +396,8 @@ class _$PaginationStateImpl<T> implements _PaginationState<T> {
       appendError,
       requestContext,
       isStale,
-      lastLoadedAt);
+      lastLoadedAt,
+      query);
 
   @JsonKey(ignore: true)
   @override
@@ -377,7 +416,8 @@ abstract class _PaginationState<T> implements PaginationState<T> {
       final PaginationError? appendError,
       final RequestContext? requestContext,
       final bool isStale,
-      final DateTime? lastLoadedAt}) = _$PaginationStateImpl<T>;
+      final DateTime? lastLoadedAt,
+      final QueryCriteria? query}) = _$PaginationStateImpl<T>;
 
   @override
 
@@ -411,6 +451,11 @@ abstract class _PaginationState<T> implements PaginationState<T> {
 
   /// Last successful load timestamp
   DateTime? get lastLoadedAt;
+  @override
+
+  /// Current search and filter criteria
+  /// Defaults to empty criteria (no search, filters, or sorting)
+  QueryCriteria? get query;
   @override
   @JsonKey(ignore: true)
   _$$PaginationStateImplCopyWith<T, _$PaginationStateImpl<T>> get copyWith =>

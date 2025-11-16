@@ -182,10 +182,17 @@ class ErrorUtils {
       final buf = StringBuffer();
       var bytes = 0;
       for (final cp in s.runes) {
-        final chunk = utf8.encode(String.fromCharCode(cp));
-        if (bytes + chunk.length + ellipsisByteLength > maxBytes) break;
-        buf.writeCharCode(cp);
-        bytes += chunk.length;
+        try {
+          final char = String.fromCharCode(cp);
+          final chunk = utf8.encode(char);
+          if (bytes + chunk.length + ellipsisByteLength > maxBytes) break;
+          buf.writeCharCode(cp);
+          bytes += chunk.length;
+        } catch (e) {
+          // Skip invalid code points (surrogate pairs, invalid Unicode)
+          // This prevents crashes with certain Unicode characters
+          continue;
+        }
       }
       buf.write(ellipsis);
       return buf.toString();
