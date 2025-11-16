@@ -63,6 +63,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
   CancelToken? _currentCancelToken;
   Timer? _scrollDebounceTimer;
   Timer? _refreshDebounceTimer;
+  Timer? _searchDebounceTimer;
 
   // Retry backoff tracking
   int _retryCount = 0;
@@ -98,15 +99,130 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
   bool get hasAppendError => state.hasAppendError;
 
   /// Safely cancels the scroll debounce timer to prevent memory leaks
+  ///
+  /// **Timer Lifecycle:**
+  /// - Timers are created when scroll events trigger near-end detection
+  /// - Timers are automatically cancelled in the `finally` block of `_loadData()`
+  /// - Timers are also cancelled in `close()` to ensure cleanup
+  /// - If an error occurs before timer creation, no cleanup is needed (safe)
   void _cancelDebounceTimer() {
     _scrollDebounceTimer?.cancel();
     _scrollDebounceTimer = null;
   }
 
   /// Safely cancels the refresh debounce timer to prevent memory leaks
+  ///
+  /// **Timer Lifecycle:**
+  /// - Timers are created when `refresh()` is called
+  /// - Timers are automatically cancelled in the `finally` block of `_loadData()`
+  /// - Timers are also cancelled in `close()` to ensure cleanup
+  /// - If an error occurs before timer creation, no cleanup is needed (safe)
   void _cancelRefreshDebounceTimer() {
     _refreshDebounceTimer?.cancel();
     _refreshDebounceTimer = null;
+  }
+
+  /// Safely cancels the search debounce timer to prevent memory leaks
+  ///
+  /// **Timer Lifecycle:**
+  /// - Timers are created when `updateSearchTerm()` is called
+  /// - Timers are cancelled when a new search term is set (replaced)
+  /// - Timers are also cancelled in `close()` to ensure cleanup
+  /// - If an error occurs before timer creation, no cleanup is needed (safe)
+  void _cancelSearchDebounceTimer() {
+    _searchDebounceTimer?.cancel();
+    _searchDebounceTimer = null;
+  }
+
+  /// Handles the scroll near-end event by emitting immediate feedback and scheduling load
+  ///
+  /// This method extracts the complex logic for handling near-end scroll events,
+  /// including immediate state emission and debounced API calls.
+  ///
+  /// **Parameters:**
+  /// - [debounceDuration] - Duration to wait before triggering the actual API call
+  void _handleNearEndScroll(Duration debounceDuration) {
+    // Cancel any pending debounce timer
+    _cancelDebounceTimer();
+
+    // Emit appending state immediately to show loading footer
+    // This provides immediate visual feedback while debouncing the actual API call
+    _emitImmediateAppendingState();
+
+    // Create new debounce timer for actual API call
+    _scrollDebounceTimer = Timer(debounceDuration, () {
+      // Early return check to prevent execution after cubit is closed
+      if (isClosed) return;
+      _executeDebouncedLoad();
+    });
+  }
+
+  /// Emits appending state immediately for visual feedback
+  ///
+  /// This provides immediate visual feedback to the user while the debounced
+  /// API call is being prepared. The state is emitted synchronously to show
+  /// the loading footer right away.
+  void _emitImmediateAppendingState() {
+    final currentMeta = state.meta;
+    if (currentMeta != null &&
+        !state.status.maybeWhen(appending: () => true, orElse: () => false)) {
+      // Create a temporary request context for immediate feedback
+      final tempRequestContext = RequestContext.create(
+        generation: _generationGuard.currentGeneration,
+        cancelToken: CancelToken(),
+        isAppend: true,
+      );
+
+      // Emit appending state immediately - footer will show right away
+      emit(PaginationState.appending(
+        requestContext: tempRequestContext,
+        currentItems: state.items,
+        currentMeta: currentMeta,
+        query: state.query ?? const QueryCriteria(),
+      ));
+    }
+  }
+
+  /// Executes the debounced load operation after scroll debounce delay
+  ///
+  /// This method is called after the debounce timer expires to actually
+  /// trigger the next page load. It includes proper guards against race
+  /// conditions and cubit closure.
+  Future<void> _executeDebouncedLoad() async {
+    // Guard against race condition: check if cubit is closed first
+    if (isClosed) return;
+
+    // Only load if conditions are met (double-check after timer delay)
+    // Note: We allow proceeding even if already in appending state (from immediate emit above)
+    if (canLoadMore && !isClosed) {
+      // Check if we're already loading from a previous call
+      final isCurrentlyLoading = state.status.maybeWhen(
+        loading: () => true,
+        refreshing: () => true,
+        orElse: () => false,
+      );
+
+      // Only proceed if not already loading (but allow if just appending from immediate emit)
+      if (!isCurrentlyLoading) {
+        // Call loadNextPage and handle only specific race condition errors
+        try {
+          await loadNextPage();
+        } catch (e) {
+          // Only catch StateError about emitting after close
+          if (e is StateError &&
+              e.message
+                  .contains('Cannot emit new states after calling close')) {
+            // Silently ignore - cubit was closed during execution
+            return;
+          }
+          // Re-throw other errors to be handled by _loadData's error handling
+          // This ensures proper error state emission
+          if (!isClosed) {
+            rethrow; // Let _loadData handle it properly
+          }
+        }
+      }
+    }
   }
 
   /// Logs a debug message if debug logging is enabled
@@ -136,6 +252,10 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     // Don't trigger if already loading or no more items available
     if (!canLoadMore || isLoading) return false;
 
+    // Don't trigger pagination if there are no items (e.g., empty search results)
+    // This prevents showing loading footer when search returns no results
+    if (!hasData && !canLoadMore) return false;
+
     // Only check if we have valid scroll dimensions
     if (!metrics.hasContentDimensions || metrics.maxScrollExtent == 0) {
       return false;
@@ -156,67 +276,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
         : remainingScroll <= thresholdPixels;
 
     if (isNearEnd) {
-      // Cancel any pending debounce timer
-      _cancelDebounceTimer();
-
-      // Emit appending state immediately to show loading footer
-      // This provides immediate visual feedback while debouncing the actual API call
-      final currentMeta = state.meta;
-      if (currentMeta != null &&
-          !state.status.maybeWhen(appending: () => true, orElse: () => false)) {
-        // Create a temporary request context for immediate feedback
-        final tempRequestContext = RequestContext.create(
-          generation: _generationGuard.currentGeneration,
-          cancelToken: CancelToken(),
-          isAppend: true,
-        );
-
-        // Emit appending state immediately - footer will show right away
-        emit(PaginationState.appending(
-          requestContext: tempRequestContext,
-          currentItems: state.items,
-          currentMeta: currentMeta,
-        ));
-      }
-
-      // Create new debounce timer for actual API call
-      _scrollDebounceTimer = Timer(debounceDuration, () async {
-        // Guard against race condition: check if cubit is closed first
-        if (isClosed) return;
-
-        // Only load if conditions are met (double-check after timer delay)
-        // Note: We allow proceeding even if already in appending state (from immediate emit above)
-        if (canLoadMore && !isClosed) {
-          // Check if we're already loading from a previous call
-          final isCurrentlyLoading = state.status.maybeWhen(
-            loading: () => true,
-            refreshing: () => true,
-            orElse: () => false,
-          );
-
-          // Only proceed if not already loading (but allow if just appending from immediate emit)
-          if (!isCurrentlyLoading) {
-            // Call loadNextPage and handle only specific race condition errors
-            try {
-              await loadNextPage();
-            } catch (e) {
-              // Only catch StateError about emitting after close
-              if (e is StateError &&
-                  e.message
-                      .contains('Cannot emit new states after calling close')) {
-                // Silently ignore - cubit was closed during execution
-                return;
-              }
-              // For other errors, log if cubit is still open
-              if (!isClosed) {
-                _debugLog('Unexpected error loading next page: $e');
-              }
-              // Don't rethrow - errors are already handled in _loadData
-            }
-          }
-        }
-      });
-
+      _handleNearEndScroll(debounceDuration);
       return true;
     }
 
@@ -359,8 +419,9 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     }
 
     // Calculate backoff delay using exponential backoff
+    // Formula: initialBackoff * exponentialBackoffBase * (2^retryCount)
     final backoffDelay =
-        _options.initialBackoff * (1 << _retryCount); // 2^retryCount
+        _options.initialBackoff * _calculateBackoffMultiplier(_retryCount);
 
     _debugLog(
       'Retry attempt ${_retryCount + 1}/${_options.maxRetries} '
@@ -399,6 +460,19 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     _lastRetryTime = null;
   }
 
+  /// Calculates the exponential backoff multiplier for retry attempts
+  ///
+  /// Formula: exponentialBackoffBase * (2^retryCount)
+  /// This provides exponential backoff: 2^0 = 1, 2^1 = 2, 2^2 = 4, etc.
+  ///
+  /// **Parameters:**
+  /// - [retryCount] - Current retry attempt number (0-based)
+  ///
+  /// **Returns:** Multiplier value for the backoff calculation
+  int _calculateBackoffMultiplier(int retryCount) {
+    return PaginationDefaults.exponentialBackoffBase * (1 << retryCount);
+  }
+
   /// Cancels the current in-flight request.
   ///
   /// This will cancel any ongoing HTTP request and prevent it from updating the state.
@@ -434,23 +508,556 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     emit(PaginationState.initial());
   }
 
-  /// Checks if load operation should proceed
-  /// Returns true if load should proceed, false otherwise
+  /// Updates the search term and triggers a debounced reload of the first page.
+  ///
+  /// This method updates the query criteria with the new search term and
+  /// automatically reloads the first page after a debounce delay to prevent
+  /// excessive API calls while the user is typing.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// // In a TextField's onChanged callback
+  /// controller.updateSearchTerm('john');
+  /// ```
+  ///
+  /// **Behavior:**
+  /// - Updates `state.query.searchTerm`
+  /// - Cancels any previous search debounce timer
+  /// - Schedules a new debounced reload after [PaginationOptions.searchDebounceDuration]
+  /// - Automatically resets to page 1 when reload occurs
+  /// - Cancels any in-flight requests before starting new search
+  ///
+  /// **Note:** The debounce duration is configurable via [PaginationOptions.searchDebounceDuration].
+  /// If the duration is zero, the reload happens immediately.
+  void updateSearchTerm(String term) {
+    if (isClosed) return;
+
+    // Trim search term to normalize whitespace-only searches
+    // This prevents accidental searches with only spaces
+    final trimmedTerm = term.trim();
+
+    // Update query criteria with new search term
+    final currentQuery = state.query ?? const QueryCriteria();
+    final updatedQuery = currentQuery.copyWith(searchTerm: trimmedTerm);
+    emit(state.copyWith(query: updatedQuery));
+
+    // Cancel any previous search debounce timer
+    _cancelSearchDebounceTimer();
+
+    // Always use debounce, even for empty strings, to prevent rapid calls
+    // But use a shorter debounce for empty (clear search)
+    final debounceDuration = trimmedTerm.isEmpty
+        ? const Duration(milliseconds: 100) // Shorter debounce for clearing
+        : _options.searchDebounceDuration;
+
+    if (debounceDuration == Duration.zero) {
+      _reloadFirstPageWithCurrentQuery();
+      return;
+    }
+
+    // Create debounce timer for search
+    _searchDebounceTimer = Timer(debounceDuration, () {
+      if (!isClosed) {
+        _reloadFirstPageWithCurrentQuery();
+      }
+    });
+  }
+
+  /// Updates a specific filter and immediately reloads the first page.
+  ///
+  /// This method updates the query criteria with the new filter value and
+  /// immediately triggers a reload of the first page (no debouncing).
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// // Add or update a filter
+  /// controller.updateFilter('status', 'active');
+  ///
+  /// // Remove a filter by passing null
+  /// controller.updateFilter('status', null);
+  /// ```
+  ///
+  /// **Behavior:**
+  /// - Updates `state.query.filters` with the new key-value pair
+  /// - If value is null, removes the filter
+  /// - Immediately reloads first page (no debouncing)
+  /// - Cancels any in-flight requests before starting new load
+  ///
+  /// **Note:** Filters trigger immediate reloads because they represent
+  /// discrete user actions (e.g., selecting from a dropdown), unlike
+  /// search which is continuous typing.
+  void updateFilter(String key, dynamic value) {
+    if (isClosed) return;
+
+    // Validate key
+    if (key.isEmpty || key.trim().isEmpty) {
+      throw ArgumentError('Filter key cannot be empty');
+    }
+
+    // Validate value type (optional, but helpful)
+    if (value != null &&
+        value is! String &&
+        value is! int &&
+        value is! double &&
+        value is! bool) {
+      _debugLog(
+          'Warning: Filter value type ${value.runtimeType} may not serialize correctly');
+    }
+
+    // Update query criteria with new filter
+    final currentQuery = state.query ?? const QueryCriteria();
+    final updatedQuery = currentQuery.withFilter(key, value);
+    emit(state.copyWith(query: updatedQuery));
+
+    // Immediately reload with new filter (no debouncing)
+    _reloadFirstPageWithCurrentQuery();
+  }
+
+  /// Updates multiple filters at once and immediately reloads the first page.
+  ///
+  /// This method is useful when you need to update several filters simultaneously,
+  /// such as when applying a filter preset or resetting multiple filters.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// // Update multiple filters
+  /// controller.updateFilters({
+  ///   'status': 'active',
+  ///   'category': 'electronics',
+  ///   'priceRange': '100-500',
+  /// });
+  ///
+  /// // Remove filters by passing null values
+  /// controller.updateFilters({
+  ///   'status': null,
+  ///   'category': null,
+  /// });
+  /// ```
+  ///
+  /// **Behavior:**
+  /// - Updates `state.query.filters` with all provided key-value pairs
+  /// - Filters with null values are removed
+  /// - Immediately reloads first page (no debouncing)
+  /// - Cancels any in-flight requests before starting new load
+  void updateFilters(Map<String, dynamic> filters) {
+    if (isClosed) return;
+
+    // Update query criteria with new filters
+    final currentQuery = state.query ?? const QueryCriteria();
+    final updatedQuery = currentQuery.withFilters(filters);
+    emit(state.copyWith(query: updatedQuery));
+
+    // Immediately reload with new filters (no debouncing)
+    _reloadFirstPageWithCurrentQuery();
+  }
+
+  /// Clears all filters and reloads the first page.
+  ///
+  /// This method removes all filters from the query criteria while preserving
+  /// the search term and sorting, then reloads the first page.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// controller.clearFilters();
+  /// ```
+  ///
+  /// **Behavior:**
+  /// - Clears all filters from `state.query.filters`
+  /// - Preserves search term and sorting
+  /// - Immediately reloads first page
+  void clearFilters() {
+    if (isClosed) return;
+
+    // Clear filters while preserving search and sorting
+    final currentQuery = state.query ?? const QueryCriteria();
+    final updatedQuery = currentQuery.clearFilters();
+    emit(state.copyWith(query: updatedQuery));
+
+    // Immediately reload with cleared filters
+    _reloadFirstPageWithCurrentQuery();
+  }
+
+  /// Updates the sorting criteria and immediately reloads the first page.
+  ///
+  /// This method updates the query criteria with new sorting parameters and
+  /// immediately triggers a reload of the first page.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// // Sort by name ascending
+  /// controller.updateSorting('name', sortDesc: false);
+  ///
+  /// // Sort by price descending
+  /// controller.updateSorting('price', sortDesc: true);
+  ///
+  /// // Clear sorting
+  /// controller.updateSorting(null);
+  /// ```
+  ///
+  /// **Behavior:**
+  /// - Updates `state.query.sortBy` and `state.query.sortDesc`
+  /// - If sortBy is null, clears sorting
+  /// - Immediately reloads first page
+  /// - Cancels any in-flight requests before starting new load
+  void updateSorting(String? sortBy, {bool sortDesc = false}) {
+    if (isClosed) return;
+
+    // Validate sortBy if provided
+    String? normalizedSortBy;
+    if (sortBy != null) {
+      final trimmed = sortBy.trim();
+      if (trimmed.isEmpty) {
+        throw ArgumentError('sortBy cannot be empty or whitespace-only');
+      }
+      // Optionally validate format (alphanumeric + underscore)
+      if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(trimmed)) {
+        _debugLog('Warning: sortBy contains invalid characters: $trimmed');
+      }
+      normalizedSortBy = trimmed;
+    }
+
+    // Update query criteria with new sorting
+    final currentQuery = state.query ?? const QueryCriteria();
+    final updatedQuery = currentQuery.copyWith(
+      sortBy: normalizedSortBy,
+      sortDesc: normalizedSortBy != null ? sortDesc : false,
+    );
+    emit(state.copyWith(query: updatedQuery));
+
+    // Immediately reload with new sorting
+    _reloadFirstPageWithCurrentQuery();
+  }
+
+  /// Clears all search, filters, and sorting, then reloads the first page.
+  ///
+  /// This method resets the query criteria to empty and reloads the first page
+  /// with no search, filters, or sorting applied.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// controller.clearAllQuery();
+  /// ```
+  ///
+  /// **Behavior:**
+  /// - Clears search term, filters, and sorting
+  /// - Immediately reloads first page
+  /// - Cancels any in-flight requests before starting new load
+  void clearAllQuery() {
+    if (isClosed) return;
+
+    // Clear all query criteria
+    final currentQuery = state.query ?? const QueryCriteria();
+    final updatedQuery = currentQuery.clearAll();
+    emit(state.copyWith(query: updatedQuery));
+
+    // Immediately reload with cleared query
+    _reloadFirstPageWithCurrentQuery();
+  }
+
+  /// Reloads the first page with the current query criteria
+  ///
+  /// This method cancels any in-flight requests, cancels search debounce timers,
+  /// and loads the first page. The loader can access the current query via state.query.
+  /// The app layer is responsible for reading state.query and applying it to the actual API call.
+  void _reloadFirstPageWithCurrentQuery() {
+    // Cancel any in-flight requests
+    cancel();
+
+    // Cancel search debounce timer (if any)
+    _cancelSearchDebounceTimer();
+
+    // Reload first page - the loader can access query via state.query
+    // The app layer is responsible for reading state.query and applying it
+    // to the actual API call
+    loadFirstPage();
+  }
+
+  /// Determines if a load operation should proceed based on current state.
+  ///
+  /// This method performs defensive validation to prevent crashes, race conditions,
+  /// and invalid state transitions by checking all prerequisites before attempting
+  /// a load operation.
+  ///
+  /// **Validation Rules (in order of execution):**
+  ///
+  /// 1. **Appending State Exception:**
+  ///    - If state is `appending` and load type is `next`, allow proceeding
+  ///    - This handles the case where appending state is emitted immediately for
+  ///      visual feedback, but the actual API call hasn't started yet
+  ///    - Example: User scrolls near end → immediate appending state → debounced load
+  ///
+  /// 2. **Loading State Check:**
+  ///    - Blocks if already loading (prevents concurrent loads)
+  ///    - Exception: Allows proceeding if in appending state for next page loads
+  ///    - Prevents race conditions from rapid user interactions
+  ///
+  /// 3. **Next Page Validation:**
+  ///    - Only applies to `PaginatrixLoadType.next`
+  ///    - Requires `canLoadMore == true` (more pages available)
+  ///    - Requires `state.meta != null` (metadata exists for pagination calculation)
+  ///    - Prevents crashes in `_getNextPageNumber()` and related methods
+  ///
+  /// 4. **Cubit Closure Check:**
+  ///    - Blocks if cubit is closed (prevents state emissions after disposal)
+  ///    - Final safety check to prevent memory leaks and exceptions
+  ///
+  /// **Edge Cases Handled:**
+  ///
+  /// - **Appending State for Next Page:**
+  ///   - When user scrolls near end, we emit appending state immediately
+  ///   - The actual API call is debounced, so we need to allow proceeding
+  ///   - This provides immediate visual feedback while preventing duplicate calls
+  ///
+  /// - **First Page Loads:**
+  ///   - Always proceed if not already loading (no metadata required)
+  ///   - Used for initial load or reset scenarios
+  ///
+  /// - **Refresh Operations:**
+  ///   - Require existing metadata (validated in `_validateMetaForOperation`)
+  ///   - This method doesn't block refresh, but `_validateMetaForOperation` does
+  ///
+  /// - **Concurrent Load Prevention:**
+  ///   - Multiple rapid calls to `loadFirstPage()` or `loadNextPage()` are blocked
+  ///   - Only one load operation can proceed at a time
+  ///
+  /// **Return Values:**
+  /// - `true`: Load operation should proceed
+  /// - `false`: Load operation should be blocked (reason logged if debug enabled)
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// if (!_shouldProceedWithLoad(PaginatrixLoadType.next)) {
+  ///   return; // Blocked by validation
+  /// }
+  /// // Proceed with load operation
+  /// ```
+  ///
+  /// **See Also:**
+  /// - `_validateMetaForOperation()` - Validates metadata for refresh/append
+  /// - `_emitImmediateAppendingState()` - Emits appending state for visual feedback
+  /// - `_executeDebouncedLoad()` - Executes the actual debounced load
   bool _shouldProceedWithLoad(PaginatrixLoadType type) {
-    // Allow proceeding if we're in appending state and trying to load next page
-    // This handles the case where we emit appending state immediately for visual feedback
+    // Early exit if closed
+    if (isClosed) return false;
+
+    // Allow proceeding if in appending state for next page loads
+    // This is a special case: when user scrolls near end, we emit appending
+    // state immediately for visual feedback, but the actual API call is debounced.
+    // By the time the debounced call executes, we're already in appending state,
+    // so we need to allow proceeding to avoid blocking the legitimate load.
     final isAppending = state.status.maybeWhen(
       appending: () => true,
       orElse: () => false,
     );
 
-    // Block if already loading (but allow appending state for next page loads)
-    if (state.isLoading && !(isAppending && type == PaginatrixLoadType.next)) {
+    // Check if already loading (with exception for appending state)
+    // Allow proceeding if in appending state for next page loads
+    // (this handles immediate visual feedback before debounced API call)
+    final isCurrentlyLoading =
+        state.isLoading && !(isAppending && type == PaginatrixLoadType.next);
+
+    if (isCurrentlyLoading) {
       return false;
     }
-    if (type == PaginatrixLoadType.next && !canLoadMore) return false;
-    if (isClosed) return false;
+
+    // For next page loads, validate prerequisites
+    if (type == PaginatrixLoadType.next) {
+      if (!canLoadMore) return false;
+      if (state.meta == null) {
+        _debugLog(
+          'Cannot load next page: metadata is null. '
+          'Load first page before attempting to load next page.',
+        );
+        return false;
+      }
+    }
+
     return true;
+  }
+
+  /// Determines pagination parameters based on load type and metadata
+  ///
+  /// This method extracts the complex pagination parameter determination logic
+  /// from `_loadData()`, making it more testable and maintainable.
+  /// Uses factory methods to create appropriate pagination parameters based on type.
+  ///
+  /// **Parameters:**
+  /// - [type] - The type of load operation (first, next, refresh)
+  /// - [currentMeta] - Current pagination metadata (null for first page)
+  ///
+  /// **Returns:** A map with pagination parameters (page, cursor, offset, limit)
+  ///
+  /// **Throws:** [StateError] if pagination type cannot be determined
+  Map<String, dynamic> _determinePaginationParams(
+    PaginatrixLoadType type,
+    PageMeta? currentMeta,
+  ) {
+    // For first page or refresh, try to infer pagination type from meta parser
+    if (type != PaginatrixLoadType.next || currentMeta == null) {
+      // Check if meta parser is configured for offset-based pagination
+      if (_metaParser is ConfigMetaParser) {
+        final configParser = _metaParser;
+        if (configParser.isOffsetBased) {
+          // Use offset-based pagination with offset=0 for first page
+          // Default limit is 20 (common default for pagination)
+          return _createOffsetBasedParams(offset: 0, limit: 20);
+        }
+      }
+      return _createPageBasedParams(page: 1);
+    }
+
+    // For next page, determine pagination type from metadata
+    return _createPaginationParamsFromMeta(currentMeta);
+  }
+
+  /// Creates page-based pagination parameters
+  ///
+  /// **Parameters:**
+  /// - [page] - The page number to load
+  ///
+  /// **Returns:** A map with page-based pagination parameters
+  Map<String, dynamic> _createPageBasedParams({required int page}) {
+    return {
+      'page': page,
+      'cursor': null,
+      'offset': null,
+      'limit': null,
+    };
+  }
+
+  /// Creates cursor-based pagination parameters
+  ///
+  /// **Parameters:**
+  /// - [cursor] - The cursor token for the next page
+  ///
+  /// **Returns:** A map with cursor-based pagination parameters
+  Map<String, dynamic> _createCursorBasedParams({required String cursor}) {
+    return {
+      'page': null,
+      'cursor': cursor,
+      'offset': null,
+      'limit': null,
+    };
+  }
+
+  /// Creates offset-based pagination parameters
+  ///
+  /// **Parameters:**
+  /// - [offset] - The offset value for the next page
+  /// - [limit] - The limit value (items per page)
+  ///
+  /// **Returns:** A map with offset-based pagination parameters
+  ///
+  /// **Throws:** [StateError] if offset is out of valid range
+  Map<String, dynamic> _createOffsetBasedParams({
+    required int offset,
+    required int limit,
+  }) {
+    // Bounds checking to prevent integer overflow
+    if (offset < 0 || offset > PaginatrixPaginationConstants.maxOffsetValue) {
+      throw StateError(
+        ErrorUtils.formatErrorMessage(
+          message:
+              'Offset calculation resulted in invalid value. Consider using cursor-based pagination for large datasets.',
+          context: 'Validation Error',
+          details: {
+            'offset': offset.toString(),
+            'min': '0',
+            'max': PaginatrixPaginationConstants.maxOffsetValue.toString(),
+            'suggestion':
+                'For datasets with more than ${PaginatrixPaginationConstants.maxOffsetValue} items, consider switching to cursor-based pagination.',
+          },
+        ),
+      );
+    }
+    return {
+      'page': null,
+      'cursor': null,
+      'offset': offset,
+      'limit': limit,
+    };
+  }
+
+  /// Creates pagination parameters from metadata using factory pattern
+  ///
+  /// This method determines the pagination type from metadata and creates
+  /// the appropriate parameters using factory methods.
+  ///
+  /// **Parameters:**
+  /// - [meta] - Current pagination metadata
+  ///
+  /// **Returns:** A map with pagination parameters
+  ///
+  /// **Throws:** [StateError] if pagination type cannot be determined
+  Map<String, dynamic> _createPaginationParamsFromMeta(PageMeta meta) {
+    // Determine pagination type from metadata and use appropriate factory method
+    if (meta.page != null) {
+      // Page-based pagination
+      return _createPageBasedParams(page: _getNextPageNumber());
+    } else if (meta.nextCursor != null && meta.nextCursor!.isNotEmpty) {
+      // Cursor-based pagination
+      final nextCursor =
+          _getNextCursor(); // Now guaranteed non-null and non-empty
+      return _createCursorBasedParams(cursor: nextCursor);
+    } else if (meta.offset != null && meta.limit != null) {
+      // Offset-based pagination
+      final currentOffset = meta.offset ?? 0;
+      final limit = meta.limit;
+      if (limit == null) {
+        throw StateError(
+          ErrorUtils.formatErrorMessage(
+            message: 'Cannot create offset-based params: limit is null',
+            context: 'Pagination Error',
+            details: {
+              'reason': 'This should not happen if meta.limit is not null',
+              'paginationType': 'offset-based',
+            },
+          ),
+        );
+      }
+
+      // Check for potential overflow BEFORE calculation
+      if (currentOffset >
+          PaginatrixPaginationConstants.maxOffsetValue - limit) {
+        throw StateError(
+          ErrorUtils.formatErrorMessage(
+            message:
+                'Offset calculation would overflow. Consider using cursor-based pagination for large datasets.',
+            context: 'Validation Error',
+            details: {
+              'currentOffset': currentOffset.toString(),
+              'limit': limit.toString(),
+              'maxAllowed':
+                  PaginatrixPaginationConstants.maxOffsetValue.toString(),
+              'suggestion':
+                  'For datasets with more than ${PaginatrixPaginationConstants.maxOffsetValue} items, consider switching to cursor-based pagination.',
+            },
+          ),
+        );
+      }
+
+      final newOffset = currentOffset + limit; // Now safe
+
+      return _createOffsetBasedParams(
+        offset: newOffset,
+        limit: limit,
+      );
+    } else {
+      throw StateError(
+        ErrorUtils.formatErrorMessage(
+          message: 'Cannot determine pagination type from metadata',
+          context: 'Pagination Error',
+          details: {
+            'required':
+                'Metadata must contain page, nextCursor, or offset/limit',
+            'hasPage': (meta.page != null).toString(),
+            'hasNextCursor': (meta.nextCursor != null).toString(),
+            'hasOffset': (meta.offset != null).toString(),
+            'hasLimit': (meta.limit != null).toString(),
+          },
+        ),
+      );
+    }
   }
 
   /// Validates that required metadata exists for append/refresh operations
@@ -489,11 +1096,20 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     RequestContext requestContext,
     PageMeta? currentMeta,
   ) {
+    if (isClosed) return;
+    final currentQuery = state.query ?? const QueryCriteria();
+
+    // Helper to emit loading state with query
+    void emitLoading(QueryCriteria query) {
+      emit(PaginationState.loading(
+        requestContext: requestContext,
+        query: query,
+      ));
+    }
+
     switch (type) {
       case PaginatrixLoadType.first:
-        emit(PaginationState.loading(
-          requestContext: requestContext,
-        ));
+        emitLoading(currentQuery);
         break;
 
       case PaginatrixLoadType.next:
@@ -502,13 +1118,14 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
         if (meta == null) {
           _debugLog(
               'Warning: currentMeta is null for next operation, falling back to loading state');
-          emit(PaginationState.loading(requestContext: requestContext));
+          emitLoading(currentQuery);
           return;
         }
         emit(PaginationState.appending(
           requestContext: requestContext,
           currentItems: state.items,
           currentMeta: meta,
+          query: currentQuery,
         ));
         break;
 
@@ -518,13 +1135,14 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
         if (meta == null) {
           _debugLog(
               'Warning: currentMeta is null for refresh operation, falling back to loading state');
-          emit(PaginationState.loading(requestContext: requestContext));
+          emitLoading(currentQuery);
           return;
         }
         emit(PaginationState.refreshing(
           requestContext: requestContext,
           currentItems: state.items,
           currentMeta: meta,
+          query: currentQuery,
         ));
         break;
     }
@@ -543,6 +1161,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     int? limit,
     required CancelToken cancelToken,
   }) {
+    final currentQuery = state.query ?? const QueryCriteria();
     return _loader(
       page: page,
       perPage: _options.defaultPageSize,
@@ -550,6 +1169,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
       limit: limit,
       cursor: cursor,
       cancelToken: cancelToken,
+      query: currentQuery, // Pass QueryCriteria directly
     ).timeout(
       _options.requestTimeout,
       onTimeout: () {
@@ -598,13 +1218,54 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     RequestContext requestContext,
     PaginatrixLoadType type,
   ) {
-    if (items.isEmpty && type != PaginatrixLoadType.next) {
-      return PaginationState<T>.empty(requestContext: requestContext);
+    final currentQuery = state.query ?? const QueryCriteria();
+
+    // Handle empty items based on load type
+    if (items.isEmpty) {
+      if (type == PaginatrixLoadType.next) {
+        // Empty append - could be valid (no more items) or error
+        // Check if hasMore to determine
+        if (meta.hasMore == false) {
+          // Valid empty append - no more items available
+          // Return success state with existing items (no new items to append)
+          return PaginationState.success(
+            items: state.items,
+            meta: meta,
+            requestContext: requestContext,
+            query: currentQuery,
+          );
+        } else {
+          // Unexpected empty append - might be an error
+          // Log warning but return success state to avoid breaking the UI
+          _debugLog(
+            'Warning: Received empty items but hasMore is true. '
+            'This might indicate an API issue. Possible causes: '
+            '1) API returned incorrect hasMore flag, '
+            '2) All items were filtered out, '
+            '3) API pagination logic error. '
+            'Check your API response structure and meta parser configuration.',
+          );
+          return PaginationState.success(
+            items: state.items,
+            meta: meta,
+            requestContext: requestContext,
+            query: currentQuery,
+          );
+        }
+      } else {
+        // Empty first page or refresh - return empty state
+        return PaginationState<T>.empty(
+          requestContext: requestContext,
+          query: currentQuery,
+        );
+      }
     }
+
     return PaginationState.success(
       items: items,
       meta: meta,
       requestContext: requestContext,
+      query: currentQuery,
     );
   }
 
@@ -615,21 +1276,27 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     RequestContext requestContext,
     PageMeta? currentMeta,
   ) {
+    if (isClosed) return;
+    final currentQuery = state.query ?? const QueryCriteria();
     switch (type) {
       case PaginatrixLoadType.first:
         emit(PaginationState.error(
           error: error,
           requestContext: requestContext,
+          query: currentQuery,
         ));
         break;
 
       case PaginatrixLoadType.next:
         if (currentMeta == null) {
-          // Fallback to initial error state if meta is missing
+          // Preserve items and previous meta even if current meta is missing
+          // This prevents user from losing their data when append fails without metadata
           emit(PaginationState.error(
             error: error,
             requestContext: requestContext,
             previousItems: state.items,
+            previousMeta: state.meta, // Preserve previous meta if available
+            query: currentQuery,
           ));
         } else {
           emit(PaginationState.appendError(
@@ -637,6 +1304,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
             requestContext: requestContext,
             currentItems: state.items,
             currentMeta: currentMeta,
+            query: currentQuery,
           ));
         }
         break;
@@ -647,6 +1315,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
           requestContext: requestContext,
           previousItems: state.items,
           previousMeta: currentMeta,
+          query: currentQuery,
         ));
         break;
     }
@@ -679,39 +1348,13 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     // 4. Execution Block
     try {
       // Determine pagination parameters based on metadata type
-      int? page;
-      String? cursor;
-      int? offset;
-      int? limit;
-
-      if (type == PaginatrixLoadType.next && currentMeta != null) {
-        // For next page, determine pagination type from metadata
-        if (currentMeta.page != null) {
-          // Page-based pagination
-          page = _getNextPageNumber();
-        } else if (currentMeta.nextCursor != null) {
-          // Cursor-based pagination
-          cursor = _getNextCursor();
-        } else if (currentMeta.offset != null && currentMeta.limit != null) {
-          // Offset-based pagination
-          offset = (currentMeta.offset ?? 0) + (currentMeta.limit ?? 0);
-          limit = currentMeta.limit;
-        } else {
-          throw StateError(
-            'Cannot determine pagination type from metadata. '
-            'Metadata must contain page, nextCursor, or offset/limit.',
-          );
-        }
-      } else {
-        // For first page or refresh, use default page 1
-        page = 1;
-      }
+      final paginationParams = _determinePaginationParams(type, currentMeta);
 
       final data = await _fetchData(
-        page: page,
-        cursor: cursor,
-        offset: offset,
-        limit: limit,
+        page: paginationParams['page'] as int?,
+        cursor: paginationParams['cursor'] as String?,
+        offset: paginationParams['offset'] as int?,
+        limit: paginationParams['limit'] as int?,
         cancelToken: cancelToken,
       );
 
@@ -728,8 +1371,10 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
         type,
       );
 
-      emit(newState);
-      _resetRetryTracking();
+      if (!isClosed) {
+        emit(newState);
+        _resetRetryTracking();
+      }
     } catch (e) {
       if (!_generationGuard.isValid(requestContext)) {
         return; // Stale response
@@ -741,6 +1386,10 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
       _currentCancelToken = null;
       _cancelDebounceTimer();
       _cancelRefreshDebounceTimer();
+      // Note: Search timer is intentionally NOT cancelled here because:
+      // 1. Search operations should complete independently
+      // 2. Search triggers loadFirstPage which will cancel in-flight requests
+      // 3. Cancelling here would prevent legitimate search-triggered reloads
     }
   }
 
@@ -763,24 +1412,41 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     final meta = state.meta;
     if (meta == null) {
       throw StateError(
-        'Cannot load next page: no metadata available. '
-        'Load first page before attempting to load next page.',
+        ErrorUtils.formatErrorMessage(
+          message: 'Cannot load next page: no metadata available',
+          context: 'Validation Error',
+          details: {
+            'reason': 'Load first page before attempting to load next page',
+          },
+        ),
       );
     }
 
     final page = meta.page;
     if (page == null) {
       throw StateError(
-        'Cannot load next page: page number is null in metadata. '
-        'This may indicate cursor-based or offset-based pagination. '
-        'Use appropriate method for the pagination type.',
+        ErrorUtils.formatErrorMessage(
+          message: 'Cannot load next page: page number is null in metadata',
+          context: 'Validation Error',
+          details: {
+            'reason':
+                'This may indicate cursor-based or offset-based pagination',
+            'suggestion': 'Use appropriate method for the pagination type',
+          },
+        ),
       );
     }
 
     if (page < 1) {
       throw StateError(
-        'Cannot load next page: invalid page number in metadata. '
-        'Expected positive integer, got: $page',
+        ErrorUtils.formatErrorMessage(
+          message: 'Cannot load next page: invalid page number in metadata',
+          context: 'Validation Error',
+          details: {
+            'expected': 'Positive integer',
+            'actual': page.toString(),
+          },
+        ),
       );
     }
 
@@ -798,19 +1464,39 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
   /// - [canLoadMore] should be checked before calling this method.
   /// - Only use for cursor-based pagination
   ///
-  /// **Returns:** The next cursor string
+  /// **Returns:** The next cursor string (guaranteed non-null and non-empty)
   ///
   /// **Throws:** [StateError] if metadata is null or next cursor is invalid
-  String? _getNextCursor() {
+  String _getNextCursor() {
     final meta = state.meta;
     if (meta == null) {
       throw StateError(
-        'Cannot load next page: no metadata available. '
-        'Load first page before attempting to load next page.',
+        ErrorUtils.formatErrorMessage(
+          message: 'Cannot load next page: no metadata available',
+          context: 'Validation Error',
+          details: {
+            'reason': 'Load first page before attempting to load next page',
+          },
+        ),
       );
     }
 
-    return meta.nextCursor;
+    final cursor = meta.nextCursor;
+    if (cursor == null || cursor.isEmpty) {
+      throw StateError(
+        ErrorUtils.formatErrorMessage(
+          message: 'Cannot load next page: nextCursor is null or empty',
+          context: 'Validation Error',
+          details: {
+            'reason':
+                'This may indicate that there are no more pages available',
+            'paginationType': 'cursor-based',
+          },
+        ),
+      );
+    }
+
+    return cursor;
   }
 
   /// Converts various error types to [PaginationError].
@@ -868,6 +1554,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
   Future<void> close() {
     _cancelDebounceTimer();
     _cancelRefreshDebounceTimer();
+    _cancelSearchDebounceTimer();
     cancel();
     return super.close();
   }
