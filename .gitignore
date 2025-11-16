@@ -28,7 +28,12 @@ migrate_working_dir/
 .dart_tool/
 .flutter-plugins-dependencies
 /build/
+**/build/
 /coverage/
+# Example build folders with old names (prevent creation)
+examples/example_*/
+# All build directories in examples
+examples/*/build/
 
 # GitHub templates and workflows documentation
 .github/PULL_REQUEST_TEMPLATE.md

@@ -5,11 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2024-12-XX
+## [1.0.0] - 2025-11-16
 
 ### Added
 - **Initial release** of Flutter Paginatrix - A simple, flexible, and backend-agnostic pagination package
-- **PaginatedCubit** - Cubit-based controller for managing paginated data with automatic state management
+- **PaginatrixCubit** / **PaginatrixController** - Cubit-based controller for managing paginated data with automatic state management
 - **PaginatrixListView** - ListView widget with built-in pagination support using Slivers
 - **PaginatrixGridView** - GridView widget with built-in pagination support using Slivers
 - **Multiple pagination strategies**:
@@ -66,13 +66,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Developer-friendly** - Simple API with minimal configuration
 
 ### Examples
-- `example_basic_controller` - Basic usage with PaginatrixController
-- `example_list_view` - PaginatrixListView with performance monitoring
-- `example_grid_view` - PaginatrixGridView pagination
-- `example_bloc_pattern` - BLoC pattern integration with custom events
-- `example_cubit_direct` - Direct PaginatrixCubit usage
-- `example_web_infinite_scroll` - Web infinite scroll pagination
-- `example_web_page_selector` - Web page selector pagination
+- `list_view` - PaginatrixListView with performance monitoring
+- `grid_view` - PaginatrixGridView pagination
+- `bloc_pattern` - BLoC pattern integration with custom events
+- `cubit_direct` - Direct PaginatrixCubit usage
+- `search_basic` - Basic search functionality with pagination
+- `search_advanced` - Advanced search with filters, sorting, and pagination
+- `web_infinite_scroll` - Web infinite scroll pagination
+- `web_page_selector` - Web page selector pagination
 
 ### Documentation
 - Complete API reference

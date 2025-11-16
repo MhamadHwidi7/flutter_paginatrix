@@ -3,62 +3,89 @@
 [![pub package](https://img.shields.io/pub/v/flutter_paginatrix.svg)](https://pub.dev/packages/flutter_paginatrix)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Flutter](https://img.shields.io/badge/Flutter-3.22+-blue.svg)](https://flutter.dev)
-[![CI/CD](https://github.com/MhamadHwidi7/flutter_paginatrix/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/MhamadHwidi7/flutter_paginatrix/actions/workflows/ci-cd.yml)
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/mohammadihwidi)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/mhamad-hwidi-563915237)
+[![Dart](https://img.shields.io/badge/Dart-3.2+-blue.svg)](https://dart.dev)
 
-**A simple, flexible, and backend-agnostic pagination package for Flutter applications.**
+**The most flexible, backend-agnostic pagination engine for Flutter applications.**
 
-Flutter Paginatrix provides everything you need for pagination with clean architecture, comprehensive error handling, and beautiful UI components built with Slivers for optimal performance.
+Flutter Paginatrix provides everything you need for pagination with clean architecture, comprehensive error handling, and beautiful UI components built with Slivers for optimal performance. It supports multiple pagination strategies (page-based, offset-based, cursor-based) and works seamlessly with any API structure.
 
 ---
 
 ## 📋 Table of Contents
 
+- [Overview](#-overview)
 - [Features](#-features)
-- [Installation](#-installation)
-- [Quick Start](#-quick-start)
-- [Core Concepts](#-core-concepts)
-- [Usage Examples](#-usage-examples)
-- [API Reference](#-api-reference)
+- [Getting Started](#-getting-started)
+- [Basic Usage](#-basic-usage)
+- [Advanced Usage](#-advanced-usage)
+- [API Overview](#-api-overview)
+- [Example Projects](#-example-projects)
+- [Common Pitfalls](#-common-pitfalls)
 - [Configuration](#-configuration)
-- [UI Components](#-ui-components)
-- [Examples](#-examples)
-- [Error Handling](#️-error-handling)
-- [Performance](#-performance)
 - [Testing](#-testing)
-- [CI/CD](#-cicd)
-- [Documentation](#-documentation)
-- [Contributing](#-contributing)
 - [License](#-license)
-- [Links](#-links)
-- [Support](#-support)
+- [Support & Links](#-support--links)
+
+---
+
+## 🎯 Overview
+
+Flutter Paginatrix is a complete pagination solution that handles data loading, state management, error recovery, and UI rendering. It uses `flutter_bloc` under the hood for reactive state management but provides a clean API through `PaginatrixController` that doesn't require you to import `flutter_bloc` directly.
+
+### Architecture Principles
+
+- **Type-Safe** - Full generics support with immutable data structures using `freezed`
+- **Backend-Agnostic** - Flexible meta parsers that work with any API format
+- **Performance-Optimized** - Sliver-based architecture for smooth scrolling
+- **Clean Architecture** - Clear separation of concerns (Core/Data/Presentation)
+- **Comprehensive Error Handling** - 6 error types with automatic recovery and retry
+- **Zero Boilerplate** - Minimal configuration required
+
+### Why Flutter Paginatrix?
+
+Unlike typical infinite scroll solutions, Flutter Paginatrix provides:
+
+- ✅ **Single Loader Function** - One function handles all pagination scenarios
+- ✅ **Generation Guards** - Prevents stale responses and race conditions
+- ✅ **Request Cancellation** - Automatic cleanup of in-flight requests
+- ✅ **Multiple Pagination Strategies** - Page-based, offset-based, and cursor-based
+- ✅ **Built-in Debouncing** - Prevents excessive API calls during search
+- ✅ **Comprehensive Test Suite** - 171+ tests with full coverage
 
 ---
 
 ## ✨ Features
 
+### Core Features
+
 - ✅ **Backend Agnostic** - Works with any API structure (page/perPage, offset/limit, cursor-based)
 - ✅ **Single Loader Function** - One function handles all pagination scenarios
-- ✅ **Type-Safe** - Full generics support with immutable data structures
-- ✅ **Reactive** - Stream-based state management with flutter_bloc
+- ✅ **Type-Safe** - Full generics support with immutable data structures using `freezed`
+- ✅ **Reactive State Management** - Built on `flutter_bloc` with clean public API
 - ✅ **Performance Optimized** - Sliver-based architecture for smooth scrolling
-- ✅ **Comprehensive Error Handling** - 6 error types with automatic recovery
+- ✅ **Comprehensive Error Handling** - 6 error types with automatic recovery and retry
 - ✅ **Beautiful UI Components** - Pre-built widgets with modern loading animations
 - ✅ **Request Cancellation** - Automatic cleanup of in-flight requests
 - ✅ **Stale Response Prevention** - Generation-based guards prevent race conditions
-- ✅ **Zero External Dependencies** - flutter_bloc is bundled, no need to add it to your pubspec.yaml
-- ✅ **171+ Tests** - Comprehensive test coverage
 - ✅ **Multiple Pagination Strategies** - Page-based, offset-based, and cursor-based pagination
+
+### Advanced Features
+
 - ✅ **Flexible Meta Parsers** - Pre-configured and custom parsers for any API format
-- ✅ **Web Support** - Page selector widgets optimized for web applications
+- ✅ **Search & Filtering** - Built-in support for search terms, filters, and sorting
 - ✅ **Pull-to-Refresh** - Built-in pull-to-refresh functionality
 - ✅ **Skeleton Loading** - Beautiful skeleton loading effects
 - ✅ **Empty States** - Pre-built empty state widgets for various scenarios
+- ✅ **Web Support** - Page selector widgets optimized for web applications
+- ✅ **Exponential Backoff** - Automatic retry with exponential backoff
+- ✅ **Debouncing** - Configurable debouncing for search and refresh operations
+- ✅ **Comprehensive Test Suite** - 171+ tests with full coverage
 
 ---
 
-## 📦 Installation
+## 🚀 Getting Started
+
+### Installation
 
 Add `flutter_paginatrix` to your `pubspec.yaml`:
 
@@ -81,9 +108,9 @@ flutter pub get
 
 ---
 
-## 🚀 Quick Start
+## 🔧 Basic Usage
 
-### Simple Usage (Recommended - No flutter_bloc import required)
+### Simple Example with PaginatrixController
 
 ```dart
 import 'package:flutter/material.dart';
@@ -99,16 +126,18 @@ class UsersPage extends StatefulWidget {
 
 class _UsersPageState extends State<UsersPage> {
   late final PaginatrixController<User> _controller;
-  final _dio = Dio(BaseOptions(baseUrl: 'https://api.example.com'));
 
   @override
   void initState() {
     super.initState();
+    
     _controller = PaginatrixController<User>(
       loader: _loadUsers,
       itemDecoder: User.fromJson,
       metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
     );
+    
+    // Load first page
     _controller.loadFirstPage();
   }
 
@@ -119,13 +148,27 @@ class _UsersPageState extends State<UsersPage> {
     int? limit,
     String? cursor,
     CancelToken? cancelToken,
+    QueryCriteria? query,
   }) async {
-    final response = await _dio.get(
-      '/users',
-      queryParameters: {'page': page, 'per_page': perPage},
+    final dio = Dio();
+    final response = await dio.get(
+      'https://api.example.com/users',
+      queryParameters: {
+        'page': page ?? 1,
+        'per_page': perPage ?? 20,
+        if (query?.searchTerm.isNotEmpty ?? false)
+          'search': query!.searchTerm,
+        ...?query?.filters,
+      },
       cancelToken: cancelToken,
     );
-    return response.data; // {data: [...], meta: {...}}
+    return response.data;
+  }
+
+  @override
+  void dispose() {
+    _controller.close();
+    super.dispose();
   }
 
   @override
@@ -140,965 +183,621 @@ class _UsersPageState extends State<UsersPage> {
             subtitle: Text(user.email),
           );
         },
-        appendLoaderBuilder: (context) => const AppendLoader(
-          loaderType: LoaderType.pulse,
-          message: 'Loading more users...',
-        ),
-        onPullToRefresh: () => _controller.refresh(),
       ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.close();
-    super.dispose();
-  }
-}
-
-// User model
-class User {
-  const User({required this.name, required this.email});
-
-  final String name;
-  final String email;
-
-  static User fromJson(Map<String, dynamic> json) {
-    return User(
-      name: json['name'] as String,
-      email: json['email'] as String,
     );
   }
 }
 ```
 
-### Advanced Usage with flutter_bloc (Optional)
+### Using PaginatrixCubit (Advanced)
 
-If you want to use `BlocProvider` and `BlocBuilder` directly for more control:
+If you prefer to use `PaginatrixCubit` directly with `BlocProvider`:
 
 ```dart
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
-import 'package:dio/dio.dart';
 
-class UsersPage extends StatelessWidget {
-  const UsersPage({super.key});
+final cubit = PaginatrixCubit<User>(
+  loader: _loadUsers,
+  itemDecoder: User.fromJson,
+  metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
+);
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => PaginatrixCubit<User>(
-        loader: _loadUsers,
-        itemDecoder: User.fromJson,
-        metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
-      )..loadFirstPage(),
-      child: const UsersView(),
-    );
-  }
-
-  static Future<Map<String, dynamic>> _loadUsers({
-    int? page,
-    int? perPage,
-    int? offset,
-    int? limit,
-    String? cursor,
-    CancelToken? cancelToken,
-  }) async {
-    final dio = Dio(BaseOptions(baseUrl: 'https://api.example.com'));
-    final response = await dio.get(
-      '/users',
-      queryParameters: {'page': page, 'per_page': perPage},
-      cancelToken: cancelToken,
-    );
-    return response.data; // {data: [...], meta: {...}}
-  }
-}
-
-class UsersView extends StatelessWidget {
-  const UsersView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Users')),
-      body: BlocBuilder<PaginatrixCubit<User>, PaginationState<User>>(
-        builder: (context, state) {
-          return PaginatrixListView<User>(
-            controller: context.read<PaginatrixCubit<User>>(),
-            itemBuilder: (context, user, index) {
-              return ListTile(
-                title: Text(user.name),
-                subtitle: Text(user.email),
-              );
-            },
-            appendLoaderBuilder: (context) => const AppendLoader(
-              loaderType: LoaderType.pulse,
-              message: 'Loading more users...',
-            ),
-            onPullToRefresh: () => context.read<PaginatrixCubit<User>>().refresh(),
-          );
-        },
-      ),
-    );
-  }
-}
-
-// User model
-class User {
-  const User({required this.name, required this.email});
-
-  final String name;
-  final String email;
-
-  static User fromJson(Map<String, dynamic> json) {
-    return User(
-      name: json['name'] as String,
-      email: json['email'] as String,
-    );
-  }
-}
+// In widget tree
+BlocProvider(
+  create: (_) => cubit..loadFirstPage(),
+  child: PaginatrixListView<User>(
+    cubit: cubit,
+    itemBuilder: (context, user, index) => UserTile(user: user),
+  ),
+)
 ```
 
 ---
 
-## 📚 Core Concepts
+## 📚 Advanced Usage
 
-### Single Loader Function
-
-The library uses a **single loader function** that handles both initial load and pagination:
+### Search and Filtering
 
 ```dart
-Future<Map<String, dynamic>> Function({
-  int? page,        // Page number (1-based)
-  int? perPage,     // Items per page
-  int? offset,      // Offset for offset/limit pagination
-  int? limit,       // Limit for offset/limit pagination
-  String? cursor,   // Cursor for cursor-based pagination
-  CancelToken? cancelToken,  // For request cancellation
-})
+// Update search term (debounced automatically)
+_controller.updateSearchTerm('john');
+
+// Add or update a single filter
+_controller.updateFilter('status', 'active');
+
+// Add multiple filters at once
+_controller.updateFilters({
+  'status': 'active',
+  'role': 'admin',
+  'minPrice': 10.0,
+});
+
+// Remove a filter
+_controller.updateFilter('status', null);
+
+// Clear all filters
+_controller.clearFilters();
+
+// Add sorting
+_controller.updateSorting('name', sortDesc: false);
+
+// Clear sorting
+_controller.updateSorting(null);
+
+// Clear all query criteria (search, filters, sorting)
+_controller.clearAllQuery();
 ```
 
-The controller automatically:
-- Calls this function with `page: 1` for initial load
-- Calls it with `page: 2, 3, ...` for pagination
-- Manages the list (sets for first page, appends for next pages)
+### Custom Meta Parser
 
-### RequestContext
-
-`RequestContext` prevents stale responses and manages race conditions:
-
-- **Generation numbers** - Ensures only the latest response updates the UI
-- **Request cancellation** - Automatic cleanup of in-flight requests
-- **Race condition prevention** - Multiple rapid requests handled correctly
-
-### Meta Parsers
-
-Meta parsers transform API responses into the expected format:
-
-- **ConfigMetaParser** - Pre-configured parsers for common API formats
-- **CustomMetaParser** - Flexible parser for custom API response structures
-
-### Pagination Types
-
-Flutter Paginatrix supports three main pagination strategies:
-
-1. **Page-based** - Traditional page/perPage pagination (e.g., `page=1&per_page=20`)
-2. **Offset-based** - Offset/limit pagination (e.g., `offset=0&limit=20`)
-3. **Cursor-based** - Cursor/token pagination (e.g., `cursor=abc123`)
-
----
-
-## 🎯 Usage Examples
-
-### List View with Pagination
+For APIs that don't match standard formats:
 
 ```dart
-class ProductsPage extends StatefulWidget {
-  const ProductsPage({super.key});
+final parser = CustomMetaParser((data) {
+  final items = data['results'] as List;
+  final meta = PageMeta(
+    page: data['currentPage'] as int,
+    perPage: data['pageSize'] as int,
+    total: data['totalCount'] as int,
+    hasMore: data['hasNext'] as bool,
+  );
+  return {
+    'items': items,
+    'meta': meta.toJson(),
+  };
+});
 
-  @override
-  State<ProductsPage> createState() => _ProductsPageState();
-}
-
-class _ProductsPageState extends State<ProductsPage> {
-  late final PaginatrixController<Product> _controller;
-  final _dio = Dio(BaseOptions(baseUrl: 'https://api.example.com'));
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = PaginatrixController<Product>(
-      loader: _loadProducts,
-      itemDecoder: Product.fromJson,
-      metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
-    );
-    _controller.loadFirstPage();
-  }
-
-  Future<Map<String, dynamic>> _loadProducts({
-    int? page,
-    int? perPage,
-    int? offset,
-    int? limit,
-    String? cursor,
-    CancelToken? cancelToken,
-  }) async {
-    final response = await _dio.get(
-      '/products',
-      queryParameters: {'page': page, 'per_page': perPage},
-      cancelToken: cancelToken,
-    );
-    return response.data;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Products')),
-      body: PaginatrixListView<Product>(
-        controller: _controller,
-        itemBuilder: (context, product, index) {
-          return ProductCard(product: product);
-        },
-        appendLoaderBuilder: (context) => const AppendLoader(
-          loaderType: LoaderType.pulse,
-          message: 'Loading more products...',
-        ),
-        onPullToRefresh: () => _controller.refresh(),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.close();
-    super.dispose();
-  }
-}
-```
-
-### Grid View with Pagination
-
-```dart
-class ProductsGridPage extends StatefulWidget {
-  const ProductsGridPage({super.key});
-
-  @override
-  State<ProductsGridPage> createState() => _ProductsGridPageState();
-}
-
-class _ProductsGridPageState extends State<ProductsGridPage> {
-  late final PaginatrixController<Product> _controller;
-  final _dio = Dio(BaseOptions(baseUrl: 'https://api.example.com'));
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = PaginatrixController<Product>(
-      loader: _loadProducts,
-      itemDecoder: Product.fromJson,
-      metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
-    );
-    _controller.loadFirstPage();
-  }
-
-  Future<Map<String, dynamic>> _loadProducts({
-    int? page,
-    int? perPage,
-    int? offset,
-    int? limit,
-    String? cursor,
-    CancelToken? cancelToken,
-  }) async {
-    final response = await _dio.get(
-      '/products',
-      queryParameters: {'page': page, 'per_page': perPage},
-      cancelToken: cancelToken,
-    );
-    return response.data;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Products')),
-      body: PaginatrixGridView<Product>(
-        controller: _controller,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-        ),
-        itemBuilder: (context, product, index) {
-          return ProductCard(product: product);
-        },
-        appendLoaderBuilder: (context) => const AppendLoader(
-          loaderType: LoaderType.wave,
-          message: 'Loading more...',
-        ),
-        onPullToRefresh: () => _controller.refresh(),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.close();
-    super.dispose();
-  }
-}
-```
-
-### Page Selection (Web)
-
-```dart
-class ProductsPageWithSelector extends StatefulWidget {
-  const ProductsPageWithSelector({super.key});
-
-  @override
-  State<ProductsPageWithSelector> createState() => _ProductsPageWithSelectorState();
-}
-
-class _ProductsPageWithSelectorState extends State<ProductsPageWithSelector> {
-  late final PaginatrixController<Product> _controller;
-  final _dio = Dio(BaseOptions(baseUrl: 'https://api.example.com'));
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = PaginatrixController<Product>(
-      loader: _loadProducts,
-      itemDecoder: Product.fromJson,
-      metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
-    );
-    _controller.loadFirstPage();
-  }
-
-  Future<Map<String, dynamic>> _loadProducts({
-    int? page,
-    int? perPage,
-    int? offset,
-    int? limit,
-    String? cursor,
-    CancelToken? cancelToken,
-  }) async {
-    final response = await _dio.get(
-      '/products',
-      queryParameters: {'page': page, 'per_page': perPage},
-      cancelToken: cancelToken,
-    );
-    return response.data;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Products')),
-      body: Column(
-        children: [
-          // Page selector at the top
-          BlocBuilder<PaginatrixCubit<Product>, PaginationState<Product>>(
-            bloc: _controller,
-            builder: (context, state) {
-              return PageSelector(
-                currentPage: state.meta?.page ?? 1,
-                totalPages: state.meta?.lastPage ?? 1,
-                onPageSelected: (page) {
-                  // Navigate to specific page
-                  _controller.loadFirstPage();
-                },
-                style: PageSelectorStyle.buttons,
-                showFirstLast: true,
-                showPreviousNext: true,
-              );
-            },
-          ),
-          // Product list
-          Expanded(
-            child: PaginatrixListView<Product>(
-              controller: _controller,
-              itemBuilder: (context, product, index) {
-                return ProductCard(product: product);
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.close();
-    super.dispose();
-  }
-}
+final controller = PaginatrixController<User>(
+  loader: _loadUsers,
+  itemDecoder: User.fromJson,
+  metaParser: parser,
+);
 ```
 
 ### Error Handling
 
 ```dart
-class UsersPageWithErrorHandling extends StatefulWidget {
-  const UsersPageWithErrorHandling({super.key});
-
-  @override
-  State<UsersPageWithErrorHandling> createState() => _UsersPageWithErrorHandlingState();
-}
-
-class _UsersPageWithErrorHandlingState extends State<UsersPageWithErrorHandling> {
-  late final PaginatrixController<User> _controller;
-  final _dio = Dio(BaseOptions(baseUrl: 'https://api.example.com'));
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = PaginatrixController<User>(
-      loader: _loadUsers,
-      itemDecoder: User.fromJson,
-      metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
+PaginatrixListView<User>(
+  controller: _controller,
+  itemBuilder: (context, user, index) => UserTile(user: user),
+  errorBuilder: (context, error, onRetry) {
+    return PaginatrixErrorView(
+      error: error,
+      onRetry: onRetry,
     );
-    _controller.loadFirstPage();
-  }
-
-  Future<Map<String, dynamic>> _loadUsers({
-    int? page,
-    int? perPage,
-    int? offset,
-    int? limit,
-    String? cursor,
-    CancelToken? cancelToken,
-  }) async {
-    final response = await _dio.get(
-      '/users',
-      queryParameters: {'page': page, 'per_page': perPage},
-      cancelToken: cancelToken,
+  },
+  onRetryInitial: () {
+    _controller.retry(); // Automatically retries initial load
+  },
+  appendErrorBuilder: (context, error, onRetry) {
+    return PaginatrixAppendErrorView(
+      error: error,
+      onRetry: onRetry,
     );
-    return response.data;
-  }
+  },
+  onRetryAppend: () {
+    _controller.loadNextPage(); // Retry loading next page
+  },
+)
+```
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Users')),
-      body: BlocBuilder<PaginatrixCubit<User>, PaginationState<User>>(
-        bloc: _controller,
-        builder: (context, state) {
-          if (state.hasError) {
-            return PaginatrixErrorView(
-              error: state.error!,
-              onRetry: () => _controller.retry(),
-            );
-          }
-          
-          if (state.isEmpty) {
-            return PaginatrixEmptyView(
-              title: 'No users found',
-              description: 'Try refreshing to load users',
-              action: ElevatedButton(
-                onPressed: () => _controller.loadFirstPage(),
-                child: const Text('Retry'),
-              ),
-            );
-          }
-          
-          return PaginatrixListView<User>(
-            controller: _controller,
-            itemBuilder: (context, user, index) => UserTile(user: user),
-            errorBuilder: (context, error) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Error: ${error.message}'),
-                  ElevatedButton(
-                    onPressed: () => _controller.retry(),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            ),
-            appendErrorBuilder: (context, error) => Center(
-              child: Column(
-                children: [
-                  Text('Failed to load more: ${error.message}'),
-                  ElevatedButton(
-                    onPressed: () => _controller.retry(),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
+### Custom Loaders and Empty States
 
-  @override
-  void dispose() {
-    _controller.close();
-    super.dispose();
-  }
-}
+```dart
+PaginatrixListView<User>(
+  controller: _controller,
+  itemBuilder: (context, user, index) => UserTile(user: user),
+  appendLoaderBuilder: (context) => AppendLoader(
+    loaderType: LoaderType.pulse,
+    message: 'Loading more...',
+  ),
+  emptyBuilder: (context) => PaginatrixSearchEmptyView(
+    message: 'No users found',
+  ),
+  skeletonizerBuilder: (context) => PaginationSkeletonizer(
+    child: ListView.builder(
+      itemCount: 5,
+      itemBuilder: (context, index) => UserSkeletonCard(),
+    ),
+  ),
+)
+```
+
+### Grid View
+
+```dart
+PaginatrixGridView<User>(
+  controller: _controller,
+  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: 2,
+    crossAxisSpacing: 8,
+    mainAxisSpacing: 8,
+  ),
+  itemBuilder: (context, user, index) => UserCard(user: user),
+)
+```
+
+### Pull-to-Refresh
+
+```dart
+PaginatrixListView<User>(
+  controller: _controller,
+  itemBuilder: (context, user, index) => UserTile(user: user),
+  onPullToRefresh: () async {
+    await _controller.refresh();
+  },
+)
+```
+
+### Web Page Selector
+
+```dart
+// For web applications with page-based pagination
+PageSelector(
+  currentPage: _controller.state.meta?.page ?? 1,
+  totalPages: _controller.state.meta?.lastPage ?? 1,
+  onPageSelected: (page) {
+    // Navigate to specific page
+    _controller.loadFirstPage(); // Will load the requested page
+  },
+  style: PageSelectorStyle.buttons, // or .dropdown, .compact
+)
+```
+
+### Retry with Exponential Backoff
+
+The `retry()` method automatically implements exponential backoff:
+
+```dart
+// Automatically retries with exponential backoff
+// 1st retry: waits 500ms
+// 2nd retry: waits 1000ms
+// 3rd retry: waits 2000ms
+// etc.
+await _controller.retry();
 ```
 
 ---
 
-## 📖 API Reference
+## 📦 API Overview
 
-### PaginatrixController<T>
+### Core Classes
 
-The main controller for managing paginated data. This is the recommended public API.
+#### `PaginatrixController<T>`
 
-**Constructor:**
-```dart
-PaginatrixController<T>({
-  required LoaderFn<T> loader,
-  required ItemDecoder<T> itemDecoder,
-  required MetaParser metaParser,
-  PaginationOptions? options,
-})
-```
+Main controller for pagination. Provides a clean API without requiring `flutter_bloc` imports. This is a type alias for `PaginatrixCubit<T>`.
+
+**Key Methods:**
+
+- `loadFirstPage()` - Load the first page of data
+- `loadNextPage()` - Load the next page (appends to existing items)
+- `refresh()` - Refresh current data (reloads first page)
+- `updateSearchTerm(String term)` - Update search term (debounced)
+- `updateFilter(String key, dynamic value)` - Add or update a filter
+- `updateFilters(Map<String, dynamic> filters)` - Update multiple filters
+- `clearFilters()` - Clear all filters
+- `updateSorting(String? sortBy, {bool sortDesc})` - Update sorting
+- `clearAllQuery()` - Clear all search, filters, and sorting
+- `retry()` - Retry failed operation with exponential backoff (automatically determines initial or append retry)
+- `cancel()` - Cancel in-flight requests
+- `clear()` - Clear all data and reset to initial state
+- `close()` - Dispose and clean up resources
 
 **Properties:**
-- `PaginationState<T> state` - Current pagination state
-- `bool canLoadMore` - Whether more data can be loaded
-- `bool isLoading` - Whether currently loading
-- `bool hasData` - Whether has data
-- `bool hasError` - Whether has error
-- `bool hasAppendError` - Whether has append error
+
+- `state: PaginationState<T>` - Current pagination state (read-only)
+- `canLoadMore: bool` - Whether more data can be loaded
+- `isLoading: bool` - Whether a load operation is in progress
+- `hasData: bool` - Whether the controller has successfully loaded data
+- `hasError: bool` - Whether the initial load encountered an error
+- `hasAppendError: bool` - Whether loading the next page encountered an error
+
+#### `PaginatrixCubit<T>`
+
+Internal implementation using `Cubit`. Use `PaginatrixController` for most cases. Can be used directly with `BlocProvider` for advanced scenarios.
+
+#### `PaginationState<T>`
+
+Immutable state object containing:
+
+- `status: PaginationStatus` - Current pagination status
+- `items: List<T>` - List of loaded items
+- `meta: PageMeta?` - Pagination metadata (page, total, etc.)
+- `error: PaginationError?` - Current error (if any)
+- `appendError: PaginationError?` - Append error (non-blocking)
+- `query: QueryCriteria?` - Current search/filter criteria
+- `isStale: bool` - Whether data is stale and needs refresh
+- `lastLoadedAt: DateTime?` - Last successful load timestamp
+
+#### `PageMeta`
+
+Pagination metadata containing:
+
+- `page: int?` - Current page number
+- `perPage: int?` - Items per page
+- `total: int?` - Total number of items
+- `lastPage: int?` - Last page number
+- `hasMore: bool` - Whether more pages are available
+- `nextCursor: String?` - Cursor for cursor-based pagination
+- `previousCursor: String?` - Previous cursor
+- `offset: int?` / `limit: int?` - For offset-based pagination
+
+#### `QueryCriteria`
+
+Immutable value object for search and filter criteria:
+
+- `searchTerm: String` - Search term for text-based searching
+- `filters: Map<String, dynamic>` - Filter key-value pairs
+- `sortBy: String?` - Field name to sort by
+- `sortDesc: bool` - Whether to sort in descending order
 
 **Methods:**
-- `Future<void> loadFirstPage()` - Loads the first page (resets list)
-- `Future<void> loadNextPage()` - Loads the next page (appends to list)
-- `Future<void> refresh()` - Refreshes current data (debounced)
-- `Future<void> retry()` - Retries the last failed operation
-- `void cancel()` - Cancels current request
-- `void clear()` - Clears all data and resets to initial state
-- `Future<void> close()` - Closes the controller (call in dispose)
 
-### PaginatrixCubit<T>
+- `withFilter(String key, dynamic value)` - Add or update a filter
+- `withFilters(Map<String, dynamic> filters)` - Add or update multiple filters
+- `removeFilter(String key)` - Remove a specific filter
+- `clearSearch()` - Clear search term
+- `clearFilters()` - Clear all filters
+- `clearSorting()` - Clear sorting
+- `clearAll()` - Clear everything
 
-The internal cubit implementation. Use `PaginatrixController` instead unless you need `BlocProvider`/`BlocBuilder`.
+### Widgets
 
-**Note:** `PaginatrixController` is a type alias for `PaginatrixCubit<T>`, so you can use either depending on your needs.
+#### `PaginatrixListView<T>`
 
-### PaginatrixListView<T>
-
-A ListView widget with built-in pagination support using Slivers.
+ListView widget with built-in pagination support.
 
 **Key Parameters:**
-- `controller` or `cubit` - The pagination controller (required)
+
+- `controller` or `cubit` - Pagination controller (required, one of them)
 - `itemBuilder` - Function to build each item (required)
-- `appendLoaderBuilder` - Custom loader widget for pagination
-- `onPullToRefresh` - Callback for pull-to-refresh
-- `onRetryInitial` - Callback for retrying initial load
-- `onRetryAppend` - Callback for retrying append
-- `errorBuilder` - Custom error widget for initial load errors
-- `appendErrorBuilder` - Custom error widget for append errors
-- `emptyBuilder` - Custom empty state widget
-- `scrollDirection` - Scroll direction (default: Axis.vertical)
+- `keyBuilder` - Optional function to generate keys for items
+- `prefetchThreshold` - Items from end to trigger next page load
 - `padding` - Padding around the list
-- `physics` - Scroll physics
-- `shrinkWrap` - Whether to shrink-wrap the list
-- `reverse` - Whether to reverse the list
-- `separatorBuilder` - Builder for separators between items
-- `skeletonizerBuilder` - Custom skeleton loader
+- `physics` - Scroll physics behavior
+- `shrinkWrap` - Whether the list should shrink-wrap its contents
+- `scrollDirection` - Scroll direction (vertical or horizontal)
+- `reverse` - Whether to reverse the scroll direction
+- `separatorBuilder` - Optional builder for separators between items
+- `skeletonizerBuilder` - Custom skeleton loader for initial state
+- `emptyBuilder` - Custom widget for empty state
+- `errorBuilder` - Custom widget for error state
+- `appendErrorBuilder` - Custom widget for append error state
+- `appendLoaderBuilder` - Custom widget for loading more indicator
+- `onPullToRefresh` - Callback when user pulls to refresh
+- `onRetryInitial` - Callback for retrying initial load
+- `onRetryAppend` - Callback for retrying append operation
+- `endOfListMessage` - Custom message when no more items are available
 
-### PaginatrixGridView<T>
+#### `PaginatrixGridView<T>`
 
-A GridView widget with built-in pagination support using Slivers.
+GridView widget with built-in pagination support.
 
 **Key Parameters:**
-- `controller` or `cubit` - The pagination controller (required)
-- `gridDelegate` - Grid layout configuration (required)
+
+- `controller` or `cubit` - Pagination controller (required, one of them)
 - `itemBuilder` - Function to build each item (required)
-- `appendLoaderBuilder` - Custom loader widget for pagination
-- `onPullToRefresh` - Callback for pull-to-refresh
-- `errorBuilder` - Custom error widget
-- `appendErrorBuilder` - Custom error widget for append errors
-- `emptyBuilder` - Custom empty state widget
+- `gridDelegate` - Grid layout configuration (required)
+- Same optional parameters as `PaginatrixListView`
 
-### PageSelector
+#### `AppendLoader`
 
-A reusable widget for page selection with multiple display styles.
-
-**Styles:**
-- `PageSelectorStyle.buttons` - Displays page numbers as buttons
-- `PageSelectorStyle.dropdown` - Displays page numbers in a dropdown
-- `PageSelectorStyle.compact` - Compact display with current/total pages
-
-**Example:**
-```dart
-PageSelector(
-  currentPage: 1,
-  totalPages: 10,
-  onPageSelected: (page) {
-    // Handle page selection
-  },
-  style: PageSelectorStyle.buttons,
-  showFirstLast: true,
-  showPreviousNext: true,
-)
-```
-
-### AppendLoader
-
-A beautiful loading widget for pagination.
+Loading indicator widget with multiple animation types.
 
 **Loader Types:**
-- `LoaderType.circular` - Circular progress indicator
-- `LoaderType.linear` - Linear progress indicator
-- `LoaderType.pulse` - Pulsing animation
-- `LoaderType.rotating` - Rotating animation
-- `LoaderType.wave` - Wave animation
+
 - `LoaderType.bouncingDots` - Bouncing dots animation
+- `LoaderType.wave` - Wave animation
+- `LoaderType.rotatingSquares` - Rotating squares animation
+- `LoaderType.pulse` - Pulse animation
 - `LoaderType.skeleton` - Skeleton loading effect
 - `LoaderType.traditional` - Traditional spinner
 
-**Example:**
-```dart
-AppendLoader(
-  loaderType: LoaderType.pulse,
-  message: 'Loading more...',
-  color: Colors.blue,
-  size: 24,
-  padding: const EdgeInsets.all(16),
-)
-```
+#### `PaginatrixErrorView`
 
----
+Error display widget with retry functionality.
 
-## 🔧 Configuration
+#### `PaginatrixAppendErrorView`
+
+Inline error view for append failures with retry functionality.
+
+#### `PaginatrixEmptyView`
+
+Base empty state widget. Pre-built variants:
+
+- `PaginatrixGenericEmptyView` - Generic empty state
+- `PaginatrixSearchEmptyView` - Search empty state
+- `PaginatrixNetworkEmptyView` - Network empty state
+
+#### `PaginationSkeletonizer`
+
+Skeleton loading effect widget using the `skeletonizer` package.
+
+#### `PageSelector`
+
+Page selection widget for web applications with multiple display styles:
+
+- `PageSelectorStyle.buttons` - Button-based pagination
+- `PageSelectorStyle.dropdown` - Dropdown selector
+- `PageSelectorStyle.compact` - Compact display
 
 ### Meta Parsers
 
-#### ConfigMetaParser
+#### `ConfigMetaParser`
 
-Pre-configured parsers for common API formats:
+Pre-configured parser for common API formats.
 
-```dart
-// Nested meta format: {data: [], meta: {current_page, per_page, ...}}
-ConfigMetaParser(MetaConfig.nestedMeta)
+**Pre-configured Configs:**
 
-// Results format: {results: [], count, page, per_page, ...}
-ConfigMetaParser(MetaConfig.resultsFormat)
+- `MetaConfig.nestedMeta` - `{data: [], meta: {current_page, per_page, ...}}`
+- `MetaConfig.resultsFormat` - `{results: [], count, page, per_page, ...}`
+- `MetaConfig.pageBased` - Simple page-based format
+- `MetaConfig.cursorBased` - Cursor-based format
+- `MetaConfig.offsetBased` - Offset/limit format
 
-// Simple page-based: {data: [], page, per_page, ...}
-ConfigMetaParser(MetaConfig.pageBased)
+#### `CustomMetaParser`
 
-// Offset-based: {data: [], offset, limit, ...}
-ConfigMetaParser(MetaConfig.offsetBased)
+Flexible parser for custom API response structures. Takes a function that transforms the raw API response into the expected format.
 
-// Cursor-based: {data: [], meta: {next_cursor, has_more, ...}}
-ConfigMetaParser(MetaConfig.cursorBased)
-```
+### Enums
 
-#### CustomMetaParser
+#### `PaginationStatus`
 
-For non-standard API formats:
+Union type for pagination status:
 
-```dart
-CustomMetaParser(
-  itemsExtractor: (data) => data['items'] as List,
-  metaExtractor: (data) {
-    return PageMeta(
-      page: data['page'] as int,
-      perPage: data['limit'] as int,
-      total: data['total'] as int,
-      lastPage: (data['total'] as int / data['limit'] as int).ceil(),
-    );
-  },
-)
-```
+- `initial()` - Initial state
+- `loading()` - Loading data
+- `success()` - Successfully loaded
+- `empty()` - Empty state (no data)
+- `error()` - Error occurred
+- `refreshing()` - Refreshing data
+- `appending()` - Loading next page
+- `appendError()` - Error during append
+
+#### `PaginationError`
+
+Union type for different error types:
+
+- `network()` - Network errors (connection issues, timeouts, HTTP errors)
+- `parse()` - Parse errors (invalid response format, missing keys)
+- `cancelled()` - Cancellation errors
+- `rateLimited()` - Rate limit errors
+- `circuitBreaker()` - Circuit breaker errors
+- `unknown()` - Unknown errors
+
+---
+
+## ⚙️ Configuration
 
 ### PaginationOptions
 
+Configure pagination behavior:
+
 ```dart
-PaginationOptions(
+final options = PaginationOptions(
   defaultPageSize: 20,
   maxPageSize: 100,
   requestTimeout: Duration(seconds: 30),
-  enableDebugLogging: false,
-  refreshDebounceDuration: Duration(milliseconds: 300),
-  defaultPrefetchThreshold: 3, // Load next page when 3 items from end
+  maxRetries: 5,
   initialBackoff: Duration(milliseconds: 500),
-  maxRetries: 3,
-  retryResetTimeout: Duration(minutes: 5),
-)
-```
-
-### BuildConfig
-
-Environment-specific configuration:
-
-```dart
-import 'package:flutter_paginatrix/flutter_paginatrix.dart';
-
-// Get environment-specific configuration
-final config = BuildConfig.current;
-final options = config.defaultPaginationOptions;
+  retryResetTimeout: Duration(seconds: 60),
+  refreshDebounceDuration: Duration(milliseconds: 300),
+  searchDebounceDuration: Duration(milliseconds: 400),
+  enableDebugLogging: false,
+  defaultPrefetchThreshold: 3,
+  defaultPrefetchThresholdPixels: 300.0,
+);
 
 final controller = PaginatrixController<User>(
-  loader: loadUsers,
+  loader: _loadUsers,
   itemDecoder: User.fromJson,
   metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
-  options: options, // Uses environment-specific options
+  options: options,
+);
+```
+
+### MetaConfig
+
+Configure meta parser paths:
+
+```dart
+final config = MetaConfig(
+  itemsPath: 'data',
+  pagePath: 'meta.current_page',
+  perPagePath: 'meta.per_page',
+  totalPath: 'meta.total',
+  lastPagePath: 'meta.last_page',
+  hasMorePath: 'meta.has_more',
+  nextCursorPath: 'meta.next_cursor',
+  previousCursorPath: 'meta.previous_cursor',
+  offsetPath: 'meta.offset',
+  limitPath: 'meta.limit',
 );
 ```
 
 ---
 
-## 🎨 UI Components
+## 📁 Example Projects
 
-### PaginatrixErrorView
+The package includes several example applications demonstrating different use cases:
 
-Displays pagination errors with retry functionality:
-
-```dart
-PaginatrixErrorView(
-  error: state.error!,
-  onRetry: () => controller.retry(),
-)
-```
-
-### PaginatrixEmptyView
-
-Displays empty states:
-
-```dart
-PaginatrixEmptyView(
-  title: 'No items found',
-  description: 'Try refreshing to load items',
-  action: ElevatedButton(
-    onPressed: () => controller.loadFirstPage(),
-    child: const Text('Retry'),
-  ),
-)
-```
-
-### Pre-built Empty Views
-
-The package includes several pre-built empty view widgets:
-
-- `PaginatrixGenericEmptyView` - Generic empty state
-- `PaginatrixSearchEmptyView` - Search-specific empty state
-- `PaginatrixNetworkEmptyView` - Network error empty state
-
-### PaginationSkeletonizer
-
-Skeleton loading effect for initial load:
-
-```dart
-PaginationSkeletonizer(
-  padding: EdgeInsets.all(16),
-  physics: AlwaysScrollableScrollPhysics(),
-)
-```
-
----
-
-## 📱 Examples
-
-The package includes comprehensive examples:
-
-- **example_list_view** - `PaginatrixListView` with performance monitoring
-- **example_grid_view** - `PaginatrixGridView` pagination
-- **example_bloc_pattern** - BLoC pattern integration with custom events (Pokemon API)
-- **example_cubit_direct** - Direct `PaginatrixCubit` usage with BlocBuilder
-- **example_web_infinite_scroll** - Web infinite scroll pagination
-- **example_web_page_selector** - Web page selector pagination
+- **`list_view`** - Basic ListView pagination with performance monitoring
+- **`grid_view`** - GridView pagination example
+- **`bloc_pattern`** - BLoC pattern integration with custom events
+- **`cubit_direct`** - Direct PaginatrixCubit usage
+- **`search_basic`** - Basic search functionality with pagination
+- **`search_advanced`** - Advanced search with filters, sorting, and pagination
+- **`web_infinite_scroll`** - Web infinite scroll pagination
+- **`web_page_selector`** - Web page selector pagination
 
 Run any example:
 
 ```bash
-cd examples/example_list_view
+cd examples/list_view
 flutter run
 ```
 
 ---
 
-## 🛡️ Error Handling
+## ❗ Common Pitfalls
 
-The library provides comprehensive error handling with 6 error types:
+### 1. Not Disposing Controllers
 
-1. **Network Errors** - Connection issues, timeouts, HTTP errors
-2. **Parse Errors** - Invalid response format, missing keys
-3. **Cancelled Errors** - Request was cancelled
-4. **Rate Limited Errors** - Too many requests
-5. **Circuit Breaker Errors** - Service unavailable
-6. **Unknown Errors** - Unexpected errors
+Always dispose controllers to prevent memory leaks:
 
-All errors are retryable where appropriate and provide user-friendly messages.
+```dart
+@override
+void dispose() {
+  _controller.close(); // or _controller.dispose() if using cubit directly
+  super.dispose();
+}
+```
 
-### Error Recovery
+### 2. Forgetting to Call loadFirstPage()
 
-The package includes automatic retry mechanisms:
+The controller doesn't automatically load data. You must call `loadFirstPage()`:
 
-- **Exponential Backoff** - Retries with increasing delays
-- **Max Retries** - Configurable maximum retry attempts
-- **Retry Reset** - Automatic reset after successful operations
-- **Manual Retry** - `retry()` method for user-initiated retries
+```dart
+@override
+void initState() {
+  super.initState();
+  _controller = PaginatrixController<User>(...);
+  _controller.loadFirstPage(); // Don't forget this!
+}
+```
 
----
+### 3. Incorrect Meta Parser Configuration
 
-## ⚡ Performance
+Ensure your `MetaConfig` paths match your API response structure. Use `CustomMetaParser` for complex structures.
 
-- **Sliver-based architecture** - Optimal scrolling performance
-- **Request cancellation** - Prevents unnecessary work
-- **Generation guards** - Prevents stale responses
-- **Efficient state management** - Minimal rebuilds with flutter_bloc
-- **Memory-efficient** - Proper disposal and cleanup
-- **Debounced refresh** - Prevents rapid successive refresh calls
-- **Prefetch threshold** - Configurable distance from end to trigger load
-- **Metadata caching** - Intelligent caching of parsed metadata
-- **Request deduplication** - Prevents duplicate requests
-- **Optimized widgets** - Const constructors for better performance
-- **Clean code quality** - Zero linting issues in library code
+### 4. Not Handling Errors
 
-### Performance Tips
+Always provide error builders or handle errors in your UI:
 
-1. **Use appropriate page sizes** - Balance between too many requests and too much data
-2. **Enable debug logging in development** - Use `enableDebugLogging: true` to monitor performance
-3. **Configure prefetch threshold** - Adjust `defaultPrefetchThreshold` based on your item sizes
-4. **Use skeleton loaders** - Provide visual feedback during loading
-5. **Implement proper disposal** - Always call `controller.close()` in `dispose()`
+```dart
+PaginatrixListView<User>(
+  controller: _controller,
+  itemBuilder: (context, user, index) => UserTile(user: user),
+  errorBuilder: (context, error, onRetry) {
+    return ErrorWidget(error.message);
+  },
+)
+```
+
+### 5. Race Conditions
+
+The package handles race conditions internally using generation guards. However, avoid calling `loadNextPage()` multiple times rapidly - the controller will handle this automatically.
+
+### 6. Search Debouncing
+
+Search uses debouncing by default (400ms). If you need immediate search, set `searchDebounceDuration: Duration.zero` in `PaginationOptions`.
+
+### 7. Filter vs Search Behavior
+
+- **Search** (`updateSearchTerm`) - Debounced, triggers reload after delay
+- **Filters** (`updateFilter`, `updateFilters`) - Immediate, triggers reload right away
+
+### 8. Retry Method Behavior
+
+The `retry()` method automatically determines whether to retry the initial load or append operation based on the current error state. You don't need separate `retryInitial()` and `retryAppend()` methods.
 
 ---
 
 ## 🧪 Testing
 
-The package includes comprehensive tests:
+The package includes comprehensive test coverage. Here's how to test your pagination:
 
-- **171+ tests** covering all scenarios
-- **Unit tests** for entities and controllers
-- **Integration tests** for complete flows
-- **Widget tests** for UI components
-- **Performance tests** for large datasets
-- **Edge case coverage** - Empty responses, errors, cancellation, race conditions
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_paginatrix/flutter_paginatrix.dart';
 
-Run tests:
+void main() {
+  test('should load first page', () async {
+    final cubit = PaginatrixCubit<User>(
+      loader: mockLoader,
+      itemDecoder: User.fromJson,
+      metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
+    );
 
-```bash
-flutter test
+    await cubit.loadFirstPage();
+
+    expect(cubit.state.items.length, greaterThan(0));
+    expect(cubit.state.status, PaginationStatus.success());
+  });
+
+  test('should handle search', () async {
+    final cubit = PaginatrixCubit<User>(...);
+    await cubit.loadFirstPage();
+
+    cubit.updateSearchTerm('john');
+    await Future.delayed(Duration(milliseconds: 500)); // Wait for debounce
+
+    expect(cubit.state.currentQuery.searchTerm, equals('john'));
+  });
+}
 ```
 
-Run tests with coverage:
-
-```bash
-flutter test --coverage
-```
-
-View coverage report:
-
-```bash
-genhtml coverage/lcov.info -o coverage/html
-open coverage/html/index.html
-```
+See the `test/` directory for more examples including integration tests and performance tests.
 
 ---
 
-## 🔄 CI/CD
-
-The package includes a complete CI/CD pipeline:
-
-- **Automated testing** on every push and pull request
-- **Code formatting** and analysis checks
-- **Code coverage** reporting
-- **Automated publishing** to pub.dev on version tags
-- **GitHub Releases** creation
-
-The CI/CD pipeline is configured in `.github/workflows/ci-cd.yml`.
-
----
-
-## 📄 Documentation
-
-All documentation is included in this README. For changelog, see [CHANGELOG.md](CHANGELOG.md).
-
-### Additional Resources
-
-- **API Documentation** - Generated documentation available on pub.dev
-- **Example Apps** - See the `examples/` directory for complete working examples
-- **GitHub Issues** - Report bugs or request features on GitHub
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Setup
-
-1. Clone the repository:
-```bash
-git clone https://github.com/MhamadHwidi7/flutter_paginatrix.git
-cd flutter_paginatrix
-```
-
-2. Install dependencies:
-```bash
-flutter pub get
-```
-
-3. Run tests:
-```bash
-flutter test
-```
-
-4. Run example apps:
-```bash
-cd examples/example_list_view
-flutter run
-```
-
-### Code Style
-
-- Follow the [Effective Dart](https://dart.dev/guides/language/effective-dart) style guide
-- Run `dart format .` before committing
-- Ensure all tests pass
-- Update documentation for new features
-- Maintain zero linting issues in library code
-- Use const constructors where possible for performance
-
----
-
-## 📝 License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
----
-
-## 🔗 Links
-
-- **Package**: [pub.dev/packages/flutter_paginatrix](https://pub.dev/packages/flutter_paginatrix)
-- **Repository**: [github.com/MhamadHwidi7/flutter_paginatrix](https://github.com/MhamadHwidi7/flutter_paginatrix)
-- **Issues**: [github.com/MhamadHwidi7/flutter_paginatrix/issues](https://github.com/MhamadHwidi7/flutter_paginatrix/issues)
-- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
+Copyright (c) 2025 Mhamad Hwidi
 
 ---
 
-## 💚 Support
+## 🔗 Support & Links
+
+### Package Links
+
+- [Pub.dev Package](https://pub.dev/packages/flutter_paginatrix)
+- [GitHub Repository](https://github.com/MhamadHwidi7/flutter_paginatrix)
+- [Issue Tracker](https://github.com/MhamadHwidi7/flutter_paginatrix/issues)
+- [Documentation](https://pub.dev/documentation/flutter_paginatrix)
+- [📚 Full Documentation](./docs/README.md) - Comprehensive guides and API reference
+
+### Support the Project
 
 If you find this package useful, please consider:
 
-- ⭐ **Starring the repository** on GitHub
-- 🐛 **Reporting bugs** or suggesting features
-- 💬 **Sharing your feedback** and use cases
-- 📢 **Spreading the word** about Flutter Paginatrix
+- ⭐ **Starring the repository** - Help others discover this package
+- 🐛 **Reporting bugs** - Help improve the package
+- 💡 **Suggesting features** - Share your ideas
+- 📖 **Improving documentation** - Help others learn
 
-### Author
+### ☕ Buy Me a Coffee
 
-**Mohammad Hwidi**
+If this package has been helpful to you, consider supporting its development:
 
-- 💼 [LinkedIn](https://www.linkedin.com/in/mhamad-hwidi-563915237)
-- ☕ [Buy Me a Coffee](https://buymeacoffee.com/mohammadihwidi)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/mohammadihwidi)
+
+### 👨‍💻 Connect
+
+- [LinkedIn](https://www.linkedin.com/in/mhamad-hwidi-563915237) - Let's connect and discuss Flutter development!
 
 ---
 
