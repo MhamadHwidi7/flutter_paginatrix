@@ -303,7 +303,7 @@ mixin PaginatrixStateBuilderMixin<T> on StatelessWidget {
       // Show "end of list" message when there's no more data but we have items
       final message = endOfListMessage ?? 'No more items to load';
       return Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Center(
           child: Text(
             message,

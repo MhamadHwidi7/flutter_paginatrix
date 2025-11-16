@@ -32,7 +32,7 @@ void main() {
         },
         itemDecoder: (json) => json,
         metaParser: ConfigMetaParser(MetaConfig.nestedMeta),
-        options: PaginationOptions(
+        options: const PaginationOptions(
           searchDebounceDuration: Duration(milliseconds: 100),
         ),
       );

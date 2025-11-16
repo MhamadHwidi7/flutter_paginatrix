@@ -23,21 +23,21 @@ void main() {
     });
 
     test('hasActiveFilters returns true when search term is present', () {
-      final criteria = QueryCriteria(searchTerm: 'test');
+      const criteria = QueryCriteria(searchTerm: 'test');
 
       expect(criteria.hasActiveFilters, isTrue);
       expect(criteria.hasSearchTerm, isTrue);
     });
 
     test('hasActiveFilters returns true when filters are present', () {
-      final criteria = QueryCriteria(filters: {'status': 'active'});
+      const criteria = QueryCriteria(filters: {'status': 'active'});
 
       expect(criteria.hasActiveFilters, isTrue);
       expect(criteria.hasFilters, isTrue);
     });
 
     test('hasActiveFilters returns true when sorting is present', () {
-      final criteria = QueryCriteria(sortBy: 'name');
+      const criteria = QueryCriteria(sortBy: 'name');
 
       expect(criteria.hasActiveFilters, isTrue);
       expect(criteria.hasSorting, isTrue);
@@ -60,7 +60,7 @@ void main() {
     });
 
     test('withFilter removes filter when value is null', () {
-      final criteria = QueryCriteria(filters: {'status': 'active'});
+      const criteria = QueryCriteria(filters: {'status': 'active'});
       final withoutFilter = criteria.withFilter('status', null);
 
       expect(withoutFilter.filters.containsKey('status'), isFalse);
@@ -69,7 +69,7 @@ void main() {
 
     test('withFilters updates multiple filters at once', () {
       final criteria = QueryCriteria.empty();
-      final withFilters = criteria.withFilters({
+      final withFilters = criteria.withFilters(const {
         'status': 'active',
         'category': 'electronics',
       });
@@ -80,7 +80,7 @@ void main() {
     });
 
     test('withFilters removes filters with null values', () {
-      final criteria = QueryCriteria(filters: {
+      const criteria = QueryCriteria(filters: {
         'status': 'active',
         'category': 'electronics',
       });
@@ -95,7 +95,7 @@ void main() {
     });
 
     test('removeFilter removes specific filter', () {
-      final criteria = QueryCriteria(filters: {
+      const criteria = QueryCriteria(filters: {
         'status': 'active',
         'category': 'electronics',
       });
@@ -107,7 +107,7 @@ void main() {
     });
 
     test('clearSearch removes search term', () {
-      final criteria = QueryCriteria(searchTerm: 'test');
+      const criteria = QueryCriteria(searchTerm: 'test');
       final cleared = criteria.clearSearch();
 
       expect(cleared.searchTerm, isEmpty);
@@ -115,7 +115,7 @@ void main() {
     });
 
     test('clearFilters removes all filters', () {
-      final criteria = QueryCriteria(filters: {
+      const criteria = QueryCriteria(filters: {
         'status': 'active',
         'category': 'electronics',
       });
@@ -126,7 +126,7 @@ void main() {
     });
 
     test('clearSorting removes sorting', () {
-      final criteria = QueryCriteria(sortBy: 'name', sortDesc: true);
+      const criteria = QueryCriteria(sortBy: 'name', sortDesc: true);
       final cleared = criteria.clearSorting();
 
       expect(cleared.sortBy, isNull);
@@ -135,7 +135,7 @@ void main() {
     });
 
     test('clearAll removes all criteria', () {
-      final criteria = QueryCriteria(
+      const criteria = QueryCriteria(
         searchTerm: 'test',
         filters: {'status': 'active'},
         sortBy: 'name',
@@ -151,19 +151,19 @@ void main() {
     });
 
     test('equality works correctly', () {
-      final criteria1 = QueryCriteria(
+      const criteria1 = QueryCriteria(
         searchTerm: 'test',
         filters: {'status': 'active'},
         sortBy: 'name',
         sortDesc: false,
       );
-      final criteria2 = QueryCriteria(
+      const criteria2 = QueryCriteria(
         searchTerm: 'test',
         filters: {'status': 'active'},
         sortBy: 'name',
         sortDesc: false,
       );
-      final criteria3 = QueryCriteria(
+      const criteria3 = QueryCriteria(
         searchTerm: 'different',
         filters: {'status': 'active'},
         sortBy: 'name',

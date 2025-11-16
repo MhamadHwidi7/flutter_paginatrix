@@ -742,7 +742,7 @@ void main() {
     group('Very large offset values', () {
       test('should handle maximum valid offset value', () {
         final offsetParser = ConfigMetaParser(MetaConfig.offsetBased);
-        final maxOffset = 2147483647; // Max int32
+        const maxOffset = 2147483647; // Max int32
 
         final data = {
           'data': [],
@@ -763,7 +763,7 @@ void main() {
         final offsetParser = ConfigMetaParser(MetaConfig.offsetBased);
 
         // Test with large but valid offset
-        final largeOffset = 1000000;
+        const largeOffset = 1000000;
         final data = {
           'data': [],
           'meta': {
