@@ -67,4 +67,3 @@ class ViewControlsState extends Equatable {
         gridColumns,
       ];
 }
-

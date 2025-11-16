@@ -68,8 +68,10 @@ class _PokemonPageState extends State<PokemonPage> {
       options: PaginationOptions(
         enableDebugLogging: true, // Enable debug logging for examples
         defaultPageSize: config.defaultPaginationOptions.defaultPageSize,
-        searchDebounceDuration: config.defaultPaginationOptions.searchDebounceDuration,
-        refreshDebounceDuration: config.defaultPaginationOptions.refreshDebounceDuration,
+        searchDebounceDuration:
+            config.defaultPaginationOptions.searchDebounceDuration,
+        refreshDebounceDuration:
+            config.defaultPaginationOptions.refreshDebounceDuration,
       ),
     );
 
@@ -96,7 +98,8 @@ class _PokemonPageState extends State<PokemonPage> {
     debugPrint('   📄 Page: $currentPage');
     debugPrint('   📊 Items per page: $itemsPerPage');
     debugPrint('   📍 Offset: $actualOffset, Limit: $itemsPerPage');
-    debugPrint('   🌐 Making API request: GET https://pokeapi.co/api/v2/pokemon?offset=$actualOffset&limit=$itemsPerPage');
+    debugPrint(
+        '   🌐 Making API request: GET https://pokeapi.co/api/v2/pokemon?offset=$actualOffset&limit=$itemsPerPage');
     final stopwatch = Stopwatch()..start();
     final response = await dio.get(
       'https://pokeapi.co/api/v2/pokemon',
@@ -107,7 +110,8 @@ class _PokemonPageState extends State<PokemonPage> {
       cancelToken: cancelToken,
     );
     stopwatch.stop();
-    debugPrint('   ✅ API Response received in ${stopwatch.elapsedMilliseconds}ms');
+    debugPrint(
+        '   ✅ API Response received in ${stopwatch.elapsedMilliseconds}ms');
     debugPrint('   📦 Status: ${response.statusCode}');
 
     final data = response.data as Map<String, dynamic>;
@@ -165,4 +169,3 @@ class _PokemonPageState extends State<PokemonPage> {
     );
   }
 }
-

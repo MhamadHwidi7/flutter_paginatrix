@@ -78,4 +78,3 @@ class PaginationBlocState<T> extends Equatable {
     return 'PaginationBlocState<$T>(paginationState: $paginationState)';
   }
 }
-

@@ -77,7 +77,8 @@ class PokemonRepository {
       }
 
       // Fetch list of Pokemon from API
-      debugPrint('   🌐 Making API request: GET /pokemon?offset=$offsetValue&limit=$limitValue');
+      debugPrint(
+          '   🌐 Making API request: GET /pokemon?offset=$offsetValue&limit=$limitValue');
       final stopwatch = Stopwatch()..start();
       final response = await _dio.get<Map<String, dynamic>>(
         '/pokemon',
@@ -88,7 +89,8 @@ class PokemonRepository {
         cancelToken: cancelToken,
       );
       stopwatch.stop();
-      debugPrint('   ✅ API Response received in ${stopwatch.elapsedMilliseconds}ms');
+      debugPrint(
+          '   ✅ API Response received in ${stopwatch.elapsedMilliseconds}ms');
       debugPrint('   📦 Status: ${response.statusCode}');
 
       if (response.statusCode != 200) {
@@ -99,8 +101,8 @@ class PokemonRepository {
       }
 
       final data = response.data ?? <String, dynamic>{};
-      final results =
-          (data['results'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>();
+      final results = (data['results'] as List<dynamic>? ?? [])
+          .cast<Map<String, dynamic>>();
       final count = (data['count'] as num?)?.toInt() ?? 0;
 
       debugPrint('   📋 Raw results from API: ${results.length} items');
@@ -120,7 +122,8 @@ class PokemonRepository {
 
       final pokemonDetails = await Future.wait(pokemonFutures);
       detailsStopwatch.stop();
-      debugPrint('   ✅ Details fetched in ${detailsStopwatch.elapsedMilliseconds}ms');
+      debugPrint(
+          '   ✅ Details fetched in ${detailsStopwatch.elapsedMilliseconds}ms');
 
       // Transform to Pokemon objects
       var pokemonList = pokemonDetails
@@ -139,7 +142,8 @@ class PokemonRepository {
           final matchesId = pokemon.id.toString().contains(searchLower);
           return matchesName || matchesId;
         }).toList();
-        debugPrint('   🔍 After search filter: ${pokemonList.length} Pokemon (filtered ${beforeCount - pokemonList.length})');
+        debugPrint(
+            '   🔍 After search filter: ${pokemonList.length} Pokemon (filtered ${beforeCount - pokemonList.length})');
       }
 
       // Apply type filter
@@ -148,7 +152,8 @@ class PokemonRepository {
         pokemonList = pokemonList
             .where((pokemon) => pokemon.types.contains(typeFilter))
             .toList();
-        debugPrint('   🏷️  After type filter: ${pokemonList.length} Pokemon (filtered ${beforeCount - pokemonList.length})');
+        debugPrint(
+            '   🏷️  After type filter: ${pokemonList.length} Pokemon (filtered ${beforeCount - pokemonList.length})');
       }
 
       // Apply sorting
@@ -180,7 +185,8 @@ class PokemonRepository {
       final totalPages = (count / itemsPerPage).ceil();
       final hasMore = currentPage < totalPages;
 
-      debugPrint('   📊 Pagination: Page $currentPage/$totalPages, Has more: $hasMore');
+      debugPrint(
+          '   📊 Pagination: Page $currentPage/$totalPages, Has more: $hasMore');
       debugPrint('   ✅ Returning ${pokemonList.length} Pokemon');
 
       // Return the Pokemon data that will be added to the list
@@ -227,4 +233,3 @@ class PokemonRepository {
     }
   }
 }
-

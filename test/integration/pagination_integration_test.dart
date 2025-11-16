@@ -512,7 +512,9 @@ void main() {
       expect(controller.state.status, equals(const PaginationStatus.success()));
     });
 
-    test('concurrent refresh operations: should handle multiple rapid refreshes', () async {
+    test(
+        'concurrent refresh operations: should handle multiple rapid refreshes',
+        () async {
       controller = createTestController(
         mockData: mockData,
         loaderDelay: const Duration(milliseconds: 10), // Reduced delay
@@ -523,7 +525,8 @@ void main() {
       final initialItemCount = controller.state.items.length;
 
       // Trigger fewer concurrent refresh operations to speed up test
-      final refreshFutures = List.generate(5, (_) => controller.refresh()); // Reduced from 10 to 5
+      final refreshFutures =
+          List.generate(5, (_) => controller.refresh()); // Reduced from 10 to 5
       await Future.wait(refreshFutures);
       await Future.delayed(const Duration(milliseconds: 50)); // Reduced delay
 
@@ -533,7 +536,8 @@ void main() {
       expect(controller.state.items.length, initialItemCount);
     });
 
-    test('concurrent refresh with search: should handle refresh during search', () async {
+    test('concurrent refresh with search: should handle refresh during search',
+        () async {
       // Use zero debounce for faster test
       controller = createTestControllerWithZeroDebounce(
         mockData: mockData,
@@ -549,13 +553,15 @@ void main() {
       final refreshFuture = controller.refresh();
 
       await Future.wait([refreshFuture]);
-      await Future.delayed(const Duration(milliseconds: 100)); // Reduced wait time
+      await Future.delayed(
+          const Duration(milliseconds: 100)); // Reduced wait time
 
       // Should end in valid state
       expect(controller.hasError, isFalse);
     });
 
-    test('concurrent refresh and append: should handle refresh during append', () async {
+    test('concurrent refresh and append: should handle refresh during append',
+        () async {
       controller = createTestController(
         mockData: mockData,
         loaderDelay: const Duration(milliseconds: 10), // Reduced delay
@@ -578,7 +584,8 @@ void main() {
       expect(controller.hasError, isFalse);
       expect(controller.state.status, equals(const PaginationStatus.success()));
       // Should have at least first page data (could be more if both completed)
-      expect(controller.state.items.length, greaterThanOrEqualTo(firstPageCount));
+      expect(
+          controller.state.items.length, greaterThanOrEqualTo(firstPageCount));
     });
   });
 }

@@ -62,4 +62,3 @@ class ViewControlsCubit extends Cubit<ViewControlsState> {
     emit(state.copyWith(sortBy: null, sortDesc: false));
   }
 }
-

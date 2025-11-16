@@ -50,32 +50,41 @@ class PaginationOptions with _$PaginationOptions {
     @Default(PaginationDefaults.maxPageSize) int maxPageSize,
 
     /// Request timeout
-    @Default(Duration(seconds: PaginationDefaults.defaultRequestTimeoutSeconds)) Duration requestTimeout,
+    @Default(Duration(seconds: PaginationDefaults.defaultRequestTimeoutSeconds))
+    Duration requestTimeout,
 
     /// Whether to enable debug logging
     @Default(false) bool enableDebugLogging,
 
     /// Default prefetch threshold (number of items from end to trigger load)
-    @Default(PaginationDefaults.defaultPrefetchThreshold) int defaultPrefetchThreshold,
+    @Default(PaginationDefaults.defaultPrefetchThreshold)
+    int defaultPrefetchThreshold,
 
     /// Default prefetch threshold in pixels (if threshold is not set)
-    @Default(PaginationDefaults.defaultPrefetchThresholdPixels) double defaultPrefetchThresholdPixels,
+    @Default(PaginationDefaults.defaultPrefetchThresholdPixels)
+    double defaultPrefetchThresholdPixels,
 
     /// Maximum number of retry attempts
     @Default(PaginationDefaults.maxRetries) int maxRetries,
 
     /// Initial backoff duration for retry attempts
-    @Default(Duration(milliseconds: PaginationDefaults.defaultInitialBackoffMs)) Duration initialBackoff,
+    @Default(Duration(milliseconds: PaginationDefaults.defaultInitialBackoffMs))
+    Duration initialBackoff,
 
     /// Retry reset timeout (resets retry count after this duration)
-    @Default(Duration(seconds: PaginationDefaults.defaultRetryResetTimeoutSeconds)) Duration retryResetTimeout,
+    @Default(
+        Duration(seconds: PaginationDefaults.defaultRetryResetTimeoutSeconds))
+    Duration retryResetTimeout,
 
     /// Debounce duration for refresh calls to prevent rapid successive refreshes
-    @Default(Duration(milliseconds: PaginationDefaults.defaultRefreshDebounceMs)) Duration refreshDebounceDuration,
+    @Default(
+        Duration(milliseconds: PaginationDefaults.defaultRefreshDebounceMs))
+    Duration refreshDebounceDuration,
 
     /// Debounce duration for search term updates to prevent excessive API calls
     /// while user is typing
-    @Default(Duration(milliseconds: PaginationDefaults.defaultSearchDebounceMs)) Duration searchDebounceDuration,
+    @Default(Duration(milliseconds: PaginationDefaults.defaultSearchDebounceMs))
+    Duration searchDebounceDuration,
   }) = _PaginationOptions;
 
   factory PaginationOptions.fromJson(Map<String, dynamic> json) =>

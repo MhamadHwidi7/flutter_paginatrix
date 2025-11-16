@@ -697,7 +697,8 @@ void main() {
         expect(meta2.perPage, 20);
       });
 
-      test('should correctly distinguish between different pagination types', () {
+      test('should correctly distinguish between different pagination types',
+          () {
         // Page-based parser
         final pageParser = ConfigMetaParser(MetaConfig.nestedMeta);
         final pageData = {

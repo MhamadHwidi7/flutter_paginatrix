@@ -142,4 +142,3 @@ class PokemonView extends StatelessWidget {
     );
   }
 }
-

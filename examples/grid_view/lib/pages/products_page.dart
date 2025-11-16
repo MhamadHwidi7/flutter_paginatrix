@@ -29,8 +29,10 @@ class _ProductsPageState extends State<ProductsPage> {
       options: PaginationOptions(
         enableDebugLogging: true, // Enable debug logging for examples
         defaultPageSize: config.defaultPaginationOptions.defaultPageSize,
-        searchDebounceDuration: config.defaultPaginationOptions.searchDebounceDuration,
-        refreshDebounceDuration: config.defaultPaginationOptions.refreshDebounceDuration,
+        searchDebounceDuration:
+            config.defaultPaginationOptions.searchDebounceDuration,
+        refreshDebounceDuration:
+            config.defaultPaginationOptions.refreshDebounceDuration,
       ),
     );
 
@@ -65,7 +67,8 @@ class _ProductsPageState extends State<ProductsPage> {
     // Simulate API delay to see loading state
     await Future.delayed(const Duration(seconds: 2));
     stopwatch.stop();
-    debugPrint('   ✅ Simulated delay completed in ${stopwatch.elapsedMilliseconds}ms');
+    debugPrint(
+        '   ✅ Simulated delay completed in ${stopwatch.elapsedMilliseconds}ms');
 
     // Generate mock products
     debugPrint('   🔄 Generating ${itemsPerPage} mock products...');
@@ -85,7 +88,8 @@ class _ProductsPageState extends State<ProductsPage> {
 
     final totalPages = 5;
     final hasMore = currentPage < totalPages;
-    debugPrint('   📊 Pagination: Page $currentPage/$totalPages, Has more: $hasMore');
+    debugPrint(
+        '   📊 Pagination: Page $currentPage/$totalPages, Has more: $hasMore');
     debugPrint('   ✅ Returning ${products.length} products');
 
     return {
@@ -138,4 +142,3 @@ class _ProductsPageState extends State<ProductsPage> {
     );
   }
 }
-

@@ -117,9 +117,8 @@ class ErrorNotificationHelper {
     // Only show dialog if error is user-visible
     if (!error.isUserVisible) return;
 
-    final title = isAppendError
-        ? 'Failed to Load More Items'
-        : _getErrorTitle(error);
+    final title =
+        isAppendError ? 'Failed to Load More Items' : _getErrorTitle(error);
     final message = error.userMessage;
     final theme = Theme.of(context);
 
@@ -236,9 +235,8 @@ class ErrorNotificationHelper {
     // Only show bottom sheet if error is user-visible
     if (!error.isUserVisible) return;
 
-    final title = isAppendError
-        ? 'Failed to Load More Items'
-        : _getErrorTitle(error);
+    final title =
+        isAppendError ? 'Failed to Load More Items' : _getErrorTitle(error);
     final message = error.userMessage;
 
     showModalBottomSheet<void>(
@@ -386,4 +384,3 @@ class ErrorNotificationHelper {
     return null;
   }
 }
-

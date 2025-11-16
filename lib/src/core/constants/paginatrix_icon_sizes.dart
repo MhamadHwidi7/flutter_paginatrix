@@ -31,4 +31,3 @@ class PaginatrixIconSizes {
   /// - Compact UI elements
   static const double small = 20;
 }
-

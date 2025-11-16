@@ -21,4 +21,3 @@ class PaginatrixSkeletonConstants {
   /// - List and grid view skeleton placeholders
   static const int defaultItemCount = 10;
 }
-

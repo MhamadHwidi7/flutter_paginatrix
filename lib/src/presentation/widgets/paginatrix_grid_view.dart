@@ -261,7 +261,8 @@ class PaginatrixGridView<T> extends StatelessWidget
   /// onAppendError: ErrorNotificationHelper.showBottomSheet,
   /// ```
   @override
-  final void Function(BuildContext context, PaginationError error)? onAppendError;
+  final void Function(BuildContext context, PaginationError error)?
+      onAppendError;
 
   /// Custom message to display when there are no more items to load.
   ///

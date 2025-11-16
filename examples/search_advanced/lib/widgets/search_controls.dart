@@ -53,7 +53,9 @@ class _SearchControlsState extends State<SearchControls> {
             child: TextField(
               controller: _controller,
               onChanged: (value) {
-                context.read<PaginationBloc<Pokemon>>().add(UpdateSearch(value));
+                context
+                    .read<PaginationBloc<Pokemon>>()
+                    .add(UpdateSearch(value));
               },
               decoration: InputDecoration(
                 hintText: 'Search Pokemon by name or ID...',
@@ -81,4 +83,3 @@ class _SearchControlsState extends State<SearchControls> {
     );
   }
 }
-

@@ -27,8 +27,10 @@ class PokemonPage extends StatelessWidget {
       options: PaginationOptions(
         enableDebugLogging: true, // Enable debug logging for examples
         defaultPageSize: config.defaultPaginationOptions.defaultPageSize,
-        searchDebounceDuration: config.defaultPaginationOptions.searchDebounceDuration,
-        refreshDebounceDuration: config.defaultPaginationOptions.refreshDebounceDuration,
+        searchDebounceDuration:
+            config.defaultPaginationOptions.searchDebounceDuration,
+        refreshDebounceDuration:
+            config.defaultPaginationOptions.refreshDebounceDuration,
       ),
     );
 
@@ -40,4 +42,3 @@ class PokemonPage extends StatelessWidget {
     );
   }
 }
-

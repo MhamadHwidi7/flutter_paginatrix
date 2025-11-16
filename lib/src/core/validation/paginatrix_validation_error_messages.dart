@@ -86,4 +86,3 @@ class PaginatrixValidationErrorMessages {
   static String invalidPathCharacters(String segment, String path) =>
       'Invalid path segment: "$segment" in path "$path". Segments must contain only alphanumeric characters, underscores, or hyphens.';
 }
-

@@ -75,7 +75,8 @@ class SortControls extends StatelessWidget {
                       bloc.add(
                         UpdateSorting(
                           sortBy: value,
-                          sortDesc: isSame ? !viewControlsState.sortDesc : false,
+                          sortDesc:
+                              isSame ? !viewControlsState.sortDesc : false,
                         ),
                       );
                     } else {
@@ -113,4 +114,3 @@ class SortControls extends StatelessWidget {
     );
   }
 }
-

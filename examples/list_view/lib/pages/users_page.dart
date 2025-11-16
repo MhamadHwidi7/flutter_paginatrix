@@ -27,8 +27,10 @@ class _UsersPageState extends State<UsersPage> {
       options: PaginationOptions(
         enableDebugLogging: true, // Enable debug logging for examples
         defaultPageSize: config.defaultPaginationOptions.defaultPageSize,
-        searchDebounceDuration: config.defaultPaginationOptions.searchDebounceDuration,
-        refreshDebounceDuration: config.defaultPaginationOptions.refreshDebounceDuration,
+        searchDebounceDuration:
+            config.defaultPaginationOptions.searchDebounceDuration,
+        refreshDebounceDuration:
+            config.defaultPaginationOptions.refreshDebounceDuration,
       ),
     );
 
@@ -62,7 +64,8 @@ class _UsersPageState extends State<UsersPage> {
     // Simulate API delay
     await Future.delayed(const Duration(milliseconds: 500));
     stopwatch.stop();
-    debugPrint('   ✅ Simulated delay completed in ${stopwatch.elapsedMilliseconds}ms');
+    debugPrint(
+        '   ✅ Simulated delay completed in ${stopwatch.elapsedMilliseconds}ms');
 
     // Generate mock users
     debugPrint('   🔄 Generating $itemsPerPage mock users...');
@@ -82,7 +85,8 @@ class _UsersPageState extends State<UsersPage> {
 
     const totalPages = 10;
     final hasMore = currentPage < totalPages;
-    debugPrint('   📊 Pagination: Page $currentPage/$totalPages, Has more: $hasMore');
+    debugPrint(
+        '   📊 Pagination: Page $currentPage/$totalPages, Has more: $hasMore');
     debugPrint('   ✅ Returning ${users.length} users');
 
     return {
@@ -154,4 +158,3 @@ class _UsersPageState extends State<UsersPage> {
     );
   }
 }
-

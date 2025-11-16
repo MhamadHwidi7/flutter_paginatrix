@@ -3,7 +3,7 @@ import 'package:flutter_paginatrix/src/core/entities/query_criteria.dart';
 /// Extension methods for [QueryCriteria] to provide convenient helpers
 ///
 /// **Note:** Methods that check for search, filters, or sorting are available
-/// directly on [QueryCriteria] (e.g., [QueryCriteria.hasSearchTerm], 
+/// directly on [QueryCriteria] (e.g., [QueryCriteria.hasSearchTerm],
 /// [QueryCriteria.hasFilters], [QueryCriteria.hasSorting]). This extension
 /// provides additional convenience methods and functional-style aliases.
 ///
@@ -25,7 +25,8 @@ extension QueryCriteriaExtension on QueryCriteria {
   /// **Note:** This is an alias for [QueryCriteria.hasSearchTerm] for
   /// backward compatibility and functional-style API preference.
   /// Prefer using [QueryCriteria.hasSearchTerm] for consistency.
-  @Deprecated('Use hasSearchTerm instead. This will be removed in a future version.')
+  @Deprecated(
+      'Use hasSearchTerm instead. This will be removed in a future version.')
   bool get hasSearch => hasSearchTerm;
 
   /// Gets the filter value for a given key, or null if not present
@@ -72,4 +73,3 @@ extension QueryCriteriaExtension on QueryCriteria {
   /// for consistency with the primary API.
   QueryCriteria withoutSorting() => clearSorting();
 }
-

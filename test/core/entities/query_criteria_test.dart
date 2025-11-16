@@ -3,7 +3,8 @@ import 'package:flutter_paginatrix/flutter_paginatrix.dart';
 
 void main() {
   group('QueryCriteria', () {
-    test('empty factory creates criteria with no search, filters, or sorting', () {
+    test('empty factory creates criteria with no search, filters, or sorting',
+        () {
       final criteria = QueryCriteria.empty();
 
       expect(criteria.searchTerm, isEmpty);
@@ -174,5 +175,3 @@ void main() {
     });
   });
 }
-
-

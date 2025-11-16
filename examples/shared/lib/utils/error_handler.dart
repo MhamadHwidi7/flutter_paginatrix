@@ -26,7 +26,8 @@ class RepositoryErrorHandler {
     String? context,
   }) {
     final contextPrefix = context != null ? '[$context] ' : '';
-    debugPrint('   ❌ ${contextPrefix}API Error: ${exception.type} - ${exception.message}');
+    debugPrint(
+        '   ❌ ${contextPrefix}API Error: ${exception.type} - ${exception.message}');
 
     // Handle cancellation
     if (exception.type == DioExceptionType.cancel) {
@@ -106,4 +107,3 @@ class RepositoryErrorHandler {
     }
   }
 }
-

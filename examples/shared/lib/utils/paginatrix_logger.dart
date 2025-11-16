@@ -23,22 +23,23 @@ class PaginatrixLogger {
     debugPrint('┌─ Paginatrix API Call ──────────────────────────────────────');
     debugPrint('│ Method: $methodStr');
     debugPrint('│ Endpoint: $endpoint');
-    
+
     if (queryParams != null && queryParams.isNotEmpty) {
       debugPrint('│ Query Parameters:');
       queryParams.forEach((key, value) {
         debugPrint('│   • $key: $value');
       });
     }
-    
+
     if (body != null && body.isNotEmpty) {
       debugPrint('│ Body:');
       body.forEach((key, value) {
         debugPrint('│   • $key: $value');
       });
     }
-    
-    debugPrint('└─────────────────────────────────────────────────────────────');
+
+    debugPrint(
+        '└─────────────────────────────────────────────────────────────');
   }
 
   /// Logs API response
@@ -50,22 +51,24 @@ class PaginatrixLogger {
   }) {
     if (!isEnabled) return;
 
-    debugPrint('┌─ Paginatrix API Response ───────────────────────────────────');
+    debugPrint(
+        '┌─ Paginatrix API Response ───────────────────────────────────');
     debugPrint('│ Status: $statusCode');
     debugPrint('│ Duration: ${duration.inMilliseconds}ms');
-    
+
     if (itemCount != null) {
       debugPrint('│ Items: $itemCount');
     }
-    
+
     if (metadata != null && metadata.isNotEmpty) {
       debugPrint('│ Metadata:');
       metadata.forEach((key, value) {
         debugPrint('│   • $key: $value');
       });
     }
-    
-    debugPrint('└─────────────────────────────────────────────────────────────');
+
+    debugPrint(
+        '└─────────────────────────────────────────────────────────────');
   }
 
   /// Logs pagination operation
@@ -79,9 +82,10 @@ class PaginatrixLogger {
   }) {
     if (!isEnabled) return;
 
-    debugPrint('┌─ Paginatrix Operation ──────────────────────────────────────');
+    debugPrint(
+        '┌─ Paginatrix Operation ──────────────────────────────────────');
     debugPrint('│ Operation: $operation');
-    
+
     if (page != null) {
       debugPrint('│ Page: $page');
     }
@@ -97,8 +101,9 @@ class PaginatrixLogger {
     if (cursor != null) {
       debugPrint('│ Cursor: $cursor');
     }
-    
-    debugPrint('└─────────────────────────────────────────────────────────────');
+
+    debugPrint(
+        '└─────────────────────────────────────────────────────────────');
   }
 
   /// Logs query criteria (search, filters, sorting)
@@ -119,23 +124,24 @@ class PaginatrixLogger {
     }
 
     debugPrint('┌─ Paginatrix Query Criteria ────────────────────────────────');
-    
+
     if (hasSearch) {
       debugPrint('│ Search: "$searchTerm"');
     }
-    
+
     if (hasFilters) {
       debugPrint('│ Filters:');
       filters!.forEach((key, value) {
         debugPrint('│   • $key: $value');
       });
     }
-    
+
     if (hasSorting) {
       debugPrint('│ Sort: $sortBy (${sortDesc == true ? 'desc' : 'asc'})');
     }
-    
-    debugPrint('└─────────────────────────────────────────────────────────────');
+
+    debugPrint(
+        '└─────────────────────────────────────────────────────────────');
   }
 
   /// Logs state transition
@@ -146,13 +152,15 @@ class PaginatrixLogger {
   }) {
     if (!isEnabled) return;
 
-    debugPrint('┌─ Paginatrix State Transition ───────────────────────────────');
+    debugPrint(
+        '┌─ Paginatrix State Transition ───────────────────────────────');
     debugPrint('│ From: $from');
     debugPrint('│ To: $to');
     if (itemCount != null) {
       debugPrint('│ Items: $itemCount');
     }
-    debugPrint('└─────────────────────────────────────────────────────────────');
+    debugPrint(
+        '└─────────────────────────────────────────────────────────────');
   }
 
   /// Logs error
@@ -164,7 +172,8 @@ class PaginatrixLogger {
   }) {
     if (!isEnabled) return;
 
-    debugPrint('┌─ Paginatrix Error ──────────────────────────────────────────');
+    debugPrint(
+        '┌─ Paginatrix Error ──────────────────────────────────────────');
     if (type != null) {
       debugPrint('│ Type: $type');
     }
@@ -175,7 +184,8 @@ class PaginatrixLogger {
     if (error != null) {
       debugPrint('│ Error: $error');
     }
-    debugPrint('└─────────────────────────────────────────────────────────────');
+    debugPrint(
+        '└─────────────────────────────────────────────────────────────');
   }
 
   /// Logs a simple info message
@@ -198,18 +208,19 @@ class PaginatrixLogger {
   }) {
     if (!isEnabled) return;
 
-    debugPrint('┌─ Paginatrix Performance ────────────────────────────────────');
+    debugPrint(
+        '┌─ Paginatrix Performance ────────────────────────────────────');
     debugPrint('│ Operation: $operation');
     debugPrint('│ Duration: ${duration.inMilliseconds}ms');
-    
+
     if (additionalMetrics != null && additionalMetrics.isNotEmpty) {
       debugPrint('│ Metrics:');
       additionalMetrics.forEach((key, value) {
         debugPrint('│   • $key: $value');
       });
     }
-    
-    debugPrint('└─────────────────────────────────────────────────────────────');
+
+    debugPrint(
+        '└─────────────────────────────────────────────────────────────');
   }
 }
-

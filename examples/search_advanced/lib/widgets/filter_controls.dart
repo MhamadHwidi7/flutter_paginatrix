@@ -83,4 +83,3 @@ class FilterControls extends StatelessWidget {
     );
   }
 }
-

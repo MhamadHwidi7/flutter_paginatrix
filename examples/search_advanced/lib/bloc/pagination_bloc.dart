@@ -69,8 +69,10 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
     // Listen to controller state changes
     _subscription = _cubit.stream.listen(
       (state) {
-        debugPrint('🟢 [PaginationBloc] Controller state changed: ${state.status}');
-        debugPrint('   📦 Items: ${state.items.length}, Has more: ${state.canLoadMore}');
+        debugPrint(
+            '🟢 [PaginationBloc] Controller state changed: ${state.status}');
+        debugPrint(
+            '   📦 Items: ${state.items.length}, Has more: ${state.canLoadMore}');
         add(ControllerStateChanged(state));
       },
     );
@@ -88,7 +90,8 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
       debugPrint('🟡 [PaginationBloc] UI state changed:');
       debugPrint('   🔍 Search: "${uiState.searchTerm}"');
       debugPrint('   🏷️  Type: ${uiState.selectedType ?? "none"}');
-      debugPrint('   🔄 Sort: ${uiState.sortBy ?? "none"} (${uiState.sortDesc ? "desc" : "asc"})');
+      debugPrint(
+          '   🔄 Sort: ${uiState.sortBy ?? "none"} (${uiState.sortDesc ? "desc" : "asc"})');
       debugPrint('   ➡️  Triggering LoadFirstPage...');
       add(const LoadFirstPage());
     });
@@ -122,15 +125,16 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
   }) async {
     // Use query from parameter if provided, otherwise build from UI state
     final uiState = _uiCubit.state;
-    final queryCriteria = query ?? QueryCriteria(
-      searchTerm: uiState.searchTerm.isNotEmpty ? uiState.searchTerm : '',
-      filters: uiState.selectedType != null 
-          ? {'type': uiState.selectedType!} 
-          : const {},
-      sortBy: uiState.sortBy,
-      sortDesc: uiState.sortDesc,
-    );
-    
+    final queryCriteria = query ??
+        QueryCriteria(
+          searchTerm: uiState.searchTerm.isNotEmpty ? uiState.searchTerm : '',
+          filters: uiState.selectedType != null
+              ? {'type': uiState.selectedType!}
+              : const {},
+          sortBy: uiState.sortBy,
+          sortDesc: uiState.sortDesc,
+        );
+
     return _repository.loadPokemonPage(
       page: page,
       perPage: perPage,
@@ -199,7 +203,8 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
     UpdateSearch event,
     Emitter<PaginationBlocState<T>> emit,
   ) {
-    debugPrint('🟦 [PaginationBloc] Handling UpdateSearch event: "${event.searchTerm}"');
+    debugPrint(
+        '🟦 [PaginationBloc] Handling UpdateSearch event: "${event.searchTerm}"');
     _uiCubit.updateSearchTerm(event.searchTerm);
     // The UI cubit listener will trigger LoadFirstPage
   }
@@ -209,7 +214,8 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
     UpdateTypeFilter event,
     Emitter<PaginationBlocState<T>> emit,
   ) {
-    debugPrint('🟦 [PaginationBloc] Handling UpdateTypeFilter event: ${event.type ?? "none"}');
+    debugPrint(
+        '🟦 [PaginationBloc] Handling UpdateTypeFilter event: ${event.type ?? "none"}');
     _uiCubit.updateTypeFilter(event.type);
     // The UI cubit listener will trigger LoadFirstPage
   }
@@ -219,7 +225,8 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
     UpdateSorting event,
     Emitter<PaginationBlocState<T>> emit,
   ) {
-    debugPrint('🟦 [PaginationBloc] Handling UpdateSorting event: ${event.sortBy ?? "none"} (${event.sortDesc ? "desc" : "asc"})');
+    debugPrint(
+        '🟦 [PaginationBloc] Handling UpdateSorting event: ${event.sortBy ?? "none"} (${event.sortDesc ? "desc" : "asc"})');
     _uiCubit.updateSortBy(event.sortBy);
     if (event.sortBy != null) {
       _uiCubit.updateSortDesc(event.sortDesc);

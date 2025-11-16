@@ -178,46 +178,46 @@ class QueryCriteria with _$QueryCriteria {
     /// Search term for text-based searching
     @Default('') String searchTerm,
 
-  /// Map of filter key-value pairs
-  ///
-  /// Keys represent filter names, values represent filter values.
-  /// Supports various value types: String, int, bool, double, List, etc.
-  ///
-  /// **Examples:**
-  /// ```dart
-  /// // String filter
-  /// filters: {'status': 'active'}
-  ///
-  /// // Integer filter
-  /// filters: {'age': 25}
-  ///
-  /// // Boolean filter
-  /// filters: {'enabled': true}
-  ///
-  /// // Double filter
-  /// filters: {'price': 99.99}
-  ///
-  /// // List filter
-  /// filters: {'tags': ['tag1', 'tag2']}
-  ///
-  /// // Multiple filters
-  /// filters: {
-  ///   'status': 'active',
-  ///   'category': 'electronics',
-  ///   'minPrice': 10.0,
-  ///   'maxPrice': 100.0,
-  /// }
-  /// ```
-  ///
-/// **Note:** For type-safe filter values, consider using `FilterValue`
-/// sealed class. You can still use dynamic values for flexibility.
-  @Default({}) Map<String, dynamic> filters,
+    /// Map of filter key-value pairs
+    ///
+    /// Keys represent filter names, values represent filter values.
+    /// Supports various value types: String, int, bool, double, List, etc.
+    ///
+    /// **Examples:**
+    /// ```dart
+    /// // String filter
+    /// filters: {'status': 'active'}
+    ///
+    /// // Integer filter
+    /// filters: {'age': 25}
+    ///
+    /// // Boolean filter
+    /// filters: {'enabled': true}
+    ///
+    /// // Double filter
+    /// filters: {'price': 99.99}
+    ///
+    /// // List filter
+    /// filters: {'tags': ['tag1', 'tag2']}
+    ///
+    /// // Multiple filters
+    /// filters: {
+    ///   'status': 'active',
+    ///   'category': 'electronics',
+    ///   'minPrice': 10.0,
+    ///   'maxPrice': 100.0,
+    /// }
+    /// ```
+    ///
+    /// **Note:** For type-safe filter values, consider using `FilterValue`
+    /// sealed class. You can still use dynamic values for flexibility.
+    @Default({}) Map<String, dynamic> filters,
 
-  /// Field name to sort by (null means no sorting)
-  ///
-  /// **Note:** Empty strings are treated as null (no sorting).
-  /// Use null explicitly to indicate no sorting.
-  String? sortBy,
+    /// Field name to sort by (null means no sorting)
+    ///
+    /// **Note:** Empty strings are treated as null (no sorting).
+    /// Use null explicitly to indicate no sorting.
+    String? sortBy,
 
     /// Whether to sort in descending order (false = ascending)
     @Default(false) bool sortDesc,
@@ -443,4 +443,3 @@ class QueryCriteria with _$QueryCriteria {
     return QueryCriteria(sortBy: sortBy, sortDesc: sortDesc);
   }
 }
-

@@ -69,7 +69,8 @@ class _ProductsPageState extends State<ProductsPage> {
       if (currentQuery.searchTerm.isNotEmpty) 'q': currentQuery.searchTerm,
     };
 
-    debugPrint('   🌐 Making API request: GET /products/search?${queryParams.entries.map((e) => '${e.key}=${e.value}').join('&')}');
+    debugPrint(
+        '   🌐 Making API request: GET /products/search?${queryParams.entries.map((e) => '${e.key}=${e.value}').join('&')}');
     final stopwatch = Stopwatch()..start();
     final response = await _dio.get(
       '/products/search',
@@ -77,7 +78,8 @@ class _ProductsPageState extends State<ProductsPage> {
       cancelToken: cancelToken,
     );
     stopwatch.stop();
-    debugPrint('   ✅ API Response received in ${stopwatch.elapsedMilliseconds}ms');
+    debugPrint(
+        '   ✅ API Response received in ${stopwatch.elapsedMilliseconds}ms');
     debugPrint('   📦 Status: ${response.statusCode}');
 
     final responseData = response.data as Map<String, dynamic>;
@@ -159,4 +161,3 @@ class _ProductsPageState extends State<ProductsPage> {
     super.dispose();
   }
 }
-

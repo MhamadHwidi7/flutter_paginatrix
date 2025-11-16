@@ -75,7 +75,8 @@ class _ProductsPageState extends State<ProductsPage> {
     final stopwatch = Stopwatch()..start();
     await Future.delayed(const Duration(milliseconds: 500));
     stopwatch.stop();
-    debugPrint('   ✅ Simulated delay completed in ${stopwatch.elapsedMilliseconds}ms');
+    debugPrint(
+        '   ✅ Simulated delay completed in ${stopwatch.elapsedMilliseconds}ms');
 
     debugPrint('   🔄 Generating ${itemsPerPage} mock products...');
     final products = List.generate(
@@ -95,7 +96,8 @@ class _ProductsPageState extends State<ProductsPage> {
 
     final totalPages = 10;
     final hasMore = currentPage < totalPages;
-    debugPrint('   📊 Pagination: Page $currentPage/$totalPages, Has more: $hasMore');
+    debugPrint(
+        '   📊 Pagination: Page $currentPage/$totalPages, Has more: $hasMore');
     debugPrint('   ✅ Returning ${products.length} products');
 
     return {

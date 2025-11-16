@@ -158,5 +158,3 @@ class Pokemon {
   @override
   int get hashCode => id.hashCode ^ name.hashCode;
 }
-
-
