@@ -50,5 +50,3 @@ class PokemonPage extends StatelessWidget {
     );
   }
 }
-
-

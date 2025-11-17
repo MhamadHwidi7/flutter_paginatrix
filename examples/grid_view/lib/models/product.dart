@@ -24,5 +24,3 @@ class Product {
   final String image;
   final double rating;
 }
-
-

@@ -264,7 +264,9 @@ void main() {
         expect(state.shouldShowFooter, isTrue);
       });
 
-      test('shouldShowFooter should return true when has append error with items', () {
+      test(
+          'shouldShowFooter should return true when has append error with items',
+          () {
         final state = PaginationState.success(
           items: [1, 2, 3],
           meta: const PageMeta(hasMore: true),
@@ -279,7 +281,9 @@ void main() {
         expect(state.shouldShowFooter, isTrue);
       });
 
-      test('shouldShowFooter should return true when no more data but has items', () {
+      test(
+          'shouldShowFooter should return true when no more data but has items',
+          () {
         final state = PaginationState.success(
           items: [1, 2, 3],
           meta: const PageMeta(hasMore: false),
@@ -292,7 +296,9 @@ void main() {
         expect(state.shouldShowFooter, isTrue);
       });
 
-      test('shouldShowFooter should return false when no items and no more pages', () {
+      test(
+          'shouldShowFooter should return false when no items and no more pages',
+          () {
         final state = PaginationState.empty(
           requestContext: RequestContext.create(
             generation: 1,
@@ -303,7 +309,9 @@ void main() {
         expect(state.shouldShowFooter, isFalse);
       });
 
-      test('shouldShowFooter should return false when appending but no items and no more pages', () {
+      test(
+          'shouldShowFooter should return false when appending but no items and no more pages',
+          () {
         final state = PaginationState.appending(
           currentItems: [],
           currentMeta: const PageMeta(hasMore: false),
