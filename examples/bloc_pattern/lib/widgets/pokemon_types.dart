@@ -72,3 +72,4 @@ class PokemonTypes extends StatelessWidget {
   }
 }
 
+

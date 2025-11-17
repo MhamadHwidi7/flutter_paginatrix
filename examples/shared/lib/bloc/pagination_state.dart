@@ -79,3 +79,4 @@ class PaginationBlocState<T> extends Equatable {
   }
 }
 
+

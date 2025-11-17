@@ -25,3 +25,4 @@ class Product {
   final double rating;
 }
 
+
