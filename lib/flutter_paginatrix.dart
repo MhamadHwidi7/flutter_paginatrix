@@ -54,7 +54,7 @@ export 'src/core/typedefs/typedefs.dart';
 // Core utilities
 export 'src/core/utils/error_utils.dart';
 export 'src/core/utils/error_notification_helper.dart';
-export 'src/core/utils/generation_guard.dart';
+// Note: GenerationGuard is intentionally not exported - it's an internal implementation detail
 // Core helpers
 export 'src/core/helpers/paginatrix_helpers.dart';
 // Core validation

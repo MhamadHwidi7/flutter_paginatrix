@@ -3,6 +3,25 @@ import 'package:flutter_paginatrix/src/core/constants/paginatrix_error_constants
 import 'package:flutter_paginatrix/src/core/entities/pagination_error.dart';
 
 /// Utility class for safe error logging / formatting
+///
+/// **⚠️ Advanced Use Only - Internal API**
+///
+/// This class is exported for advanced use cases such as creating custom meta parsers
+/// or implementing custom error handling. Most users should not need to use this class
+/// directly as the package handles error formatting internally.
+///
+/// **When to use:**
+/// - Creating custom meta parsers that need to format error messages
+/// - Implementing custom error handling utilities
+/// - Advanced debugging and error logging
+///
+/// **When NOT to use:**
+/// - Regular pagination usage (use PaginationError directly)
+/// - Standard error handling (use error builders in widgets)
+///
+/// **Note:** This is an internal utility class. The API may change in future versions
+/// without notice. For stable APIs, use the public PaginationError types and widget
+/// error builders instead.
 class ErrorUtils {
   // Compile regex patterns once, reuse for all calls
   static final _secretPatterns = <RegExp>[

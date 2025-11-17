@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
+import 'package:flutter_paginatrix/src/core/utils/generation_guard.dart';
 
 /// Cubit-based controller for managing paginated data
 ///
