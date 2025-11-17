@@ -94,6 +94,34 @@ class MetaConfig with _$MetaConfig {
   );
 }
 
+/// Extracted pagination fields from data
+///
+/// This class holds all extracted pagination fields in a structured way,
+/// making it easier to pass around and test field extraction logic.
+class _ExtractedPaginationFields {
+  const _ExtractedPaginationFields({
+    this.page,
+    this.perPage,
+    this.total,
+    this.lastPage,
+    this.hasMore,
+    this.nextCursor,
+    this.previousCursor,
+    this.offset,
+    this.limit,
+  });
+
+  final int? page;
+  final int? perPage;
+  final int? total;
+  final int? lastPage;
+  final bool? hasMore;
+  final String? nextCursor;
+  final String? previousCursor;
+  final int? offset;
+  final int? limit;
+}
+
 /// Meta parser that uses configuration-based path extraction
 
 /// Simple LRU (Least Recently Used) cache implementation
@@ -180,6 +208,228 @@ class ConfigMetaParser implements MetaParser {
         (_config.hasMorePath != null && _config.hasMorePath!.isNotEmpty);
   }
 
+  /// Extracts an integer value from data at the given path
+  ///
+  /// **Best Practice:** Type-safe extraction with runtime validation.
+  /// Returns null if value is not an integer or path doesn't exist.
+  ///
+  /// **Parameters:**
+  /// - [data] - The data map to extract from
+  /// - [path] - The path to extract (can be null/empty)
+  ///
+  /// **Returns:** The integer value or null
+  int? _extractInt(Map<String, dynamic> data, String? path) {
+    final value = _extractValue(data, path);
+    return value is int ? value : null;
+  }
+
+  /// Extracts a boolean value from data at the given path
+  ///
+  /// **Best Practice:** Type-safe extraction with runtime validation.
+  /// Returns null if value is not a boolean or path doesn't exist.
+  ///
+  /// **Parameters:**
+  /// - [data] - The data map to extract from
+  /// - [path] - The path to extract (can be null/empty)
+  ///
+  /// **Returns:** The boolean value or null
+  bool? _extractBool(Map<String, dynamic> data, String? path) {
+    final value = _extractValue(data, path);
+    return value is bool ? value : null;
+  }
+
+  /// Extracts a string value from data at the given path
+  ///
+  /// **Best Practice:** Type-safe extraction with runtime validation.
+  /// Returns null if value is not a string or path doesn't exist.
+  ///
+  /// **Parameters:**
+  /// - [data] - The data map to extract from
+  /// - [path] - The path to extract (can be null/empty)
+  ///
+  /// **Returns:** The string value or null
+  String? _extractString(Map<String, dynamic> data, String? path) {
+    final value = _extractValue(data, path);
+    return value is String ? value : null;
+  }
+
+  /// Extracts all pagination fields from data
+  ///
+  /// **Best Practice:** Centralizes field extraction logic, making it easier
+  /// to test and maintain. Uses type-safe extraction helpers.
+  ///
+  /// **Parameters:**
+  /// - [data] - The data map to extract from
+  ///
+  /// **Returns:** A structured object containing all extracted fields
+  _ExtractedPaginationFields _extractPaginationFields(
+      Map<String, dynamic> data) {
+    return _ExtractedPaginationFields(
+      page: _extractInt(data, _config.pagePath),
+      perPage: _extractInt(data, _config.perPagePath),
+      total: _extractInt(data, _config.totalPath),
+      lastPage: _extractInt(data, _config.lastPagePath),
+      hasMore: _extractBool(data, _config.hasMorePath),
+      nextCursor: _extractString(data, _config.nextCursorPath),
+      previousCursor: _extractString(data, _config.previousCursorPath),
+      offset: _extractInt(data, _config.offsetPath),
+      limit: _extractInt(data, _config.limitPath),
+    );
+  }
+
+  /// Creates a PageMeta object from extracted fields
+  ///
+  /// **Best Practice:** Determines pagination type and creates appropriate
+  /// PageMeta variant. This separates field extraction from meta creation,
+  /// making both easier to test independently.
+  ///
+  /// **Pagination Type Detection:**
+  /// - Page-based: requires both page and perPage
+  /// - Cursor-based: requires nextCursor or hasMore
+  /// - Offset-based: requires both offset and limit
+  /// - Fallback: basic meta with all fields
+  ///
+  /// **Parameters:**
+  /// - [fields] - The extracted pagination fields
+  ///
+  /// **Returns:** A PageMeta object appropriate for the pagination type
+  PageMeta _createPageMeta(_ExtractedPaginationFields fields) {
+    // Check which pagination type we have (if any)
+    // If none found, we'll fallback to basic meta (all nulls), which is valid
+    final hasPageBased = fields.page != null && fields.perPage != null;
+    final hasCursorBased = fields.nextCursor != null || fields.hasMore != null;
+    final hasOffsetBased = fields.offset != null && fields.limit != null;
+
+    if (hasPageBased) {
+      return _createPageMetaForPageBased(fields);
+    } else if (hasCursorBased) {
+      return _createPageMetaForCursorBased(fields);
+    } else if (hasOffsetBased) {
+      return _createPageMetaForOffsetBased(fields);
+    } else {
+      return _createPageMetaBasic(fields);
+    }
+  }
+
+  /// Creates a page-based PageMeta object
+  ///
+  /// **Best Practice:** Encapsulates page-based meta creation logic,
+  /// including hasMore calculation from lastPage when not provided.
+  ///
+  /// **Parameters:**
+  /// - [fields] - The extracted pagination fields
+  ///
+  /// **Returns:** A PageMeta.pageBased object
+  PageMeta _createPageMetaForPageBased(_ExtractedPaginationFields fields) {
+    // Use explicit non-nullable variables to satisfy type system
+    final page = fields.page!;
+    final perPage = fields.perPage!;
+    return PageMeta.pageBased(
+      page: page,
+      perPage: perPage,
+      total: fields.total,
+      lastPage: fields.lastPage,
+      hasMore: fields.hasMore ??
+          (fields.lastPage != null ? page < fields.lastPage! : null),
+    );
+  }
+
+  /// Creates a cursor-based PageMeta object
+  ///
+  /// **Best Practice:** Encapsulates cursor-based meta creation logic.
+  ///
+  /// **Parameters:**
+  /// - [fields] - The extracted pagination fields
+  ///
+  /// **Returns:** A PageMeta.cursorBased object
+  PageMeta _createPageMetaForCursorBased(_ExtractedPaginationFields fields) {
+    return PageMeta.cursorBased(
+      nextCursor: fields.nextCursor,
+      previousCursor: fields.previousCursor,
+      hasMore: fields.hasMore,
+    );
+  }
+
+  /// Creates an offset-based PageMeta object
+  ///
+  /// **Best Practice:** Encapsulates offset-based meta creation logic,
+  /// including hasMore calculation from offset/limit/total when not provided.
+  ///
+  /// **Parameters:**
+  /// - [fields] - The extracted pagination fields
+  ///
+  /// **Returns:** A PageMeta.offsetBased object
+  PageMeta _createPageMetaForOffsetBased(_ExtractedPaginationFields fields) {
+    // Use explicit non-nullable variables to satisfy type system
+    final offset = fields.offset!;
+    final limit = fields.limit!;
+    return PageMeta.offsetBased(
+      offset: offset,
+      limit: limit,
+      total: fields.total,
+      hasMore: fields.hasMore ??
+          (fields.total != null ? offset + limit < fields.total! : null),
+    );
+  }
+
+  /// Creates a basic PageMeta object (fallback)
+  ///
+  /// **Best Practice:** Creates a basic meta object with all fields.
+  /// Used when pagination type cannot be determined.
+  ///
+  /// **Parameters:**
+  /// - [fields] - The extracted pagination fields
+  ///
+  /// **Returns:** A basic PageMeta object
+  PageMeta _createPageMetaBasic(_ExtractedPaginationFields fields) {
+    return PageMeta(
+      page: fields.page,
+      perPage: fields.perPage,
+      total: fields.total,
+      lastPage: fields.lastPage,
+      hasMore: fields.hasMore,
+      nextCursor: fields.nextCursor,
+      previousCursor: fields.previousCursor,
+      offset: fields.offset,
+      limit: fields.limit,
+    );
+  }
+
+  /// Checks cache and returns cached meta if available and valid
+  ///
+  /// **Best Practice:** Encapsulates cache checking logic, making it easier
+  /// to test and maintain. Returns null if cache miss or invalid.
+  ///
+  /// **Parameters:**
+  /// - [data] - The data map to check cache for
+  ///
+  /// **Returns:** Cached PageMeta if available and valid, null otherwise
+  PageMeta? _getCachedMetaIfValid(Map<String, dynamic> data) {
+    // Only check cache if data structure is reasonably small
+    if (data.length >= PaginatrixCacheConstants.maxDataSizeForCaching) {
+      return null;
+    }
+
+    // Extract only metadata fields for hashing (not entire data map)
+    // This prevents hash collisions from items array or other non-metadata fields
+    final metadataMap = _extractCanonicalMetadataMap(data);
+    final dataHash = _computeCanonicalHash(metadataMap);
+    final cachedMeta = _metaCache.get(dataHash);
+
+    if (cachedMeta != null) {
+      // Validate hash collision: verify cached meta matches current data structure
+      // This prevents returning incorrect metadata due to hash collisions
+      if (_validateCachedMeta(cachedMeta, data)) {
+        return cachedMeta;
+      } else {
+        // Hash collision detected - re-add to maintain LRU order
+        _metaCache.put(dataHash, cachedMeta);
+      }
+    }
+
+    return null;
+  }
+
   @override
   PageMeta parseMeta(Map<String, dynamic> data) {
     try {
@@ -197,109 +447,22 @@ class ConfigMetaParser implements MetaParser {
         }
       }
 
-      // Only compute hash if we're going to cache (optimization)
-      // Only cache if data structure is reasonably small to avoid memory issues
-      int? dataHash;
-      if (data.length < PaginatrixCacheConstants.maxDataSizeForCaching) {
-        dataHash = _computeSimpleHash(data);
-        final cachedMeta = _metaCache.get(dataHash);
-        if (cachedMeta != null) {
-          // Validate hash collision: verify cached meta matches current data structure
-          // This prevents returning incorrect metadata due to hash collisions
-          if (_validateCachedMeta(cachedMeta, data)) {
-            return cachedMeta;
-          } else {
-            // Hash collision detected - remove from cache and continue parsing
-            _metaCache.put(
-                dataHash, cachedMeta); // Re-add to maintain LRU order
-            // Continue to parse fresh metadata below
-          }
-        }
+      // Check cache first (returns null if cache miss or invalid)
+      final cachedMeta = _getCachedMetaIfValid(data);
+      if (cachedMeta != null) {
+        return cachedMeta;
       }
 
-      // Safe type extraction with runtime checks
-      final pageValue = _extractValue(data, _config.pagePath);
-      final page = pageValue is int ? pageValue : null;
-
-      final perPageValue = _extractValue(data, _config.perPagePath);
-      final perPage = perPageValue is int ? perPageValue : null;
-
-      final totalValue = _extractValue(data, _config.totalPath);
-      final total = totalValue is int ? totalValue : null;
-
-      final lastPageValue = _extractValue(data, _config.lastPagePath);
-      final lastPage = lastPageValue is int ? lastPageValue : null;
-
-      final hasMoreValue = _extractValue(data, _config.hasMorePath);
-      final hasMore = hasMoreValue is bool ? hasMoreValue : null;
-
-      final nextCursorValue = _extractValue(data, _config.nextCursorPath);
-      final nextCursor = nextCursorValue is String ? nextCursorValue : null;
-
-      final previousCursorValue =
-          _extractValue(data, _config.previousCursorPath);
-      final previousCursor =
-          previousCursorValue is String ? previousCursorValue : null;
-
-      final offsetValue = _extractValue(data, _config.offsetPath);
-      final offset = offsetValue is int ? offsetValue : null;
-
-      final limitValue = _extractValue(data, _config.limitPath);
-      final limit = limitValue is int ? limitValue : null;
-
-      // Check which pagination type we have (if any)
-      // If none found, we'll fallback to basic meta (all nulls), which is valid
-      final hasPageBased = page != null && perPage != null;
-      final hasCursorBased = nextCursor != null || hasMore != null;
-      final hasOffsetBased = offset != null && limit != null;
+      // Extract all pagination fields using type-safe helpers
+      final extractedFields = _extractPaginationFields(data);
 
       // Determine pagination type and create appropriate PageMeta
-      final PageMeta result;
-      if (hasPageBased) {
-        // Use explicit non-nullable variables to satisfy type system
-        final pageValue = page;
-        final perPageValue = perPage;
-        result = PageMeta.pageBased(
-          page: pageValue,
-          perPage: perPageValue,
-          total: total,
-          lastPage: lastPage,
-          hasMore: hasMore ?? (lastPage != null ? pageValue < lastPage : null),
-        );
-      } else if (hasCursorBased) {
-        result = PageMeta.cursorBased(
-          nextCursor: nextCursor,
-          previousCursor: previousCursor,
-          hasMore: hasMore,
-        );
-      } else if (hasOffsetBased) {
-        // Use explicit non-nullable variables to satisfy type system
-        final offsetValue = offset;
-        final limitValue = limit;
-        result = PageMeta.offsetBased(
-          offset: offsetValue,
-          limit: limitValue,
-          total: total,
-          hasMore: hasMore ??
-              (total != null ? offsetValue + limitValue < total : null),
-        );
-      } else {
-        // Fallback to basic meta (should not reach here due to validation above)
-        result = PageMeta(
-          page: page,
-          perPage: perPage,
-          total: total,
-          lastPage: lastPage,
-          hasMore: hasMore,
-          nextCursor: nextCursor,
-          previousCursor: previousCursor,
-          offset: offset,
-          limit: limit,
-        );
-      }
+      final PageMeta result = _createPageMeta(extractedFields);
 
-      // Cache only if we computed hash
-      if (dataHash != null) {
+      // Cache the result if data structure is small enough
+      if (data.length < PaginatrixCacheConstants.maxDataSizeForCaching) {
+        final metadataMap = _extractCanonicalMetadataMap(data);
+        final dataHash = _computeCanonicalHash(metadataMap);
         _metaCache.put(dataHash, result);
       }
 
@@ -395,45 +558,89 @@ class ConfigMetaParser implements MetaParser {
   // Note: Cache eviction is now handled automatically by _LRUCache
   // The LRU cache evicts least recently used items when at capacity
 
-  /// Computes a robust hash for caching purposes
+  /// Extracts a canonical metadata map containing only pagination metadata fields
   ///
-  /// Uses `Object.hash()` to create a more robust hash that includes the structure
-  /// of relevant pagination fields. This reduces the likelihood of hash collisions
-  /// compared to simple string concatenation.
+  /// **Best Practice:** This method creates a canonical representation of only the
+  /// metadata fields, excluding items arrays and other non-metadata fields. This
+  /// ensures that:
+  /// - Hash collisions are minimized (only metadata affects the hash)
+  /// - Different items arrays with same metadata don't create different hashes
+  /// - Cache keys are based solely on metadata, not on data that changes per page
   ///
-  /// **Benefits:**
-  /// - More robust than string concatenation hashing
-  /// - Better collision resistance
-  /// - Includes structure information in hash calculation
+  /// **Why this matters:**
+  /// - Two responses with same metadata but different items should have the same hash
+  /// - Prevents cache misses when only items change but metadata stays the same
+  /// - Reduces hash collision risk by excluding large, variable data structures
+  ///
+  /// **Returns:** A map containing only the pagination metadata fields
+  Map<String, dynamic> _extractCanonicalMetadataMap(Map<String, dynamic> data) {
+    final metadataMap = <String, dynamic>{};
+
+    // Extract only metadata fields (not items array or other data)
+    final pageValue = _extractValue(data, _config.pagePath);
+    if (pageValue != null) metadataMap['page'] = pageValue;
+
+    final perPageValue = _extractValue(data, _config.perPagePath);
+    if (perPageValue != null) metadataMap['perPage'] = perPageValue;
+
+    final totalValue = _extractValue(data, _config.totalPath);
+    if (totalValue != null) metadataMap['total'] = totalValue;
+
+    final lastPageValue = _extractValue(data, _config.lastPagePath);
+    if (lastPageValue != null) metadataMap['lastPage'] = lastPageValue;
+
+    final hasMoreValue = _extractValue(data, _config.hasMorePath);
+    if (hasMoreValue != null) metadataMap['hasMore'] = hasMoreValue;
+
+    final nextCursorValue = _extractValue(data, _config.nextCursorPath);
+    if (nextCursorValue != null) metadataMap['nextCursor'] = nextCursorValue;
+
+    final previousCursorValue = _extractValue(data, _config.previousCursorPath);
+    if (previousCursorValue != null) {
+      metadataMap['previousCursor'] = previousCursorValue;
+    }
+
+    final offsetValue = _extractValue(data, _config.offsetPath);
+    if (offsetValue != null) metadataMap['offset'] = offsetValue;
+
+    final limitValue = _extractValue(data, _config.limitPath);
+    if (limitValue != null) metadataMap['limit'] = limitValue;
+
+    return metadataMap;
+  }
+
+  /// Computes a canonical hash from a metadata map
+  ///
+  /// **Best Practice:** This method hashes only the canonical metadata map,
+  /// not the entire data structure. This ensures:
+  /// - Hash collisions are minimized (only metadata affects the hash)
+  /// - Cache keys are deterministic and based solely on metadata
+  /// - Different items arrays with same metadata produce the same hash
+  ///
+  /// **Why this approach?**
+  ///
+  /// - Uses canonical JSON-like representation for deterministic hashing
+  /// - Includes all metadata fields in a consistent order (sorted keys)
   /// - Uses Dart's built-in hash function which is well-optimized
-  /// - Includes multiple pagination fields to reduce collision probability
   ///
   /// **Note:** While hash collisions are still theoretically possible, using
-  /// `Object.hash()` with multiple fields significantly reduces the risk compared
-  /// to string-based hashing or fewer fields.
-  int _computeSimpleHash(Map<String, dynamic> data) {
-    // Extract relevant pagination fields
-    final pageValue = _extractValue(data, _config.pagePath);
-    final perPageValue = _extractValue(data, _config.perPagePath);
-    final totalValue = _extractValue(data, _config.totalPath);
-    final hasMoreValue = _extractValue(data, _config.hasMorePath);
-    final nextCursorValue = _extractValue(data, _config.nextCursorPath);
-    final offsetValue = _extractValue(data, _config.offsetPath);
-    final limitValue = _extractValue(data, _config.limitPath);
-
-    // Use Object.hashAll() for more robust hashing
-    // This combines multiple values into a single hash with better collision resistance
-    // Including more fields and data length reduces the probability of hash collisions
-    return Object.hashAll([
-      pageValue,
-      perPageValue,
-      totalValue,
-      hasMoreValue,
-      nextCursorValue,
-      offsetValue,
-      limitValue,
-      data.length, // Include structure size in hash
-    ]);
+  /// `Object.hashAll()` with only metadata fields significantly reduces the risk
+  /// compared to hashing the entire data map which includes variable items arrays.
+  ///
+  /// **Parameters:**
+  /// - [metadataMap] - The canonical metadata map (from _extractCanonicalMetadataMap)
+  ///
+  /// **Returns:** A hash value suitable for use as a cache key
+  int _computeCanonicalHash(Map<String, dynamic> metadataMap) {
+    // Use Object.hashAll() with sorted keys for deterministic hashing
+    // This ensures the same metadata always produces the same hash
+    final sortedKeys = metadataMap.keys.toList()..sort();
+    final hashValues = <dynamic>[];
+    for (final key in sortedKeys) {
+      hashValues.add(key);
+      hashValues.add(metadataMap[key]);
+    }
+    return Object.hashAll(hashValues);
   }
 
   /// Validates that cached metadata matches the current data structure

@@ -25,7 +25,7 @@ class CustomMetaParser implements MetaParser {
         throw ErrorUtils.createParseError(
           message: 'Transform result missing meta key "$_metaKey"',
           expectedFormat: 'Expected keys: $_metaKey',
-          actualData: transformed,
+          actualData: _toDiagnosticString(transformed),
         );
       }
 
@@ -34,7 +34,7 @@ class CustomMetaParser implements MetaParser {
         throw ErrorUtils.createParseError(
           message: 'Meta data is null',
           expectedFormat: 'Expected non-null meta data',
-          actualData: transformed,
+          actualData: _toDiagnosticString(transformed),
         );
       }
 
@@ -44,7 +44,7 @@ class CustomMetaParser implements MetaParser {
       throw ErrorUtils.createParseError(
         message: 'Failed to parse meta from transform result: $e',
         expectedFormat: 'Expected valid PageMeta data',
-        actualData: data,
+        actualData: _toDiagnosticString(data),
       );
     }
   }
@@ -58,7 +58,7 @@ class CustomMetaParser implements MetaParser {
         throw ErrorUtils.createParseError(
           message: 'Transform result missing items key "$_itemsKey"',
           expectedFormat: 'Expected keys: $_itemsKey',
-          actualData: transformed,
+          actualData: _toDiagnosticString(transformed),
         );
       }
 
@@ -67,7 +67,7 @@ class CustomMetaParser implements MetaParser {
         throw ErrorUtils.createParseError(
           message: 'Items key "$_itemsKey" does not contain a list',
           expectedFormat: 'Expected a list of items',
-          actualData: items,
+          actualData: _toDiagnosticString(items),
         );
       }
 
@@ -83,7 +83,7 @@ class CustomMetaParser implements MetaParser {
             message: 'Item at index $i is not a Map<String, dynamic>. '
                 'Got ${item.runtimeType} instead.',
             expectedFormat: 'Expected all items to be Map<String, dynamic>',
-            actualData: item,
+            actualData: _toDiagnosticString(item),
           );
         }
       }
@@ -93,9 +93,30 @@ class CustomMetaParser implements MetaParser {
       throw ErrorUtils.createParseError(
         message: 'Failed to extract items from transform result: $e',
         expectedFormat: 'Expected items list',
-        actualData: data,
+        actualData: _toDiagnosticString(data),
       );
     }
+  }
+
+  /// Converts complex or non-serializable objects to diagnostic-friendly strings
+  ///
+  /// **Best Practice:** This method ensures that error payloads contain
+  /// diagnostic-friendly strings instead of complex or non-serializable objects.
+  /// This makes error output more useful and prevents serialization issues.
+  ///
+  /// **Why this matters:**
+  /// - Complex objects (e.g., custom classes, closures) can't be serialized
+  /// - Non-serializable objects make error output noisy and less useful
+  /// - Diagnostic strings provide type information and key details
+  ///
+  /// **Parameters:**
+  /// - [data] - The data to convert (can be any type)
+  ///
+  /// **Returns:** A diagnostic-friendly string representation
+  String _toDiagnosticString(dynamic data) {
+    // Use ErrorUtils.truncateData which already handles complex objects
+    // This ensures consistent formatting and handles non-serializable objects
+    return ErrorUtils.truncateData(data);
   }
 
   @override
@@ -109,3 +130,4 @@ class CustomMetaParser implements MetaParser {
     }
   }
 }
+
