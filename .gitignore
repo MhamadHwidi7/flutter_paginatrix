@@ -41,3 +41,7 @@ examples/*/build/
 CODE_REVIEW.md
 PRODUCTION_READINESS_ASSESSMENT.md
 PUBLISHING.md
+
+# Internal documentation (not for public repo)
+FIX_PLAN.md
+COMPREHENSIVE_CODE_REVIEW*.md
