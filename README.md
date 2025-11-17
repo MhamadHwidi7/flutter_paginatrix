@@ -13,19 +13,28 @@ A production-ready, type-safe pagination library that works with **any backend A
 
 ## ✨ Features
 
+### Core Capabilities
 - 🎯 **Backend-Agnostic** - Works with any API format (REST, GraphQL, custom)
 - 🔄 **Multiple Pagination Strategies** - Page-based, offset-based, and cursor-based
 - 🎨 **Beautiful UI Components** - Sliver-based ListView and GridView with skeleton loaders
 - 🔒 **Type-Safe** - Full generics support with compile-time safety
-- 🛡️ **Race Condition Protection** - Generation guards prevent stale responses
-- ⚡ **Performance Optimized** - LRU caching, debouncing, and efficient rendering
-- 🔍 **Search & Filtering** - Built-in support for search, filters, and sorting
-- 🚫 **Request Cancellation** - Automatic cleanup of in-flight requests
-- 🔁 **Automatic Retry** - Exponential backoff retry with configurable limits
+- 🧩 **Dependency Injection** - Built-in simple DI container, or use `get_it`/`provider`/`riverpod`
+
+### Performance & Reliability
+- ⚡ **Performance Optimized** - LRU caching for metadata, debouncing, efficient Sliver rendering
+- 🛡️ **Race Condition Protection** - Generation guards prevent stale responses from corrupting state
+- 🚫 **Request Cancellation** - Automatic cleanup of in-flight requests with operation coordination
+- 🔁 **Automatic Retry** - Exponential backoff retry (500ms → 1s → 2s → 4s) with configurable limits
+- ⏱️ **Smart Debouncing** - Search (400ms) and refresh (300ms) debouncing to prevent API spam
+- 💾 **Metadata Caching** - LRU cache prevents redundant parsing of pagination metadata
+
+### Developer Experience
+- 🔍 **Search & Filtering** - Built-in support for search, filters, and sorting with type-safe access
 - 🎭 **6 Error Types** - Network, parse, cancelled, rate-limited, circuit breaker, unknown
-- 📱 **Web Support** - Page selector widget for web applications
+- 📱 **Web Support** - Page selector widget with multiple styles (buttons, dropdown, compact)
+- 🎨 **Customizable UI** - Custom builders for empty states, errors, loaders, and skeletons
 - 🧪 **Well-Tested** - 211+ tests covering unit, integration, and widget scenarios
-- 📚 **Comprehensive Docs** - Extensive documentation and examples
+- 📚 **Comprehensive Docs** - Extensive documentation, examples, and guides
 
 ---
 
@@ -33,11 +42,14 @@ A production-ready, type-safe pagination library that works with **any backend A
 
 Unlike typical infinite scroll solutions, Flutter Paginatrix provides:
 
-- **Controller-Based API** - Clean, declarative state management using Cubit
-- **Zero Boilerplate** - Minimal configuration required
-- **Production-Ready** - Battle-tested with comprehensive error handling
+- **Controller-Based API** - Clean, declarative state management using Cubit (flutter_bloc)
+- **Zero Boilerplate** - Minimal configuration required, sensible defaults
+- **Production-Ready** - Battle-tested with comprehensive error handling and race condition protection
 - **Flexible Meta Parsing** - Configurable parsers for any API response structure
 - **Clean Architecture** - Well-organized codebase following SOLID principles
+- **Built-in DI** - Simple dependency injection container included (or use your preferred solution)
+- **Performance First** - LRU caching, debouncing, efficient Sliver rendering, request cancellation
+- **Developer Friendly** - Type-safe, well-documented, extensive examples, comprehensive test suite
 
 ---
 
@@ -343,11 +355,210 @@ final controller = PaginatrixController<User>(
     maxPageSize: 100,
     requestTimeout: Duration(seconds: 30),
     maxRetries: 5,
+    initialBackoff: Duration(milliseconds: 500),
+    retryResetTimeout: Duration(seconds: 60),
     refreshDebounceDuration: Duration(milliseconds: 300),
     searchDebounceDuration: Duration(milliseconds: 400),
+    defaultPrefetchThreshold: 3,
+    defaultPrefetchThresholdPixels: 300.0,
     enableDebugLogging: false,
   ),
 );
+```
+
+### Dependency Injection
+
+Flutter Paginatrix includes a simple built-in DI container (`PaginatrixDI`) for convenience, but you can also use your preferred DI solution like `get_it`, `provider`, or `riverpod`.
+
+#### Using Built-in DI (`PaginatrixDI`)
+
+```dart
+import 'package:flutter_paginatrix/flutter_paginatrix.dart';
+import 'package:dio/dio.dart';
+
+// Register dependencies (typically in main() or app initialization)
+void setupDependencies() {
+  PaginatrixDI.register<Dio>(Dio(BaseOptions(
+    baseUrl: 'https://api.example.com',
+    connectTimeout: const Duration(seconds: 30),
+  )));
+  
+  PaginatrixDI.register<MetaParser>(
+    ConfigMetaParser(MetaConfig.nestedMeta),
+  );
+}
+
+// Use in your code
+class UsersRepository {
+  Future<Map<String, dynamic>> loadUsers({
+    int? page,
+    int? perPage,
+    CancelToken? cancelToken,
+    QueryCriteria? query,
+  }) async {
+    final dio = PaginatrixDI.get<Dio>();
+    final response = await dio.get('/users', queryParameters: {
+      'page': page,
+      'per_page': perPage,
+      if (query?.searchTerm.isNotEmpty ?? false) 'q': query!.searchTerm,
+    }, cancelToken: cancelToken);
+    return response.data;
+  }
+}
+
+// Create controller
+final controller = PaginatrixController<User>(
+  loader: UsersRepository().loadUsers,
+  itemDecoder: (json) => User.fromJson(json),
+  metaParser: PaginatrixDI.get<MetaParser>(),
+);
+
+// Clean up in tests
+tearDown(() {
+  PaginatrixDI.reset();
+});
+```
+
+**PaginatrixDI API:**
+- `PaginatrixDI.register<T>(instance)` - Register a dependency
+- `PaginatrixDI.get<T>()` - Retrieve a dependency
+- `PaginatrixDI.isRegistered<T>()` - Check if registered
+- `PaginatrixDI.reset()` - Clear all registrations (useful in tests)
+- `PaginatrixDI.registeredCount` - Get number of registered instances
+
+#### Using `get_it` Package
+
+```dart
+import 'package:get_it/get_it.dart';
+
+final getIt = GetIt.instance;
+
+// Setup (in main() or app initialization)
+void setupDependencies() {
+  getIt.registerSingleton<Dio>(Dio(BaseOptions(
+    baseUrl: 'https://api.example.com',
+  )));
+  
+  getIt.registerSingleton<MetaParser>(
+    ConfigMetaParser(MetaConfig.nestedMeta),
+  );
+}
+
+// Use in your code
+class UsersRepository {
+  Future<Map<String, dynamic>> loadUsers({...}) async {
+    final dio = getIt<Dio>();
+    // ... use dio
+  }
+}
+
+// Create controller
+final controller = PaginatrixController<User>(
+  loader: getIt<UsersRepository>().loadUsers,
+  itemDecoder: (json) => User.fromJson(json),
+  metaParser: getIt<MetaParser>(),
+);
+```
+
+#### Using `provider` Package
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+// Create providers
+class DioProvider extends ChangeNotifier {
+  final Dio _dio = Dio(BaseOptions(baseUrl: 'https://api.example.com'));
+  Dio get dio => _dio;
+}
+
+// In your app
+MultiProvider(
+  providers: [
+    ChangeNotifierProvider(create: (_) => DioProvider()),
+    Provider(create: (_) => ConfigMetaParser(MetaConfig.nestedMeta)),
+  ],
+  child: MyApp(),
+)
+
+// Use in widget
+final dio = Provider.of<DioProvider>(context).dio;
+final metaParser = Provider.of<MetaParser>(context);
+```
+
+**When to use which:**
+- **PaginatrixDI** - Simple projects, quick setup, minimal dependencies
+- **get_it** - Complex apps, need singleton/lazy/factory patterns, async initialization
+- **provider/riverpod** - Flutter-first, reactive state management, widget tree integration
+
+### Advanced Performance Features
+
+#### LRU Metadata Caching
+
+The package automatically caches parsed pagination metadata using an LRU cache to prevent redundant parsing:
+
+```dart
+// Metadata is automatically cached and reused
+// Cache size is optimized for typical pagination responses
+// Cache keys are based on canonical metadata structure (not items array)
+```
+
+#### Smart Debouncing
+
+Prevents excessive API calls:
+
+```dart
+// Search debouncing (400ms default)
+_controller.updateSearchTerm('john'); // Waits 400ms before triggering API call
+_controller.updateSearchTerm('joh');  // Cancels previous, waits another 400ms
+_controller.updateSearchTerm('j');    // Cancels previous, waits another 400ms
+// Only the last call executes after user stops typing
+
+// Refresh debouncing (300ms default)
+_controller.refresh(); // Waits 300ms before executing
+_controller.refresh(); // Cancels previous, waits another 300ms
+// Prevents rapid successive refresh calls
+```
+
+#### Exponential Backoff Retry
+
+Automatic retry with exponential backoff:
+
+```dart
+// Retry attempts with increasing delays:
+// 1st retry: 500ms delay
+// 2nd retry: 1000ms delay (500ms * 2^1)
+// 3rd retry: 2000ms delay (500ms * 2^2)
+// 4th retry: 4000ms delay (500ms * 2^3)
+// 5th retry: 8000ms delay (500ms * 2^4)
+// Max retries: 5 (configurable)
+
+await controller.retry(); // Automatically retries with backoff
+```
+
+#### Operation Coordination
+
+Prevents race conditions by coordinating conflicting operations:
+
+```dart
+// Refresh cancels append (refresh replaces data)
+controller.loadNextPage(); // Append operation starts
+controller.refresh();      // Cancels append, starts refresh
+
+// First page load cancels both refresh and append
+controller.refresh();      // Refresh operation starts
+controller.loadFirstPage(); // Cancels refresh, starts first page load
+```
+
+#### Generation Guards
+
+Prevents stale responses from corrupting state:
+
+```dart
+// Each request gets a generation number
+// Only responses matching current generation update state
+// Stale responses (from cancelled requests) are automatically dropped
+// This ensures data integrity even with rapid user interactions
 ```
 
 ---
@@ -492,11 +703,11 @@ Base empty state widget. Variants:
 
 #### `PaginatrixSkeletonizer`
 
-Skeleton loading effect widget.
+Skeleton loading effect widget with customizable item builders. Automatically handles bounded constraints for sliver widgets.
 
 #### `PaginatrixGridSkeletonizer`
 
-Skeleton loading effect for grid layouts.
+Skeleton loading effect for grid layouts with aspect ratio constraints.
 
 #### `PageSelector`
 
@@ -507,9 +718,11 @@ Page selection widget for web with styles:
 
 ### Meta Parsers
 
+Meta parsers extract pagination metadata from API responses. The package includes two powerful parsers:
+
 #### `ConfigMetaParser`
 
-Pre-configured parser for common API formats.
+Pre-configured parser for common API formats with **automatic caching** to prevent redundant parsing.
 
 **Pre-configured Configs:**
 - `MetaConfig.nestedMeta` - `{data: [], meta: {current_page, per_page, ...}}`
@@ -528,11 +741,19 @@ final config = MetaConfig(
   lastPagePath: 'meta.last_page',
   hasMorePath: 'meta.has_more',
 );
+
+final parser = ConfigMetaParser(config);
 ```
+
+**Features:**
+- ✅ Automatic LRU caching of parsed metadata
+- ✅ Path-based extraction (supports nested paths like `meta.current_page`)
+- ✅ Type-safe field extraction
+- ✅ Automatic pagination type detection (page-based, cursor-based, offset-based)
 
 #### `CustomMetaParser`
 
-Flexible parser for custom API structures. Takes a transform function that converts the raw API response into a standard format with 'items' and 'meta' keys:
+Flexible parser for custom API structures. Takes a transform function that converts the raw API response into a standard format:
 
 ```dart
 CustomMetaParser(
@@ -552,6 +773,11 @@ CustomMetaParser(
   metaKey: 'meta',    // Optional, defaults to 'meta'
 )
 ```
+
+**When to use:**
+- API response structure doesn't match any pre-configured format
+- Need complex transformations or data validation
+- Working with GraphQL or other non-standard formats
 
 The transform function receives the raw API response and must return a Map with:
 - An 'items' key containing a List of item maps
@@ -717,6 +943,46 @@ if (controller.canLoadMore && !controller.isLoading) {
 ### 7. Retry Method
 
 The `retry()` method automatically determines whether to retry initial load or append based on current error state. You don't need separate methods.
+
+### 8. Dependency Injection
+
+**❌ Wrong:**
+```dart
+// Creating new instances everywhere
+final dio1 = Dio();
+final dio2 = Dio(); // Different instance!
+```
+
+**✅ Correct:**
+```dart
+// Use DI for shared dependencies
+PaginatrixDI.register<Dio>(Dio());
+final dio = PaginatrixDI.get<Dio>(); // Same instance everywhere
+```
+
+### 9. Performance Optimization
+
+**❌ Wrong:**
+```dart
+// No keys, no optimizations
+PaginatrixListView<User>(
+  controller: _controller,
+  itemBuilder: (context, user, index) => UserTile(user: user),
+)
+```
+
+**✅ Correct:**
+```dart
+// Use keys and optimizations for better performance
+PaginatrixListView<User>(
+  controller: _controller,
+  keyBuilder: (user, index) => user.id.toString(),
+  addAutomaticKeepAlives: true,
+  addRepaintBoundaries: true,
+  cacheExtent: 250,
+  itemBuilder: (context, user, index) => UserTile(user: user),
+)
+```
 
 ---
 
