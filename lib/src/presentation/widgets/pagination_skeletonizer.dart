@@ -78,38 +78,61 @@ class PaginatrixSkeletonizer extends StatelessWidget {
 }
 
 /// Default skeleton item for list items
+///
+/// **Best Practice:** This widget is constrained with explicit height to prevent
+/// sliver layout errors in tests. Sliver widgets require bounded constraints,
+/// and providing explicit dimensions ensures stable layout behavior.
 class _DefaultSkeletonItem extends StatelessWidget {
   const _DefaultSkeletonItem();
 
+  /// Default height for skeleton list items
+  ///
+  /// This provides a stable height constraint for sliver widgets in tests.
+  /// The height accounts for:
+  /// - Avatar circle (48px)
+  /// - Top text line (~20px)
+  /// - Spacing (8px)
+  /// - Bottom text line (~18px)
+  /// - Vertical margins (16px total)
+  static const double _defaultHeight = 90;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: const Row(
-        children: [
-          // Avatar placeholder
-          Bone.circle(
-            size: 48,
-          ),
-          SizedBox(width: PaginatrixSpacing.horizontalStandard),
-          // Content placeholder
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Bone.text(
-                  words: 3,
-                  fontSize: 16,
-                ),
-                SizedBox(height: PaginatrixSpacing.medium),
-                Bone.text(
-                  words: 5,
-                  fontSize: 14,
-                ),
-              ],
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        minHeight: _defaultHeight,
+        maxHeight: _defaultHeight,
+      ),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: const Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Avatar placeholder
+            Bone.circle(
+              size: 48,
             ),
-          ),
-        ],
+            SizedBox(width: PaginatrixSpacing.horizontalStandard),
+            // Content placeholder
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Bone.text(
+                    words: 3,
+                    fontSize: 16,
+                  ),
+                  SizedBox(height: PaginatrixSpacing.medium),
+                  Bone.text(
+                    words: 5,
+                    fontSize: 14,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -167,8 +190,18 @@ class PaginatrixGridSkeletonizer extends StatelessWidget {
 }
 
 /// Default skeleton item for grid items
+///
+/// **Best Practice:** This widget is constrained with explicit dimensions to prevent
+/// sliver layout errors in tests. Sliver widgets require bounded constraints,
+/// and providing explicit dimensions ensures stable layout behavior.
 class _DefaultGridSkeletonItem extends StatelessWidget {
   const _DefaultGridSkeletonItem();
+
+  /// Default aspect ratio for skeleton grid items
+  ///
+  /// This provides a stable aspect ratio constraint for sliver grid widgets in tests.
+  /// The aspect ratio ensures consistent sizing across different screen sizes.
+  static const double _defaultAspectRatio = 0.75; // 3:4 ratio (portrait cards)
 
   @override
   Widget build(BuildContext context) {
@@ -178,23 +211,30 @@ class _DefaultGridSkeletonItem extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Bone.circle(
-            size: 60,
+      child: const AspectRatio(
+        aspectRatio: _defaultAspectRatio,
+        child: Padding(
+          padding: EdgeInsets.all(PaginatrixSpacing.medium),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Bone.circle(
+                size: 60,
+              ),
+              SizedBox(height: PaginatrixSpacing.horizontalSmall),
+              Bone.text(
+                words: 2,
+                fontSize: 16,
+              ),
+              SizedBox(height: PaginatrixSpacing.medium),
+              Bone.text(
+                words: 1,
+                fontSize: 14,
+              ),
+            ],
           ),
-          SizedBox(height: PaginatrixSpacing.horizontalSmall),
-          Bone.text(
-            words: 2,
-            fontSize: 16,
-          ),
-          SizedBox(height: PaginatrixSpacing.medium),
-          Bone.text(
-            words: 1,
-            fontSize: 14,
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -15,7 +15,7 @@ class PaginationDefaults {
   static const int defaultPrefetchThreshold = 3;
 
   /// Default prefetch threshold in pixels
-  static const double defaultPrefetchThresholdPixels = 300.0;
+  static const double defaultPrefetchThresholdPixels = 300;
 
   /// Maximum number of retry attempts
   static const int maxRetries = 5;

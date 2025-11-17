@@ -330,10 +330,7 @@ class PaginatrixGridView<T> extends StatelessWidget
     final items = state.items;
     final itemCount = items.length;
     final hasMore = state.canLoadMore;
-    final isAppending = state.status.maybeWhen(
-      appending: () => true,
-      orElse: () => false,
-    );
+    final isAppending = state.isAppending;
     final hasAppendError = state.hasAppendError;
 
     return createScrollListener(
@@ -354,11 +351,9 @@ class PaginatrixGridView<T> extends StatelessWidget
             ),
             gridDelegate: gridDelegate,
           ),
-          // Show footer when:
-          // 1. Appending or has error (with items or more pages)
-          // 2. No more data but we have items (show "end of list" message)
-          if (((isAppending || hasAppendError) && (itemCount > 0 || hasMore)) ||
-              (!hasMore && itemCount > 0 && !isAppending && !hasAppendError))
+          // Use declarative state property instead of business logic
+          // Footer display logic is now in PaginationStateExtension.shouldShowFooter
+          if (state.shouldShowFooter)
             SliverToBoxAdapter(
               child: buildFooterItem(
                 context,

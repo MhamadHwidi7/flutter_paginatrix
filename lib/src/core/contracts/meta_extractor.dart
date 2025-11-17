@@ -20,3 +20,4 @@ abstract class MetaExtractor {
   /// Returns list of raw item data
   List<Map<String, dynamic>> extractItems(Map<String, dynamic> data);
 }
+

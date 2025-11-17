@@ -11,3 +11,4 @@ abstract class MetaValidator {
   /// Returns true if data structure is valid, false otherwise
   bool validateStructure(Map<String, dynamic> data);
 }
+
