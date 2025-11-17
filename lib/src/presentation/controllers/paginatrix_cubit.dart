@@ -60,7 +60,13 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
   final PaginationOptions _options;
   final GenerationGuard _generationGuard = GenerationGuard();
 
-  CancelToken? _currentCancelToken;
+  // CancelToken tracking for operation coordination
+  // Track tokens separately for refresh and append operations to enable
+  // proper cancellation when operations conflict (e.g., refresh cancels append)
+  CancelToken? _refreshCancelToken;
+  CancelToken? _appendCancelToken;
+  CancelToken? _firstPageCancelToken;
+
   Timer? _scrollDebounceTimer;
   Timer? _refreshDebounceTimer;
   Timer? _searchDebounceTimer;
@@ -134,6 +140,47 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     _searchDebounceTimer = null;
   }
 
+  /// Safely emits a new state, preventing errors when cubit is closed
+  ///
+  /// This wrapper method checks if the cubit is closed before emitting.
+  /// This prevents "Cannot emit new states after calling close" errors
+  /// that can occur when asynchronous operations complete after the cubit
+  /// has been closed (e.g., during route navigation or widget disposal).
+  ///
+  /// **Best Practice:** Always use `_safeEmit()` instead of direct `emit()`
+  /// to prevent runtime errors from stale async callbacks.
+  ///
+  /// **Parameters:**
+  /// - [state] - The new state to emit
+  void _safeEmit(PaginationState<T> state) {
+    if (!isClosed) {
+      emit(state);
+    }
+  }
+
+  /// Validates that a request context is still valid (not stale) and cubit is not closed
+  ///
+  /// This method checks both generation validity and cubit closure status.
+  /// It should be called before applying any results from an async operation
+  /// to prevent stale responses from overwriting newer data.
+  ///
+  /// **Why this matters:**
+  /// - Older inflight responses can complete after newer requests
+  /// - Without generation checks, older data can overwrite newer data
+  /// - This causes incorrect UI state and data corruption
+  ///
+  /// **Best Practice:** Always call this before emitting state based on
+  /// async operation results (success or error).
+  ///
+  /// **Parameters:**
+  /// - [requestContext] - The request context to validate
+  ///
+  /// **Returns:** True if the context is valid and cubit is open, false otherwise
+  bool _isValidRequestContext(RequestContext requestContext) {
+    if (isClosed) return false;
+    return _generationGuard.isValid(requestContext);
+  }
+
   /// Handles the scroll near-end event by emitting immediate feedback and scheduling load
   ///
   /// This method extracts the complex logic for handling near-end scroll events,
@@ -162,11 +209,18 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
   /// This provides immediate visual feedback to the user while the debounced
   /// API call is being prepared. The state is emitted synchronously to show
   /// the loading footer right away.
+  ///
+  /// **Note:** This creates a temporary request context for visual feedback only.
+  /// The actual load operation will create a new request context with a new generation.
+  /// We check isClosed to prevent emitting after cubit closure.
   void _emitImmediateAppendingState() {
+    if (isClosed) return; // Don't emit if cubit is closed
+
     final currentMeta = state.meta;
     if (currentMeta != null &&
         !state.status.maybeWhen(appending: () => true, orElse: () => false)) {
       // Create a temporary request context for immediate feedback
+      // This uses the current generation, but the actual load will increment it
       final tempRequestContext = RequestContext.create(
         generation: _generationGuard.currentGeneration,
         cancelToken: CancelToken(),
@@ -174,7 +228,8 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
       );
 
       // Emit appending state immediately - footer will show right away
-      emit(PaginationState.appending(
+      // Note: This is safe because _safeEmit also checks isClosed
+      _safeEmit(PaginationState.appending(
         requestContext: tempRequestContext,
         currentItems: state.items,
         currentMeta: currentMeta,
@@ -473,21 +528,106 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     return PaginationDefaults.exponentialBackoffBase * (1 << retryCount);
   }
 
-  /// Cancels the current in-flight request.
+  /// Cancels all in-flight requests.
   ///
-  /// This will cancel any ongoing HTTP request and prevent it from updating the state.
-  /// Useful when you need to cancel a request (e.g., when navigating away from a page).
+  /// This will cancel any ongoing HTTP requests (refresh, append, or first page)
+  /// and prevent them from updating the state. Useful when you need to cancel
+  /// requests (e.g., when navigating away from a page).
+  ///
+  /// **Best Practice:** This method cancels all operation types to ensure
+  /// no stale responses can mutate state after cancellation.
   ///
   /// **Usage:**
   /// ```dart
   /// controller.cancel();
   /// ```
   ///
-  /// **Note:** This does not reset the state, only cancels the current request.
+  /// **Note:** This does not reset the state, only cancels the current requests.
   /// Use [clear] if you want to reset the state as well.
   void cancel() {
-    _currentCancelToken?.cancel();
-    _currentCancelToken = null;
+    _cancelAllTokens();
+  }
+
+  /// Cancels all active cancel tokens
+  ///
+  /// **Best Practice:** This ensures all in-flight requests are cancelled,
+  /// preventing stale responses from mutating state.
+  void _cancelAllTokens() {
+    _refreshCancelToken?.cancel();
+    _refreshCancelToken = null;
+    _appendCancelToken?.cancel();
+    _appendCancelToken = null;
+    _firstPageCancelToken?.cancel();
+    _firstPageCancelToken = null;
+  }
+
+  /// Gets the appropriate cancel token for a load type
+  ///
+  /// **Best Practice:** Returns the token associated with the operation type
+  /// for proper tracking and cancellation.
+  CancelToken? _getCancelTokenForType(PaginatrixLoadType type) {
+    switch (type) {
+      case PaginatrixLoadType.first:
+        return _firstPageCancelToken;
+      case PaginatrixLoadType.next:
+        return _appendCancelToken;
+      case PaginatrixLoadType.refresh:
+        return _refreshCancelToken;
+    }
+  }
+
+  /// Sets the cancel token for a specific load type
+  ///
+  /// **Best Practice:** Tracks tokens by operation type to enable
+  /// selective cancellation (e.g., cancel append when refresh starts).
+  void _setCancelTokenForType(PaginatrixLoadType type, CancelToken? token) {
+    switch (type) {
+      case PaginatrixLoadType.first:
+        _firstPageCancelToken = token;
+        break;
+      case PaginatrixLoadType.next:
+        _appendCancelToken = token;
+        break;
+      case PaginatrixLoadType.refresh:
+        _refreshCancelToken = token;
+        break;
+    }
+  }
+
+  /// Cancels tokens for conflicting operations
+  ///
+  /// **Operation Coordination Semantics:**
+  /// - When refresh starts: cancel any in-flight append operations
+  /// - When append starts: cancel any in-flight refresh operations
+  /// - When first page loads: cancel any in-flight refresh or append operations
+  ///
+  /// **Why this matters:**
+  /// - Prevents data corruption from interleaved operations
+  /// - Ensures refresh always replaces data (not appends)
+  /// - Ensures append doesn't conflict with refresh
+  ///
+  /// **Parameters:**
+  /// - [type] - The type of operation starting
+  void _cancelConflictingOperations(PaginatrixLoadType type) {
+    switch (type) {
+      case PaginatrixLoadType.first:
+        // First page load cancels both refresh and append
+        _refreshCancelToken?.cancel();
+        _refreshCancelToken = null;
+        _appendCancelToken?.cancel();
+        _appendCancelToken = null;
+        break;
+      case PaginatrixLoadType.next:
+        // Append cancels refresh (refresh should replace, not append)
+        _refreshCancelToken?.cancel();
+        _refreshCancelToken = null;
+        break;
+      case PaginatrixLoadType.refresh:
+        // Refresh cancels append (refresh replaces data, append would corrupt it)
+        _appendCancelToken?.cancel();
+        _appendCancelToken = null;
+        break;
+    }
   }
 
   /// Clears all data and resets to initial state.
@@ -505,7 +645,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
   /// **Note:** This will emit the initial state, clearing all items and metadata.
   void clear() {
     cancel();
-    emit(PaginationState.initial());
+    _safeEmit(PaginationState.initial());
   }
 
   /// Updates the search term and triggers a debounced reload of the first page.
@@ -539,7 +679,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     // Update query criteria with new search term
     final currentQuery = state.query ?? const QueryCriteria();
     final updatedQuery = currentQuery.copyWith(searchTerm: trimmedTerm);
-    emit(state.copyWith(query: updatedQuery));
+    _safeEmit(state.copyWith(query: updatedQuery));
 
     // Cancel any previous search debounce timer
     _cancelSearchDebounceTimer();
@@ -607,7 +747,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     // Update query criteria with new filter
     final currentQuery = state.query ?? const QueryCriteria();
     final updatedQuery = currentQuery.withFilter(key, value);
-    emit(state.copyWith(query: updatedQuery));
+    _safeEmit(state.copyWith(query: updatedQuery));
 
     // Immediately reload with new filter (no debouncing)
     _reloadFirstPageWithCurrentQuery();
@@ -645,7 +785,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     // Update query criteria with new filters
     final currentQuery = state.query ?? const QueryCriteria();
     final updatedQuery = currentQuery.withFilters(filters);
-    emit(state.copyWith(query: updatedQuery));
+    _safeEmit(state.copyWith(query: updatedQuery));
 
     // Immediately reload with new filters (no debouncing)
     _reloadFirstPageWithCurrentQuery();
@@ -671,7 +811,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     // Clear filters while preserving search and sorting
     final currentQuery = state.query ?? const QueryCriteria();
     final updatedQuery = currentQuery.clearFilters();
-    emit(state.copyWith(query: updatedQuery));
+    _safeEmit(state.copyWith(query: updatedQuery));
 
     // Immediately reload with cleared filters
     _reloadFirstPageWithCurrentQuery();
@@ -722,7 +862,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
       sortBy: normalizedSortBy,
       sortDesc: normalizedSortBy != null ? sortDesc : false,
     );
-    emit(state.copyWith(query: updatedQuery));
+    _safeEmit(state.copyWith(query: updatedQuery));
 
     // Immediately reload with new sorting
     _reloadFirstPageWithCurrentQuery();
@@ -748,7 +888,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     // Clear all query criteria
     final currentQuery = state.query ?? const QueryCriteria();
     final updatedQuery = currentQuery.clearAll();
-    emit(state.copyWith(query: updatedQuery));
+    _safeEmit(state.copyWith(query: updatedQuery));
 
     // Immediately reload with cleared query
     _reloadFirstPageWithCurrentQuery();
@@ -1091,17 +1231,22 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
   }
 
   /// Emits the appropriate loading state based on load type
+  ///
+  /// **Note:** This method is called immediately after creating a new request context,
+  /// so the generation should always be valid. However, we still check for safety
+  /// in case the cubit was closed between request creation and state emission.
   void _emitLoadingState(
     PaginatrixLoadType type,
     RequestContext requestContext,
     PageMeta? currentMeta,
   ) {
-    if (isClosed) return;
+    // Check both isClosed and generation validity for safety
+    if (!_isValidRequestContext(requestContext)) return;
     final currentQuery = state.query ?? const QueryCriteria();
 
     // Helper to emit loading state with query
     void emitLoading(QueryCriteria query) {
-      emit(PaginationState.loading(
+      _safeEmit(PaginationState.loading(
         requestContext: requestContext,
         query: query,
       ));
@@ -1121,7 +1266,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
           emitLoading(currentQuery);
           return;
         }
-        emit(PaginationState.appending(
+        _safeEmit(PaginationState.appending(
           requestContext: requestContext,
           currentItems: state.items,
           currentMeta: meta,
@@ -1138,7 +1283,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
           emitLoading(currentQuery);
           return;
         }
-        emit(PaginationState.refreshing(
+        _safeEmit(PaginationState.refreshing(
           requestContext: requestContext,
           currentItems: state.items,
           currentMeta: meta,
@@ -1270,17 +1415,22 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
   }
 
   /// Emits appropriate error state based on load type
+  ///
+  /// **Important:** This method validates the request context to prevent
+  /// stale error responses from overwriting newer state. Always call this
+  /// after validating the request context in the calling code.
   void _emitErrorState(
     PaginatrixLoadType type,
     PaginationError error,
     RequestContext requestContext,
     PageMeta? currentMeta,
   ) {
-    if (isClosed) return;
+    // Validate request context to prevent stale error responses
+    if (!_isValidRequestContext(requestContext)) return;
     final currentQuery = state.query ?? const QueryCriteria();
     switch (type) {
       case PaginatrixLoadType.first:
-        emit(PaginationState.error(
+        _safeEmit(PaginationState.error(
           error: error,
           requestContext: requestContext,
           query: currentQuery,
@@ -1291,7 +1441,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
         if (currentMeta == null) {
           // Preserve items and previous meta even if current meta is missing
           // This prevents user from losing their data when append fails without metadata
-          emit(PaginationState.error(
+          _safeEmit(PaginationState.error(
             error: error,
             requestContext: requestContext,
             previousItems: state.items,
@@ -1299,7 +1449,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
             query: currentQuery,
           ));
         } else {
-          emit(PaginationState.appendError(
+          _safeEmit(PaginationState.appendError(
             appendError: error,
             requestContext: requestContext,
             currentItems: state.items,
@@ -1310,7 +1460,7 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
         break;
 
       case PaginatrixLoadType.refresh:
-        emit(PaginationState.error(
+        _safeEmit(PaginationState.error(
           error: error,
           requestContext: requestContext,
           previousItems: state.items,
@@ -1325,6 +1475,18 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
   ///
   /// This method consolidates the common logic for loading data,
   /// reducing code duplication across loadFirstPage, loadNextPage, and refresh.
+  ///
+  /// **Operation Coordination:**
+  /// - Cancels conflicting operations before starting new ones
+  /// - Tracks cancel tokens separately by operation type
+  /// - Ensures proper cleanup on completion or error
+  ///
+  /// **Request Lifecycle:**
+  /// 1. Cancel conflicting operations (refresh vs append)
+  /// 2. Create fresh CancelToken for this operation
+  /// 3. Track token by operation type
+  /// 4. Execute request
+  /// 5. Clear token on completion/error
   Future<void> _loadData(PaginatrixLoadType type) async {
     // 1. Guard Checks
     if (!_shouldProceedWithLoad(type)) return;
@@ -1332,7 +1494,11 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     final currentMeta = _validateMetaForOperation(type);
     if (currentMeta == null && type != PaginatrixLoadType.first) return;
 
-    // 2. Request Setup
+    // 2. Operation Coordination: Cancel conflicting operations
+    // This ensures refresh doesn't interleave with append, and vice versa
+    _cancelConflictingOperations(type);
+
+    // 3. Request Setup
     final generation = _generationGuard.incrementGeneration();
     final cancelToken = CancelToken();
     final requestContext = _createRequestContext(
@@ -1340,7 +1506,8 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
       cancelToken,
       type,
     );
-    _currentCancelToken = cancelToken;
+    // Track token by operation type for proper cancellation
+    _setCancelTokenForType(type, cancelToken);
 
     // 3. Set Initial State
     _emitLoadingState(type, requestContext, currentMeta);
@@ -1358,11 +1525,19 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
         cancelToken: cancelToken,
       );
 
-      if (!_generationGuard.isValid(requestContext)) {
-        return; // Stale response
+      // Validate request context before processing response
+      // This prevents stale responses from overwriting newer data
+      if (!_isValidRequestContext(requestContext)) {
+        return; // Stale response or cubit closed
       }
 
       final parsed = _parseResponseData(data);
+
+      // Double-check validity after parsing (cubit might have closed during parsing)
+      if (!_isValidRequestContext(requestContext)) {
+        return; // Stale response or cubit closed
+      }
+
       final newItems = _combineItems(type, parsed.items);
       final newState = _createSuccessState(
         newItems,
@@ -1371,19 +1546,34 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
         type,
       );
 
-      if (!isClosed) {
-        emit(newState);
+      // Final check before emitting (defensive programming)
+      if (_isValidRequestContext(requestContext)) {
+        _safeEmit(newState);
         _resetRetryTracking();
       }
     } catch (e) {
-      if (!_generationGuard.isValid(requestContext)) {
-        return; // Stale response
+      // Validate request context before processing error
+      // This prevents stale error responses from overwriting newer state
+      if (!_isValidRequestContext(requestContext)) {
+        return; // Stale response or cubit closed
       }
 
       final error = _convertToPaginationError(e);
+
+      // Double-check validity after error conversion
+      // (cubit might have closed during error conversion)
+      if (!_isValidRequestContext(requestContext)) {
+        return; // Stale response or cubit closed
+      }
+
       _emitErrorState(type, error, requestContext, currentMeta);
     } finally {
-      _currentCancelToken = null;
+      // Clear the cancel token for this operation type
+      // Only clear if it's still the current token (may have been replaced by newer operation)
+      final currentToken = _getCancelTokenForType(type);
+      if (identical(currentToken, cancelToken)) {
+        _setCancelTokenForType(type, null);
+      }
       _cancelDebounceTimer();
       _cancelRefreshDebounceTimer();
       // Note: Search timer is intentionally NOT cancelled here because:
