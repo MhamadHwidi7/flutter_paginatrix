@@ -91,3 +91,4 @@ Flutter Paginatrix depends on:
 
 All dependencies are automatically installed when you add `flutter_paginatrix`.
 
+

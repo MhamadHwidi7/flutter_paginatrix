@@ -87,3 +87,4 @@ controller.updateQuery(
 - [Advanced Usage Guide](../guides/advanced-usage.md)
 - [PaginatrixController API](../api-reference/paginatrix-controller.md)
 
+

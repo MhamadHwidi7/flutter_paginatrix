@@ -284,3 +284,4 @@ PaginatrixListView<User>(
 - [PaginatrixController](paginatrix-controller.md) - Controller API
 - [Basic Usage](../guides/basic-usage.md) - Usage examples
 
+
