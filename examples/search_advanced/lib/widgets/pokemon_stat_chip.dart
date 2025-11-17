@@ -40,3 +40,4 @@ class PokemonStatChip extends StatelessWidget {
     );
   }
 }
+

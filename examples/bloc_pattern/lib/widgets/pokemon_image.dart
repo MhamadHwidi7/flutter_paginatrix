@@ -69,3 +69,4 @@ class PokemonImage extends StatelessWidget {
     );
   }
 }
+

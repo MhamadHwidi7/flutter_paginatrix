@@ -46,3 +46,4 @@ class PokemonInfo extends StatelessWidget {
     );
   }
 }
+
