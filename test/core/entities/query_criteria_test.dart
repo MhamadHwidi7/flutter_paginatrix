@@ -155,19 +155,16 @@ void main() {
         searchTerm: 'test',
         filters: {'status': 'active'},
         sortBy: 'name',
-        sortDesc: false,
       );
       const criteria2 = QueryCriteria(
         searchTerm: 'test',
         filters: {'status': 'active'},
         sortBy: 'name',
-        sortDesc: false,
       );
       const criteria3 = QueryCriteria(
         searchTerm: 'different',
         filters: {'status': 'active'},
         sortBy: 'name',
-        sortDesc: false,
       );
 
       expect(criteria1, equals(criteria2));

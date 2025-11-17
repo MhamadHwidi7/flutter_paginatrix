@@ -14,7 +14,14 @@ void main() {
     });
 
     tearDown(() {
-      controller.close();
+      try {
+        if (!controller.isClosed) {
+          controller.close();
+        }
+      } catch (e) {
+        // Controller may not be initialized if test failed early
+        // This is safe to ignore
+      }
     });
 
     test('complete pagination flow: initial load -> pagination -> refresh',

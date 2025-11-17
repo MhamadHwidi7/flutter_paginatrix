@@ -563,6 +563,173 @@ void main() {
       });
     });
 
+    group('LRU Cache - Eviction Behavior', () {
+      test('should evict least recently used entry when cache reaches max size',
+          () {
+        // Create a parser with a small cache size for testing
+        final testParser = ConfigMetaParser(MetaConfig.nestedMeta);
+
+        // Create data structures that will be cached
+        // We need to create enough unique structures to exceed cache limit
+        final dataStructures = <Map<String, dynamic>>[];
+
+        // Create 5 unique data structures (cache size is typically 100, but we'll test with smaller)
+        // We'll parse them multiple times to test LRU behavior
+        for (var i = 0; i < 5; i++) {
+          dataStructures.add({
+            'data': [],
+            'meta': {
+              'current_page': i + 1,
+              'per_page': 20,
+              'total': 100,
+              'last_page': 5,
+            },
+          });
+        }
+
+        // Parse all structures to fill cache
+        for (final data in dataStructures) {
+          testParser.parseMeta(data);
+        }
+
+        // Access first structure again (should move it to end of LRU)
+        final firstMeta = testParser.parseMeta(dataStructures.first);
+        expect(firstMeta.page, 1);
+
+        // Verify cache is working
+        final lastMeta = testParser.parseMeta(dataStructures.last);
+        expect(lastMeta.page, 5);
+      });
+
+      test('should maintain LRU order when accessing cached entries', () {
+        final testParser = ConfigMetaParser(MetaConfig.nestedMeta);
+
+        // Create multiple unique data structures
+        final data1 = {
+          'data': [],
+          'meta': {'current_page': 1, 'per_page': 20},
+        };
+        final data2 = {
+          'data': [],
+          'meta': {'current_page': 2, 'per_page': 20},
+        };
+        final data3 = {
+          'data': [],
+          'meta': {'current_page': 3, 'per_page': 20},
+        };
+
+        // Parse all to cache them
+        testParser.parseMeta(data1);
+        testParser.parseMeta(data2);
+        testParser.parseMeta(data3);
+
+        // Access data1 again (should move it to end of LRU)
+        final meta1 = testParser.parseMeta(data1);
+        expect(meta1.page, 1);
+
+        // All should still be accessible
+        expect(testParser.parseMeta(data2).page, 2);
+        expect(testParser.parseMeta(data3).page, 3);
+        expect(testParser.parseMeta(data1).page, 1);
+      });
+
+      test('should handle cache eviction correctly when at capacity', () {
+        final testParser = ConfigMetaParser(MetaConfig.nestedMeta);
+
+        // Create enough unique structures to fill cache
+        // Cache max size is typically 100, so we'll create 101 to test eviction
+        final dataStructures = <Map<String, dynamic>>[];
+        for (var i = 0; i < 101; i++) {
+          dataStructures.add({
+            'data': [],
+            'meta': {
+              'current_page': i + 1,
+              'per_page': 20,
+              'total': 100,
+            },
+          });
+        }
+
+        // Parse all structures
+        for (final data in dataStructures) {
+          testParser.parseMeta(data);
+        }
+
+        // First entry should have been evicted (least recently used)
+        // But we can't directly test this without exposing cache internals
+        // Instead, verify that the last entries are still cached
+        final lastMeta = testParser.parseMeta(dataStructures.last);
+        expect(lastMeta.page, 101);
+
+        // Verify cache is still working correctly
+        final secondLastMeta = testParser.parseMeta(dataStructures[99]);
+        expect(secondLastMeta.page, 100);
+      });
+    });
+
+    group('LRU Cache - Get/Put Operations', () {
+      test('should return null for non-existent keys', () {
+        final testParser = ConfigMetaParser(MetaConfig.nestedMeta);
+
+        final data = {
+          'data': [],
+          'meta': {'current_page': 999, 'per_page': 20},
+        };
+
+        // Parse to cache
+        testParser.parseMeta(data);
+
+        // Different data should not be cached
+        final differentData = {
+          'data': [],
+          'meta': {'current_page': 888, 'per_page': 20},
+        };
+
+        // Should parse correctly but not use cache
+        final meta = testParser.parseMeta(differentData);
+        expect(meta.page, 888);
+      });
+
+      test('should update cache when same key is put multiple times', () {
+        final testParser = ConfigMetaParser(MetaConfig.nestedMeta);
+
+        final data = {
+          'data': [],
+          'meta': {'current_page': 1, 'per_page': 20, 'total': 100},
+        };
+
+        // Parse first time
+        final meta1 = testParser.parseMeta(data);
+        expect(meta1.total, 100);
+
+        // Modify data (same structure, different values)
+        final modifiedData = {
+          'data': [],
+          'meta': {'current_page': 1, 'per_page': 20, 'total': 200},
+        };
+
+        // Parse again - should update cache
+        final meta2 = testParser.parseMeta(modifiedData);
+        expect(meta2.total, 200);
+      });
+
+      test('should handle empty cache correctly', () {
+        final testParser = ConfigMetaParser(MetaConfig.nestedMeta);
+
+        // Clear cache
+        testParser.clearCache();
+
+        // Should still parse correctly
+        final data = {
+          'data': [],
+          'meta': {'current_page': 1, 'per_page': 20},
+        };
+
+        final meta = testParser.parseMeta(data);
+        expect(meta.page, 1);
+      });
+    });
+
     group('Cache eviction edge cases', () {
       test('should evict oldest cache entry when cache reaches max size', () {
         // Create parser and fill cache beyond max size

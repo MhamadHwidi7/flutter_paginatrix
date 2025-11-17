@@ -104,8 +104,8 @@ void main() {
             reason: 'Should be on at least page 1');
         expect(controller.hasError, isFalse);
 
-        print(
-            'Concurrent operations completed in ${stopwatch.elapsedMilliseconds}ms');
+        // Performance metric: Concurrent operations completed
+        // ${stopwatch.elapsedMilliseconds}ms
       });
 
       test('should handle rapid pagination with debounce', () async {
@@ -139,7 +139,7 @@ void main() {
 
         expect(controller.state.items.length, 200); // 10 pages * 20 items = 200
         expect(stopwatch.elapsedMilliseconds, lessThan(2000));
-        print('Loaded 10 pages in ${stopwatch.elapsedMilliseconds}ms');
+        // Performance metric: Loaded 10 pages in ${stopwatch.elapsedMilliseconds}ms
       });
     });
 
@@ -196,7 +196,7 @@ void main() {
 
         expect(controller.state.items.length, 20);
         expect(stopwatch.elapsedMilliseconds, lessThan(500));
-        print('Loaded 20 large items in ${stopwatch.elapsedMilliseconds}ms');
+        // Performance metric: Loaded 20 large items in ${stopwatch.elapsedMilliseconds}ms
       });
     });
 
@@ -223,8 +223,7 @@ void main() {
 
         // Should handle rapidly without issues
         expect(stopwatch.elapsedMilliseconds, lessThan(100));
-        print(
-            'Handled 100 scroll events in ${stopwatch.elapsedMilliseconds}ms');
+        // Performance metric: Handled 100 scroll events in ${stopwatch.elapsedMilliseconds}ms
       });
 
       test('should debounce scroll events correctly', () async {
@@ -276,8 +275,7 @@ void main() {
         stopwatch.stop();
 
         expect(stopwatch.elapsedMilliseconds, lessThan(1000));
-        print(
-            'Parsed metadata 1000 times in ${stopwatch.elapsedMilliseconds}ms');
+        // Performance metric: Parsed metadata 1000 times in ${stopwatch.elapsedMilliseconds}ms
       });
 
       test('should cache parsed paths efficiently', () async {
@@ -301,8 +299,7 @@ void main() {
         stopwatch.stop();
 
         expect(stopwatch.elapsedMilliseconds, lessThan(2000));
-        print(
-            'Parsed with caching 10000 times in ${stopwatch.elapsedMilliseconds}ms');
+        // Performance metric: Parsed with caching 10000 times in ${stopwatch.elapsedMilliseconds}ms
       });
     });
 
@@ -340,16 +337,21 @@ void main() {
 
         // Rapid state queries
         for (int i = 0; i < 10000; i++) {
-          final _ = controller.hasData;
-          final __ = controller.isLoading;
-          final ___ = controller.canLoadMore;
-          final ____ = controller.state.items.length;
+          final hasData = controller.hasData;
+          final isLoading = controller.isLoading;
+          final canLoadMore = controller.canLoadMore;
+          final itemsLength = controller.state.items.length;
+          // Use variables to prevent optimization
+          assert(hasData || !hasData);
+          assert(isLoading || !isLoading);
+          assert(canLoadMore || !canLoadMore);
+          assert(itemsLength >= 0);
         }
 
         stopwatch.stop();
 
         expect(stopwatch.elapsedMilliseconds, lessThan(100));
-        print('10000 state queries in ${stopwatch.elapsedMilliseconds}ms');
+        // Performance metric: 10000 state queries in ${stopwatch.elapsedMilliseconds}ms
       });
     });
   });

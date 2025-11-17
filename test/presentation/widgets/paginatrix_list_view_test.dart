@@ -96,6 +96,8 @@ void main() {
 
     testWidgets('should display loading skeleton on initial state',
         (tester) async {
+      // Note: createTestWidget already wraps in SizedBox(800x600) which provides
+      // bounded constraints for sliver widgets. This prevents layout errors.
       await tester.pumpWidget(createTestWidget(cubit: cubit));
       await tester.pump();
 

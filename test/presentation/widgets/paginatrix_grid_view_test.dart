@@ -18,13 +18,21 @@ void main() {
       cubit.close();
     });
 
-    Widget createTestWidget({
-      Widget Function(BuildContext, Map<String, dynamic>, int)? itemBuilder,
-      SliverGridDelegate? gridDelegate,
-    }) {
-      return MaterialApp(
-        home: Scaffold(
-          body: PaginatrixGridView<Map<String, dynamic>>(
+  /// Creates a test widget with bounded constraints for sliver widgets
+  ///
+  /// **Best Practice:** Sliver widgets require bounded constraints in tests.
+  /// This helper wraps the widget in a SizedBox with explicit dimensions
+  /// to prevent layout errors and ensure stable test behavior.
+  Widget createTestWidget({
+    Widget Function(BuildContext, Map<String, dynamic>, int)? itemBuilder,
+    SliverGridDelegate? gridDelegate,
+  }) {
+    return MaterialApp(
+      home: Scaffold(
+        body: SizedBox(
+          width: 800,
+          height: 600,
+          child: PaginatrixGridView<Map<String, dynamic>>(
             cubit: cubit,
             gridDelegate: gridDelegate ??
                 const SliverGridDelegateWithFixedCrossAxisCount(
@@ -38,8 +46,9 @@ void main() {
                     ),
           ),
         ),
-      );
-    }
+      ),
+    );
+  }
 
     testWidgets('should display loading skeleton on initial state',
         (tester) async {
@@ -142,13 +151,17 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: PaginatrixGridView<Map<String, dynamic>>(
-              cubit: emptyCubit,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-              ),
-              itemBuilder: (context, item, index) => Card(
-                child: Text(item['name'] ?? 'Item'),
+            body: SizedBox(
+              width: 800,
+              height: 600,
+              child: PaginatrixGridView<Map<String, dynamic>>(
+                cubit: emptyCubit,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                ),
+                itemBuilder: (context, item, index) => Card(
+                  child: Text(item['name'] ?? 'Item'),
+                ),
               ),
             ),
           ),
@@ -173,13 +186,17 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: PaginatrixGridView<Map<String, dynamic>>(
-              cubit: errorCubit,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-              ),
-              itemBuilder: (context, item, index) => Card(
-                child: Text(item['name'] ?? 'Item'),
+            body: SizedBox(
+              width: 800,
+              height: 600,
+              child: PaginatrixGridView<Map<String, dynamic>>(
+                cubit: errorCubit,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                ),
+                itemBuilder: (context, item, index) => Card(
+                  child: Text(item['name'] ?? 'Item'),
+                ),
               ),
             ),
           ),

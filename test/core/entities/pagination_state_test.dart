@@ -225,6 +225,97 @@ void main() {
         expect(state.canLoadMore, isTrue);
       });
 
+      test('isAppending should return true for appending state', () {
+        final state = PaginationState.appending(
+          currentItems: [1, 2, 3],
+          currentMeta: const PageMeta(hasMore: true),
+          requestContext: RequestContext.create(
+            generation: 1,
+            cancelToken: CancelToken(),
+          ),
+        );
+
+        expect(state.isAppending, isTrue);
+      });
+
+      test('isAppending should return false for non-appending state', () {
+        final state = PaginationState.success(
+          items: [1, 2, 3],
+          meta: const PageMeta(hasMore: true),
+          requestContext: RequestContext.create(
+            generation: 1,
+            cancelToken: CancelToken(),
+          ),
+        );
+
+        expect(state.isAppending, isFalse);
+      });
+
+      test('shouldShowFooter should return true when appending with items', () {
+        final state = PaginationState.appending(
+          currentItems: [1, 2, 3],
+          currentMeta: const PageMeta(hasMore: true),
+          requestContext: RequestContext.create(
+            generation: 1,
+            cancelToken: CancelToken(),
+          ),
+        );
+
+        expect(state.shouldShowFooter, isTrue);
+      });
+
+      test('shouldShowFooter should return true when has append error with items', () {
+        final state = PaginationState.success(
+          items: [1, 2, 3],
+          meta: const PageMeta(hasMore: true),
+          requestContext: RequestContext.create(
+            generation: 1,
+            cancelToken: CancelToken(),
+          ),
+        ).copyWith(
+          appendError: const PaginationError.network(message: 'Append failed'),
+        );
+
+        expect(state.shouldShowFooter, isTrue);
+      });
+
+      test('shouldShowFooter should return true when no more data but has items', () {
+        final state = PaginationState.success(
+          items: [1, 2, 3],
+          meta: const PageMeta(hasMore: false),
+          requestContext: RequestContext.create(
+            generation: 1,
+            cancelToken: CancelToken(),
+          ),
+        );
+
+        expect(state.shouldShowFooter, isTrue);
+      });
+
+      test('shouldShowFooter should return false when no items and no more pages', () {
+        final state = PaginationState.empty(
+          requestContext: RequestContext.create(
+            generation: 1,
+            cancelToken: CancelToken(),
+          ),
+        );
+
+        expect(state.shouldShowFooter, isFalse);
+      });
+
+      test('shouldShowFooter should return false when appending but no items and no more pages', () {
+        final state = PaginationState.appending(
+          currentItems: [],
+          currentMeta: const PageMeta(hasMore: false),
+          requestContext: RequestContext.create(
+            generation: 1,
+            cancelToken: CancelToken(),
+          ),
+        );
+
+        expect(state.shouldShowFooter, isFalse);
+      });
+
       test('canLoadMore should return false when hasMore is false', () {
         final state = PaginationState.success(
           items: [1, 2, 3],
