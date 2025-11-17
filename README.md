@@ -250,15 +250,20 @@ final controller = PaginatrixController<Product>(
   loader: _loadProducts,
   itemDecoder: (json) => Product.fromJson(json),
   metaParser: CustomMetaParser(
-    itemsExtractor: (data) => data['products'] as List,
-    metaExtractor: (data) {
-      return PageMeta(
-        page: data['page'],
-        perPage: data['limit'],
-        total: data['total_count'],
-        hasMore: data['has_next'],
-      );
+    (data) {
+      // Transform raw API response to standard format
+      return {
+        'items': data['products'] as List,
+        'meta': {
+          'page': data['page'],
+          'perPage': data['limit'],
+          'total': data['total_count'],
+          'hasMore': data['has_next'],
+        },
+      };
     },
+    itemsKey: 'items',  // Optional, defaults to 'items'
+    metaKey: 'meta',    // Optional, defaults to 'meta'
   ),
 );
 ```
@@ -527,14 +532,30 @@ final config = MetaConfig(
 
 #### `CustomMetaParser`
 
-Flexible parser for custom API structures:
+Flexible parser for custom API structures. Takes a transform function that converts the raw API response into a standard format with 'items' and 'meta' keys:
 
 ```dart
 CustomMetaParser(
-  itemsExtractor: (data) => data['items'] as List,
-  metaExtractor: (data) => PageMeta(...),
+  (data) {
+    // Transform raw API response to standard format
+    return {
+      'items': data['products'] as List,
+      'meta': {
+        'page': data['page'],
+        'perPage': data['limit'],
+        'total': data['total_count'],
+        'hasMore': data['has_next'],
+      },
+    };
+  },
+  itemsKey: 'items',  // Optional, defaults to 'items'
+  metaKey: 'meta',    // Optional, defaults to 'meta'
 )
 ```
+
+The transform function receives the raw API response and must return a Map with:
+- An 'items' key containing a List of item maps
+- A 'meta' key containing a Map that can be parsed by `PageMeta.fromJson()`
 
 ### Enums
 
