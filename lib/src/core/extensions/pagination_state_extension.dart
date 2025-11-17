@@ -45,4 +45,47 @@ extension PaginationStateExtension<T> on PaginationState<T> {
 
   /// Gets the current query criteria, or empty criteria if null
   QueryCriteria get currentQuery => query ?? QueryCriteria.empty();
+
+  /// Whether the footer should be displayed
+  ///
+  /// **Best Practice:** This encapsulates the business logic for when to show
+  /// the footer (append loader, error, or end of list message). This logic
+  /// should be in the state/cubit, not in widgets, to prevent duplication
+  /// and ensure consistency.
+  ///
+  /// **Footer Display Rules:**
+  /// - Show footer if appending or has append error (with items or more pages available)
+  /// - Show footer if no more data but we have items (show "end of list" message)
+  /// - Don't show footer if no items and no more pages (empty search results)
+  ///
+  /// **Returns:** `true` if footer should be displayed, `false` otherwise
+  bool get shouldShowFooter {
+    final isAppending = status.maybeWhen(
+      appending: () => true,
+      orElse: () => false,
+    );
+    final hasMore = canLoadMore;
+    final itemCount = items.length;
+
+    // Don't show footer if there are no items and no more pages
+    // This prevents showing loading indicator when search returns empty results
+    if (itemCount == 0 && !hasMore) {
+      return false;
+    }
+
+    // Show footer if:
+    // 1. Appending or has append error (with items or more pages available)
+    // 2. No more data but we have items (show "end of list" message)
+    return ((isAppending || hasAppendError) && (itemCount > 0 || hasMore)) ||
+        (!hasMore && itemCount > 0 && !isAppending && !hasAppendError);
+  }
+
+  /// Whether the state is in appending status
+  ///
+  /// **Best Practice:** Provides a convenient way to check appending status
+  /// without using `maybeWhen` in widgets.
+  bool get isAppending => status.maybeWhen(
+        appending: () => true,
+        orElse: () => false,
+      );
 }

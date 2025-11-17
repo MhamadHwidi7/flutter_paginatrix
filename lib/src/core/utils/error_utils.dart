@@ -91,6 +91,15 @@ class ErrorUtils {
   }
 
   /// Attempts to pretty-stringify objects/JSON safely.
+  ///
+  /// **Best Practice:** This method converts complex or non-serializable objects
+  /// to diagnostic-friendly strings. This prevents error payloads from including
+  /// non-serializable objects that make error output noisy and less useful.
+  ///
+  /// **Handling of non-serializable objects:**
+  /// - Maps/Lists: Attempts JSON encoding, falls back to toString() if it fails
+  /// - Complex objects: Uses toString() with type information
+  /// - Unprintable objects: Returns a diagnostic message with type information
   static String _safeStringify(dynamic data, {bool prettyJson = true}) {
     if (data == null) return 'null';
     try {
@@ -110,11 +119,23 @@ class ErrorUtils {
     } catch (_) {
       // Fall through to toString() if JSON parsing fails
     }
-    // Fallback
+    // Fallback: Convert to diagnostic-friendly string
     try {
-      return data.toString();
+      final typeName = data.runtimeType.toString();
+      final stringRep = data.toString();
+      // If toString() returns just the type name, provide more context
+      if (stringRep == typeName || stringRep.isEmpty) {
+        return '<$typeName: (no string representation)>';
+      }
+      // Limit length of toString() output to prevent extremely long error messages
+      const maxToStringLength = 500;
+      if (stringRep.length > maxToStringLength) {
+        return '${stringRep.substring(0, maxToStringLength)}... [truncated, length: ${stringRep.length}]';
+      }
+      return stringRep;
     } catch (_) {
-      return '<unprintable object>';
+      // Last resort: return type information only
+      return '<${data.runtimeType}: (unprintable object)>';
     }
   }
 
