@@ -812,8 +812,46 @@ Union type for error types:
 - `isUserVisible: bool` - Whether to show to user
 - `userMessage: String` - User-friendly message
 
----
+#### `LoaderType`
 
+Types of modern loaders available for pagination UI. Used with `AppendLoader` widget to display loading indicators:
+
+- `bouncingDots` - Bouncing dots animation
+  - Animated dots that bounce up and down
+  - Modern, playful loading indicator
+
+- `wave` - Wave animation
+  - Smooth wave-like animation
+  - Elegant and fluid motion
+
+- `rotatingSquares` - Rotating squares animation
+  - Squares that rotate in a pattern
+  - Geometric and structured appearance
+
+- `pulse` - Pulse animation
+  - Pulsing/breathing effect
+  - Subtle and smooth animation
+
+- `skeleton` - Skeleton loading effect
+  - Shimmer/skeleton effect
+  - Mimics content structure while loading
+
+- `traditional` - Traditional spinner
+  - Classic circular spinner
+  - Standard loading indicator
+
+**Usage Example:**
+```dart
+PaginatrixListView<User>(
+  controller: controller,
+  itemBuilder: (context, user, index) => UserTile(user: user),
+  appendLoaderBuilder: (context) => AppendLoader(
+    loaderType: LoaderType.bouncingDots, // Choose your loader type
+  ),
+)
+```
+
+---
 ## 📁 Example Projects
 
 The package includes comprehensive examples:
