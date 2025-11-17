@@ -46,3 +46,4 @@ class PaginatrixValidationState with _$PaginatrixValidationState {
   }) = _Invalid;
 }
 
+

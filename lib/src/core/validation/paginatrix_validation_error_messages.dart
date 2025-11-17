@@ -87,3 +87,4 @@ class PaginatrixValidationErrorMessages {
       'Invalid path segment: "$segment" in path "$path". Segments must contain only alphanumeric characters, underscores, or hyphens.';
 }
 
+

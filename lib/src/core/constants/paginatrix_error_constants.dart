@@ -41,3 +41,4 @@ class PaginatrixErrorConstants {
   static const int defaultTailChars = 40;
 }
 
+

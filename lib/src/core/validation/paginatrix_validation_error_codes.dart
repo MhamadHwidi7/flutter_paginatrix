@@ -67,3 +67,4 @@ class PaginatrixValidationErrorCodes {
   static const String invalidPathCharacters = 'INVALID_PATH_CHARACTERS';
 }
 
+

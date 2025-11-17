@@ -12,3 +12,4 @@ abstract class MetaValidator {
   bool validateStructure(Map<String, dynamic> data);
 }
 
+
