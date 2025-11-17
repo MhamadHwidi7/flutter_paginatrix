@@ -88,3 +88,4 @@ controller.updateQuery(
 - [PaginatrixController API](../api-reference/paginatrix-controller.md)
 
 
+
