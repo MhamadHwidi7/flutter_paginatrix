@@ -53,3 +53,4 @@ class ControllerStateChanged extends PaginationEvent {
   @override
   List<Object?> get props => [paginationState];
 }
+

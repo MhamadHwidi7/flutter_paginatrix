@@ -13,3 +13,4 @@ class MemorySnapshot {
     return 'MemorySnapshot(${timestamp.toIso8601String()}, ${memoryMB.toStringAsFixed(2)}MB)';
   }
 }
+

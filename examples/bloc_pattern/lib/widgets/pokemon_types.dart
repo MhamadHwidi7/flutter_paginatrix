@@ -71,3 +71,4 @@ class PokemonTypes extends StatelessWidget {
     return typeColors[type.toLowerCase()] ?? Colors.grey;
   }
 }
+
