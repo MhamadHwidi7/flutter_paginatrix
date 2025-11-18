@@ -34,4 +34,3 @@ class PokemonIdBadge extends StatelessWidget {
     );
   }
 }
-
