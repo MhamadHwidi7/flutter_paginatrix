@@ -106,12 +106,10 @@ class PageSelector extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (showPreviousNext)
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: isLoading || currentPage == 1
-                ? null
-                : () => onPageSelected(currentPage - 1),
-            tooltip: 'Previous page',
+          _buildPreviousButton(
+            context: context,
+            theme: theme,
+            colorScheme: colorScheme,
           ),
         if (showFirstLast && currentPage > 3)
           _buildPageButton(
@@ -153,12 +151,10 @@ class PageSelector extends StatelessWidget {
             isCurrent: false,
           ),
         if (showPreviousNext)
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: isLoading || currentPage == totalPages
-                ? null
-                : () => onPageSelected(currentPage + 1),
-            tooltip: 'Next page',
+          _buildNextButton(
+            context: context,
+            theme: theme,
+            colorScheme: colorScheme,
           ),
       ],
     );
@@ -173,12 +169,10 @@ class PageSelector extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (showPreviousNext)
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: isLoading || currentPage == 1
-                ? null
-                : () => onPageSelected(currentPage - 1),
-            tooltip: 'Previous page',
+          _buildPreviousButton(
+            context: context,
+            theme: theme,
+            colorScheme: colorScheme,
           ),
         const SizedBox(width: 8),
         Text(
@@ -222,12 +216,10 @@ class PageSelector extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         if (showPreviousNext)
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: isLoading || currentPage == totalPages
-                ? null
-                : () => onPageSelected(currentPage + 1),
-            tooltip: 'Next page',
+          _buildNextButton(
+            context: context,
+            theme: theme,
+            colorScheme: colorScheme,
           ),
       ],
     );
@@ -243,14 +235,13 @@ class PageSelector extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (showPreviousNext)
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
+          _buildPreviousButton(
+            context: context,
+            theme: theme,
+            colorScheme: colorScheme,
             iconSize: PaginatrixIconSizes.small,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
-            onPressed: isLoading || currentPage == 1
-                ? null
-                : () => onPageSelected(currentPage - 1),
             tooltip: 'Previous',
           ),
         const SizedBox(width: PaginatrixSpacing.horizontalSmall),
@@ -262,17 +253,60 @@ class PageSelector extends StatelessWidget {
         ),
         const SizedBox(width: PaginatrixSpacing.horizontalSmall),
         if (showPreviousNext)
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
+          _buildNextButton(
+            context: context,
+            theme: theme,
+            colorScheme: colorScheme,
             iconSize: PaginatrixIconSizes.small,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
-            onPressed: isLoading || currentPage == totalPages
-                ? null
-                : () => onPageSelected(currentPage + 1),
             tooltip: 'Next',
           ),
       ],
+    );
+  }
+
+  /// Builds a previous page navigation button
+  Widget _buildPreviousButton({
+    required BuildContext context,
+    required ThemeData theme,
+    required ColorScheme colorScheme,
+    double? iconSize,
+    EdgeInsets? padding,
+    BoxConstraints? constraints,
+    String tooltip = 'Previous page',
+  }) {
+    return IconButton(
+      icon: const Icon(Icons.chevron_left),
+      iconSize: iconSize,
+      padding: padding,
+      constraints: constraints,
+      onPressed: isLoading || currentPage == 1
+          ? null
+          : () => onPageSelected(currentPage - 1),
+      tooltip: tooltip,
+    );
+  }
+
+  /// Builds a next page navigation button
+  Widget _buildNextButton({
+    required BuildContext context,
+    required ThemeData theme,
+    required ColorScheme colorScheme,
+    double? iconSize,
+    EdgeInsets? padding,
+    BoxConstraints? constraints,
+    String tooltip = 'Next page',
+  }) {
+    return IconButton(
+      icon: const Icon(Icons.chevron_right),
+      iconSize: iconSize,
+      padding: padding,
+      constraints: constraints,
+      onPressed: isLoading || currentPage == totalPages
+          ? null
+          : () => onPageSelected(currentPage + 1),
+      tooltip: tooltip,
     );
   }
 

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_paginatrix/flutter_paginatrix.dart';
-import 'package:flutter_paginatrix/src/presentation/widgets/paginatrix_empty_views.dart';
 
 /// Mixin that provides shared pagination state building logic
 /// for PaginatrixListView and PaginatrixGridView.
@@ -362,21 +361,36 @@ mixin PaginatrixStateBuilderMixin<T> on StatelessWidget {
 
   /// Creates a CustomScrollView with common properties
   /// This reduces duplication in buildLoadingState and buildScrollableContent
+  ///
+  /// **Padding Behavior:**
+  /// When padding is provided, the entire scroll view is wrapped in a Padding widget.
+  /// This ensures consistent padding around all slivers together, rather than
+  /// applying padding to each sliver individually (which would create gaps between slivers).
   @protected
-  CustomScrollView createCustomScrollView({
+  Widget createCustomScrollView({
     required List<Widget> slivers,
   }) {
-    return CustomScrollView(
+    final paddingValue = padding; // Store once to avoid redundant null check
+
+    final scrollView = CustomScrollView(
       physics: physics,
       shrinkWrap: shrinkWrap,
       scrollDirection: scrollDirection,
       reverse: reverse,
       cacheExtent: cacheExtent,
-      slivers: [
-        if (padding != null) SliverPadding(padding: padding!),
-        ...slivers,
-      ],
+      slivers: slivers,
     );
+
+    // Wrap the entire scroll view in padding if provided
+    // This ensures padding is applied around all content, not between slivers
+    if (paddingValue != null) {
+      return Padding(
+        padding: paddingValue,
+        child: scrollView,
+      );
+    }
+
+    return scrollView;
   }
 
   /// Creates a SliverChildBuilderDelegate with common performance options

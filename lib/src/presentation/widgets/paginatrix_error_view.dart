@@ -3,6 +3,7 @@ import 'package:flutter_paginatrix/src/core/constants/paginatrix_icon_sizes.dart
 import 'package:flutter_paginatrix/src/core/constants/paginatrix_spacing.dart';
 import 'package:flutter_paginatrix/src/core/entities/pagination_error.dart';
 import 'package:flutter_paginatrix/src/core/mixins/theme_access_mixin.dart';
+import 'package:flutter_paginatrix/src/presentation/widgets/paginatrix_state_scaffold.dart';
 
 /// Error view for pagination failures
 class PaginatrixErrorView extends StatelessWidget {
@@ -31,42 +32,16 @@ class PaginatrixErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final textTheme = context.textTheme;
+    final iconWidget = customIcon ?? _buildErrorIcon(colorScheme);
 
-    final iconWidget = customIcon;
-    return Padding(
-      padding: padding ?? PaginatrixSpacing.largePaddingAll,
-      child: Column(
-        mainAxisAlignment: mainAxisAlignment,
-        crossAxisAlignment: crossAxisAlignment,
-        children: [
-          if (iconWidget != null) ...[
-            iconWidget,
-            const SizedBox(height: PaginatrixSpacing.iconBottom),
-          ] else ...[
-            _buildErrorIcon(colorScheme),
-            const SizedBox(height: PaginatrixSpacing.iconBottom),
-          ],
-          Text(
-            customTitle ?? _getErrorTitle(),
-            style: textTheme.headlineSmall?.copyWith(
-              color: colorScheme.onSurface.withValues(alpha: 0.8),
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: PaginatrixSpacing.titleBottom),
-          Text(
-            customDescription ?? _getErrorDescription(),
-            style: textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: PaginatrixSpacing.descriptionBottom),
-          _buildActionButtons(context, colorScheme),
-        ],
-      ),
+    return PaginatrixStateScaffold(
+      icon: iconWidget,
+      title: customTitle ?? _getErrorTitle(),
+      description: customDescription ?? _getErrorDescription(),
+      action: _buildActionButtons(context, colorScheme),
+      padding: padding,
+      mainAxisAlignment: mainAxisAlignment,
+      crossAxisAlignment: crossAxisAlignment,
     );
   }
 

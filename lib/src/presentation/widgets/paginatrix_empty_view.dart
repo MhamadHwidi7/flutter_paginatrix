@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_paginatrix/src/core/constants/paginatrix_icon_sizes.dart';
-import 'package:flutter_paginatrix/src/core/constants/paginatrix_spacing.dart';
 import 'package:flutter_paginatrix/src/core/mixins/theme_access_mixin.dart';
+import 'package:flutter_paginatrix/src/presentation/widgets/paginatrix_state_scaffold.dart';
 
 /// Empty state view for when no data is available
 class PaginatrixEmptyView extends StatelessWidget {
@@ -28,68 +28,29 @@ class PaginatrixEmptyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final textTheme = context.textTheme;
+    final iconWidget = icon ??
+        Icon(
+          Icons.inbox_outlined,
+          size: PaginatrixIconSizes.large,
+          color: colorScheme.onSurface.withValues(alpha: 0.4),
+        );
 
-    final iconWidget = icon;
-    final titleText = title;
-    final descriptionText = description;
-    return Padding(
-      padding: padding ?? PaginatrixSpacing.largePaddingAll,
-      child: Column(
-        mainAxisAlignment: mainAxisAlignment,
-        crossAxisAlignment: crossAxisAlignment,
-        children: [
-          if (iconWidget != null) ...[
-            iconWidget,
-            const SizedBox(height: PaginatrixSpacing.iconBottom),
-          ] else ...[
-            Icon(
-              Icons.inbox_outlined,
-              size: PaginatrixIconSizes.large,
-              color: colorScheme.onSurface.withValues(alpha: 0.4),
-            ),
-            const SizedBox(height: PaginatrixSpacing.iconBottom),
-          ],
-          if (titleText != null) ...[
-            Text(
-              titleText,
-              style: textTheme.headlineSmall?.copyWith(
-                color: colorScheme.onSurface.withValues(alpha: 0.8),
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: PaginatrixSpacing.titleBottom),
-          ],
-          if (descriptionText != null) ...[
-            Text(
-              descriptionText,
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: PaginatrixSpacing.descriptionBottom),
-          ],
-          if (action != null) ...[
-            Builder(
-              builder: (context) {
-                final actionWidget = action;
-                if (actionWidget == null) {
-                  return const SizedBox.shrink();
-                }
-                if (onActionTap != null) {
-                  return GestureDetector(
-                    onTap: onActionTap,
-                    child: actionWidget,
-                  );
-                }
-                return actionWidget;
-              },
-            ),
-          ],
-        ],
-      ),
+    Widget? actionWidget = action;
+    if (actionWidget != null && onActionTap != null) {
+      actionWidget = GestureDetector(
+        onTap: onActionTap,
+        child: actionWidget,
+      );
+    }
+
+    return PaginatrixStateScaffold(
+      icon: iconWidget,
+      title: title,
+      description: description,
+      action: actionWidget,
+      padding: padding,
+      mainAxisAlignment: mainAxisAlignment,
+      crossAxisAlignment: crossAxisAlignment,
     );
   }
 }
