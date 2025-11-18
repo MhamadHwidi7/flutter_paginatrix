@@ -1089,12 +1089,6 @@ If you find this package useful, please consider:
 - 💡 **Suggesting features** - Share your ideas
 - 📖 **Improving documentation** - Help others learn
 
-### ☕ Buy Me a Coffee
-
-If this package has been helpful to you, consider supporting its development:
-
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/mohammadihwidi)
-
 ### 👨‍💻 Connect
 
 - 💼 [LinkedIn](https://www.linkedin.com/in/mhamad-hwidi-563915237) - Let's connect and discuss Flutter development!
