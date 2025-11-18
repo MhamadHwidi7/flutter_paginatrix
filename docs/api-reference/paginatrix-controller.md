@@ -327,7 +327,7 @@ class _UsersPageState extends State<UsersPage> {
       if (offset != null) 'offset': offset,
       if (limit != null) 'limit': limit,
       if (cursor != null) 'cursor': cursor,
-      if (query?.searchTerm.isNotEmpty ?? false) 'search': query!.searchTerm,
+      if ((query?.searchTerm ?? '').isNotEmpty) 'search': query!.searchTerm,
       ...?query?.filters,
     };
     final response = await dio.get(

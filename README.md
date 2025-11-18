@@ -90,10 +90,11 @@ final controller = PaginatrixController<User>(
     CancelToken? cancelToken,
     QueryCriteria? query,
   }) async {
+    final searchTerm = query?.searchTerm;
     final response = await dio.get('/users', queryParameters: {
       'page': page,
       'per_page': perPage,
-      if (query?.searchTerm.isNotEmpty ?? false) 'q': query!.searchTerm,
+      if (searchTerm != null && searchTerm.isNotEmpty) 'q': searchTerm,
     });
     return response.data; // {data: [...], meta: {...}}
   },
@@ -173,12 +174,13 @@ class _UsersPageState extends State<UsersPage> {
     CancelToken? cancelToken,
     QueryCriteria? query,
   }) async {
+    final searchTerm = query?.searchTerm;
     final response = await _dio.get(
       '/users',
       queryParameters: {
         'page': page ?? 1,
         'per_page': perPage ?? 20,
-        if (query?.searchTerm.isNotEmpty ?? false) 'q': query!.searchTerm,
+        if (searchTerm != null && searchTerm.isNotEmpty) 'q': searchTerm,
       },
       cancelToken: cancelToken,
     );
@@ -397,10 +399,11 @@ class UsersRepository {
     QueryCriteria? query,
   }) async {
     final dio = PaginatrixDI.get<Dio>();
+    final searchTerm = query?.searchTerm;
     final response = await dio.get('/users', queryParameters: {
       'page': page,
       'per_page': perPage,
-      if (query?.searchTerm.isNotEmpty ?? false) 'q': query!.searchTerm,
+      if (searchTerm != null && searchTerm.isNotEmpty) 'q': searchTerm,
     }, cancelToken: cancelToken);
     return response.data;
   }

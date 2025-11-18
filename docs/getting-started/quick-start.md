@@ -92,7 +92,7 @@ Future<Map<String, dynamic>> _loadUsers({
       'page': page ?? 1,
       'per_page': perPage ?? 20,
       // Add search if provided
-      if (query?.searchTerm.isNotEmpty ?? false)
+      if ((query?.searchTerm ?? '').isNotEmpty)
         'search': query!.searchTerm,
       // Add filters if provided
       ...?query?.filters,
