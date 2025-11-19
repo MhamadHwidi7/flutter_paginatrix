@@ -2,18 +2,40 @@
 
 > **A backend-agnostic pagination engine for Flutter**
 
-[![pub package](https://img.shields.io/pub/v/flutter_paginatrix.svg)](https://pub.dev/packages/flutter_paginatrix)
+[![pub points](https://img.shields.io/pub/points/flutter_paginatrix)](https://pub.dev/packages/flutter_paginatrix/score)
+[![popularity](https://img.shields.io/pub/popularity/flutter_paginatrix)](https://pub.dev/packages/flutter_paginatrix/score)
+[![likes](https://img.shields.io/pub/likes/flutter_paginatrix)](https://pub.dev/packages/flutter_paginatrix/score)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.22.0-blue.svg)](https://flutter.dev)
-[![Dart](https://img.shields.io/badge/Dart-%3E%3D3.2.0-blue.svg)](https://dart.dev)
+[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Desktop-lightgrey)](https://flutter.dev)
 
 A production-ready, type-safe pagination library that works with any backend API. Built with clean architecture, comprehensive error handling, and beautiful UI components.
+
+**📦 [View on pub.dev](https://pub.dev/packages/flutter_paginatrix)** • **📖 [Documentation](./doc/README.md)** • **🐛 [Report Bug](https://github.com/MhamadHwidi7/flutter_paginatrix/issues)** • **📝 [Changelog](./CHANGELOG.md)**
+
+---
+
+## 📑 Table of Contents
+
+- [Features](#-features)
+- [Why Flutter Paginatrix?](#-why-flutter-paginatrix)
+- [Installation](#-installation)
+- [Quick Start](#-quick-start)
+- [Basic Usage](#-basic-usage)
+- [Advanced Usage](#-advanced-usage)
+- [API Overview](#-api-overview)
+- [Example Projects](#-example-projects)
+- [Common Pitfalls](#️-common-pitfalls)
+- [Testing](#-testing)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Support & Links](#-support--links)
 
 ---
 
 ## ✨ Features
 
 ### Core Capabilities
+
 - 🎯 **Backend-Agnostic** - Works with any API format (REST, GraphQL, custom)
 - 🔄 **Multiple Pagination Strategies** - Page-based, offset-based, and cursor-based
 - 🎨 **UI Components** - Sliver-based ListView and GridView with skeleton loaders
@@ -21,6 +43,7 @@ A production-ready, type-safe pagination library that works with any backend API
 - 🧩 **DI Flexible** - Use any DI solution (`get_it`, `provider`, `riverpod`) or create instances directly
 
 ### Performance & Reliability
+
 - ⚡ **LRU Caching** - Metadata caching prevents redundant parsing
 - 🛡️ **Race Condition Protection** - Generation guards prevent stale responses
 - 🚫 **Request Cancellation** - Automatic cleanup of in-flight requests
@@ -28,6 +51,7 @@ A production-ready, type-safe pagination library that works with any backend API
 - ⏱️ **Smart Debouncing** - Search (400ms) and refresh (300ms) debouncing
 
 ### Developer Experience
+
 - 🔍 **Search & Filtering** - Built-in support with type-safe access
 - 🎭 **6 Error Types** - Network, parse, cancelled, rate-limited, circuit breaker, unknown
 - 📱 **Web Support** - Page selector widget with multiple styles
@@ -186,7 +210,6 @@ class _UsersPageState extends State<UsersPage> {
     _controller.close();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -390,6 +413,7 @@ MultiProvider(
 Main controller for managing paginated data. Type alias for `PaginatrixCubit<T>`.
 
 **Key Methods:**
+
 - `loadFirstPage()` - Load the first page (resets list)
 - `loadNextPage()` - Load the next page (appends to list)
 - `refresh()` - Refresh current data (debounced)
@@ -405,6 +429,7 @@ Main controller for managing paginated data. Type alias for `PaginatrixCubit<T>`
 - `close()` - Dispose resources
 
 **Key Properties:**
+
 - `state: PaginationState<T>` - Current state
 - `canLoadMore: bool` - Whether more data can be loaded
 - `isLoading: bool` - Whether loading is in progress
@@ -412,6 +437,7 @@ Main controller for managing paginated data. Type alias for `PaginatrixCubit<T>`
 #### `PaginationState<T>`
 
 Immutable state object containing:
+
 - `status: PaginationStatus` - Current status
 - `items: List<T>` - Loaded items
 - `meta: PageMeta?` - Pagination metadata
@@ -419,6 +445,7 @@ Immutable state object containing:
 - `query: QueryCriteria` - Current search/filter criteria
 
 **Extension Methods:**
+
 - `hasData: bool` - Whether items exist
 - `isLoading: bool` - Whether in loading state
 - `canLoadMore: bool` - Whether more pages available
@@ -427,6 +454,7 @@ Immutable state object containing:
 #### `PageMeta`
 
 Pagination metadata:
+
 - `page: int?` - Current page number
 - `perPage: int?` - Items per page
 - `total: int?` - Total items
@@ -438,12 +466,14 @@ Pagination metadata:
 #### `QueryCriteria`
 
 Immutable value object for search and filter criteria:
+
 - `searchTerm: String` - Search term
 - `filters: Map<String, dynamic>` - Filter key-value pairs
 - `sortBy: String?` - Field to sort by
 - `sortDesc: bool` - Sort direction
 
 **Methods:**
+
 - `withFilter(String key, dynamic value)` - Add/update filter
 - `withFilters(Map<String, dynamic> filters)` - Add/update multiple filters
 - `removeFilter(String key)` - Remove filter
@@ -459,6 +489,7 @@ Immutable value object for search and filter criteria:
 ListView widget with built-in pagination.
 
 **Key Parameters:**
+
 - `controller` or `cubit` - Pagination controller (required)
 - `itemBuilder` - Function to build each item (required)
 - `keyBuilder` - Optional key generator
@@ -474,11 +505,13 @@ ListView widget with built-in pagination.
 #### `PaginatrixGridView<T>`
 
 GridView widget with built-in pagination. Same parameters as `PaginatrixListView` plus:
+
 - `gridDelegate` - Grid layout configuration (required)
 
 #### `AppendLoader`
 
 Loading indicator with multiple animation types:
+
 - `LoaderType.bouncingDots` - Bouncing dots
 - `LoaderType.wave` - Wave animation
 - `LoaderType.rotatingSquares` - Rotating squares
@@ -497,6 +530,7 @@ Inline error view for append failures.
 #### `PaginatrixEmptyView`
 
 Base empty state widget. Variants:
+
 - `PaginatrixGenericEmptyView` - Generic empty state
 - `PaginatrixSearchEmptyView` - Search empty state
 - `PaginatrixNetworkEmptyView` - Network empty state
@@ -508,6 +542,7 @@ Skeleton loading effect widget with customizable item builders.
 #### `PageSelector`
 
 Page selection widget for web with styles:
+
 - `PageSelectorStyle.buttons` - Button-based pagination
 - `PageSelectorStyle.dropdown` - Dropdown selector
 - `PageSelectorStyle.compact` - Compact display
@@ -519,6 +554,7 @@ Page selection widget for web with styles:
 Pre-configured parser for common API formats with automatic LRU caching.
 
 **Pre-configured Configs:**
+
 - `MetaConfig.nestedMeta` - `{data: [], meta: {current_page, per_page, ...}}`
 - `MetaConfig.resultsFormat` - `{results: [], count, page, per_page, ...}`
 - `MetaConfig.pageBased` - Simple page-based format
@@ -526,6 +562,7 @@ Pre-configured parser for common API formats with automatic LRU caching.
 - `MetaConfig.offsetBased` - Offset/limit format
 
 **Custom Config:**
+
 ```dart
 final config = MetaConfig(
   itemsPath: 'data',
@@ -564,6 +601,7 @@ CustomMetaParser(
 #### `PaginationStatus`
 
 Union type for pagination status:
+
 - `initial()` - Initial state
 - `loading()` - Loading data
 - `success()` - Successfully loaded
@@ -576,6 +614,7 @@ Union type for pagination status:
 #### `PaginationError`
 
 Union type for error types:
+
 - `network()` - Network errors
 - `parse()` - Parse errors
 - `cancelled()` - Cancellation errors
@@ -584,6 +623,7 @@ Union type for error types:
 - `unknown()` - Unknown errors
 
 **Properties:**
+
 - `isRetryable: bool` - Whether error can be retried
 - `isUserVisible: bool` - Whether to show to user
 - `userMessage: String` - User-friendly message
@@ -591,6 +631,7 @@ Union type for error types:
 #### `LoaderType`
 
 Types of loaders for pagination UI:
+
 - `bouncingDots` - Bouncing dots animation
 - `wave` - Wave animation
 - `rotatingSquares` - Rotating squares animation
@@ -618,7 +659,7 @@ The package includes comprehensive examples:
 Run any example:
 
 ```bash
-cd examples/list_view
+cd example/list_view
 flutter run
 ```
 
@@ -629,12 +670,14 @@ flutter run
 ### 1. Not Disposing Controllers
 
 **❌ Wrong:**
+
 ```dart
 final controller = PaginatrixController<User>(...);
 // Controller not disposed - memory leak!
 ```
 
 **✅ Correct:**
+
 ```dart
 @override
 void dispose() {
@@ -646,6 +689,7 @@ void dispose() {
 ### 2. Forgetting to Call `loadFirstPage()`
 
 **❌ Wrong:**
+
 ```dart
 @override
 void initState() {
@@ -656,6 +700,7 @@ void initState() {
 ```
 
 **✅ Correct:**
+
 ```dart
 @override
 void initState() {
@@ -668,12 +713,14 @@ void initState() {
 ### 3. Incorrect Meta Parser Configuration
 
 **❌ Wrong:**
+
 ```dart
 // Paths don't match API structure
 metaParser: ConfigMetaParser(MetaConfig.nestedMeta), // But API uses 'results' not 'data'
 ```
 
 **✅ Correct:**
+
 ```dart
 // Match your API structure
 metaParser: ConfigMetaParser(MetaConfig.resultsFormat), // Or use CustomMetaParser
@@ -682,6 +729,7 @@ metaParser: ConfigMetaParser(MetaConfig.resultsFormat), // Or use CustomMetaPars
 ### 4. Not Handling Errors
 
 **❌ Wrong:**
+
 ```dart
 PaginatrixListView<User>(
   controller: _controller,
@@ -691,6 +739,7 @@ PaginatrixListView<User>(
 ```
 
 **✅ Correct:**
+
 ```dart
 PaginatrixListView<User>(
   controller: _controller,
@@ -709,6 +758,7 @@ PaginatrixListView<User>(
 ### 6. Dependency Injection
 
 **❌ Wrong:**
+
 ```dart
 // Creating new instances everywhere
 final dio1 = Dio();
@@ -716,6 +766,7 @@ final dio2 = Dio(); // Different instance!
 ```
 
 **✅ Correct:**
+
 ```dart
 // Use DI for shared dependencies (example with get_it)
 final getIt = GetIt.instance;
@@ -763,6 +814,24 @@ See the `test/` directory for more examples including integration tests and perf
 
 ---
 
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+Please make sure your code:
+- Follows the existing code style
+- Includes tests for new features
+- Updates documentation as needed
+- Passes all existing tests
+
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -779,7 +848,8 @@ Copyright (c) 2025 Mhamad Hwidi
 - 🐙 [GitHub Repository](https://github.com/MhamadHwidi7/flutter_paginatrix)
 - 🐛 [Issue Tracker](https://github.com/MhamadHwidi7/flutter_paginatrix/issues)
 - 📖 [API Documentation](https://pub.dev/documentation/flutter_paginatrix)
-- 📚 [Full Documentation](./docs/README.md)
+- 📚 [Full Documentation](./doc/README.md)
+- 📝 [Changelog](./CHANGELOG.md)
 
 ### Support the Project
 
