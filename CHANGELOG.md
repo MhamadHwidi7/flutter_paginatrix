@@ -84,6 +84,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.2] - 2025-11-20
+
+### Added
+- Comprehensive documentation for all loader classes (BouncingDotsLoader, WaveLoader, RotatingSquaresLoader, PulseLoader, SkeletonLoader)
+- Comprehensive documentation for PageSelector widget and PageSelectorStyle enum
+- Comprehensive documentation for predefined empty view widgets (PaginatrixSearchEmptyView, PaginatrixNetworkEmptyView, PaginatrixGenericEmptyView)
+- Complete example/README.md with detailed documentation for all examples
+
+### Changed
+- Renamed `paginatrix_empty_views.dart` to `paginatrix_predefined_empty_views.dart` for better clarity
+- Reorganized example directory structure:
+  - Main example moved to `example/` root (recognized by pub.dev)
+  - Additional examples moved to `example/examples/` subdirectory
+- Updated main README with new example directory structure
+
+### Improved
+- Enhanced documentation coverage across all widget classes
+- Improved example organization and discoverability
+- Updated all documentation with examples and parameter descriptions
+
+---
+
 ## [1.0.1] - 2025-11-20
 
 ### Fixed
@@ -127,6 +149,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[1.0.2]: https://github.com/MhamadHwidi7/flutter_paginatrix/releases/tag/v1.0.2
 [1.0.1]: https://github.com/MhamadHwidi7/flutter_paginatrix/releases/tag/v1.0.1
 [1.0.0]: https://github.com/MhamadHwidi7/flutter_paginatrix/releases/tag/v1.0.0
 
