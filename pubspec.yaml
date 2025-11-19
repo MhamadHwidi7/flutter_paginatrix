@@ -14,7 +14,7 @@ dependencies:
     sdk: flutter
   
   # Immutability & unions
-  freezed_annotation: ^2.4.1
+  freezed_annotation: ^3.1.0
   equatable: ^2.0.7
   
   # HTTP client
@@ -28,15 +28,18 @@ dependencies:
   
   # Skeleton loading effect
   skeletonizer: ^2.1.0
+  
+  # Toast notifications
+  fluttertoast: ^8.2.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   
   # Code generation
-  build_runner: ^2.4.7
-  freezed: ^2.4.6
-  json_serializable: ^6.7.1
+  build_runner: ^2.7.1
+  freezed: ^3.2.3
+  json_serializable: ^6.11.1
   # injectable_generator removed
   
   # Testing
@@ -44,10 +47,10 @@ dev_dependencies:
   test: ^1.24.9
   
   # Linting
-  flutter_lints: ^3.0.1
+  flutter_lints: ^6.0.0
   
   # Documentation
-  dartdoc: ^7.0.0
+  dartdoc: ^8.3.4
 
 flutter:
   uses-material-design: true
