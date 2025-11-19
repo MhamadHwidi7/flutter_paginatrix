@@ -123,17 +123,18 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
     CancelToken? cancelToken,
     QueryCriteria? query,
   }) async {
-    // Use query from parameter if provided, otherwise build from UI state
+    // Always build from UI state to ensure consistency
+    // The query parameter from PaginatrixCubit may be stale if UI state changed
+    // This ensures filters are always applied correctly
     final uiState = _uiCubit.state;
-    final queryCriteria = query ??
-        QueryCriteria(
-          searchTerm: uiState.searchTerm.isNotEmpty ? uiState.searchTerm : '',
-          filters: uiState.selectedType != null
-              ? {'type': uiState.selectedType!}
-              : const {},
-          sortBy: uiState.sortBy,
-          sortDesc: uiState.sortDesc,
-        );
+    final queryCriteria = QueryCriteria(
+      searchTerm: uiState.searchTerm.isNotEmpty ? uiState.searchTerm : '',
+      filters: uiState.selectedType != null
+          ? {'type': uiState.selectedType!}
+          : const {},
+      sortBy: uiState.sortBy,
+      sortDesc: uiState.sortDesc,
+    );
 
     return _repository.loadPokemonPage(
       page: page,
@@ -206,7 +207,9 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
     debugPrint(
         '🟦 [PaginationBloc] Handling UpdateSearch event: "${event.searchTerm}"');
     _uiCubit.updateSearchTerm(event.searchTerm);
-    // The UI cubit listener will trigger LoadFirstPage
+    // Trigger LoadFirstPage immediately after updating UI state
+    // This ensures the filter is applied right away
+    add(const LoadFirstPage());
   }
 
   /// Handles UpdateTypeFilter event
@@ -217,7 +220,9 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
     debugPrint(
         '🟦 [PaginationBloc] Handling UpdateTypeFilter event: ${event.type ?? "none"}');
     _uiCubit.updateTypeFilter(event.type);
-    // The UI cubit listener will trigger LoadFirstPage
+    // Trigger LoadFirstPage immediately after updating UI state
+    // This ensures the filter is applied right away
+    add(const LoadFirstPage());
   }
 
   /// Handles UpdateSorting event
@@ -231,7 +236,9 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
     if (event.sortBy != null) {
       _uiCubit.updateSortDesc(event.sortDesc);
     }
-    // The UI cubit listener will trigger LoadFirstPage
+    // Trigger LoadFirstPage immediately after updating UI state
+    // This ensures the filter is applied right away
+    add(const LoadFirstPage());
   }
 
   /// Handles ClearAllFilters event
@@ -240,7 +247,9 @@ class PaginationBloc<T> extends Bloc<PaginationEvent, PaginationBlocState<T>> {
     Emitter<PaginationBlocState<T>> emit,
   ) {
     _uiCubit.clearAll();
-    // The UI cubit listener will trigger LoadFirstPage
+    // Trigger LoadFirstPage immediately after updating UI state
+    // This ensures the filter is applied right away
+    add(const LoadFirstPage());
   }
 
   /// Handles internal event when controller state changes

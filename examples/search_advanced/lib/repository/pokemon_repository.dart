@@ -149,11 +149,15 @@ class PokemonRepository {
       // Apply type filter
       if (typeFilter != null && typeFilter.isNotEmpty) {
         final beforeCount = pokemonList.length;
-        pokemonList = pokemonList
-            .where((pokemon) => pokemon.types.contains(typeFilter))
-            .toList();
+        final typeFilterLower = typeFilter.toLowerCase();
+        pokemonList = pokemonList.where((pokemon) {
+          // Check if any of the pokemon's types match the filter (case-insensitive)
+          return pokemon.types.any(
+            (type) => type.toLowerCase() == typeFilterLower,
+          );
+        }).toList();
         debugPrint(
-            '   🏷️  After type filter: ${pokemonList.length} Pokemon (filtered ${beforeCount - pokemonList.length})');
+            '   🏷️  After type filter "$typeFilter": ${pokemonList.length} Pokemon (filtered ${beforeCount - pokemonList.length})');
       }
 
       // Apply sorting

@@ -42,21 +42,30 @@ class ViewControlsState extends Equatable {
   bool get hasSorting => sortBy != null;
 
   /// Creates a copy with updated values
+  ///
+  /// To explicitly set a nullable field to null, use the corresponding
+  /// parameter. For example, `copyWith(selectedType: null)` will clear
+  /// the selectedType field.
   ViewControlsState copyWith({
     String? searchTerm,
-    String? selectedType,
-    String? sortBy,
+    Object? selectedType = _undefined,
+    Object? sortBy = _undefined,
     bool? sortDesc,
     double? gridColumns,
   }) {
     return ViewControlsState(
       searchTerm: searchTerm ?? this.searchTerm,
-      selectedType: selectedType ?? this.selectedType,
-      sortBy: sortBy ?? this.sortBy,
+      selectedType: selectedType == _undefined
+          ? this.selectedType
+          : selectedType as String?,
+      sortBy: sortBy == _undefined ? this.sortBy : sortBy as String?,
       sortDesc: sortDesc ?? this.sortDesc,
       gridColumns: gridColumns ?? this.gridColumns,
     );
   }
+
+  /// Internal sentinel value to distinguish between null and undefined
+  static const Object _undefined = Object();
 
   @override
   List<Object?> get props => [
