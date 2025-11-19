@@ -4,7 +4,40 @@ import 'package:flutter_paginatrix/src/core/constants/paginatrix_spacing.dart';
 import 'package:flutter_paginatrix/src/core/mixins/theme_access_mixin.dart';
 
 /// A container widget for page selection with multiple display styles
+///
+/// This widget provides a flexible page selector that supports three different
+/// display styles: buttons, dropdown, and compact. It automatically handles
+/// page number generation with ellipsis for large page counts and provides
+/// navigation controls (previous/next, first/last).
+///
+/// **Example:**
+/// ```dart
+/// PageSelector(
+///   currentPage: 5,
+///   totalPages: 20,
+///   onPageSelected: (page) {
+///     controller.loadPage(page);
+///   },
+///   style: PageSelectorStyle.buttons,
+///   maxVisiblePages: 7,
+/// )
+/// ```
+///
+/// The widget automatically hides itself when `totalPages <= 1`.
 class PageSelector extends StatelessWidget {
+  /// Creates a page selector widget.
+  ///
+  /// [currentPage] - The current page number (1-based). Must be between 1 and [totalPages].
+  /// [totalPages] - The total number of pages available. Must be greater than 0.
+  /// [onPageSelected] - Callback function called when a page is selected. Receives the selected page number.
+  /// [isLoading] - Whether pagination is currently loading. Disables all interactions when true. Defaults to false.
+  /// [style] - The display style for the page selector. Defaults to [PageSelectorStyle.buttons].
+  /// [maxVisiblePages] - Maximum number of page buttons to show in buttons style. Defaults to 7.
+  /// [showFirstLast] - Whether to show first/last page buttons. Defaults to true.
+  /// [showPreviousNext] - Whether to show previous/next navigation buttons. Defaults to true.
+  /// [padding] - Padding around the selector container. If null, uses default padding.
+  /// [backgroundColor] - Background color of the container. If null, uses theme's surface color.
+  /// [borderRadius] - Border radius of the container. If null, uses default rounded corners.
   const PageSelector({
     super.key,
     required this.currentPage,
@@ -20,37 +53,83 @@ class PageSelector extends StatelessWidget {
     this.borderRadius,
   });
 
-  /// Current page number (1-based)
+  /// The current page number (1-based).
+  ///
+  /// This value must be between 1 and [totalPages] (inclusive).
+  /// The current page will be highlighted in the buttons style.
   final int currentPage;
 
-  /// Total number of pages
+  /// The total number of pages available.
+  ///
+  /// Must be greater than 0. If `totalPages <= 1`, the widget
+  /// will automatically hide itself.
   final int totalPages;
 
-  /// Callback when a page is selected
+  /// Callback function called when a page is selected.
+  ///
+  /// Receives the selected page number (1-based) as a parameter.
+  /// This callback is not called when:
+  /// - The selected page is the same as [currentPage]
+  /// - [isLoading] is true
+  /// - Navigation buttons are disabled (e.g., previous on page 1)
   final void Function(int page) onPageSelected;
 
-  /// Whether pagination is currently loading
+  /// Whether pagination is currently loading.
+  ///
+  /// When true, all page selection interactions are disabled.
+  /// Navigation buttons and page buttons will be disabled during loading.
+  /// Defaults to false.
   final bool isLoading;
 
-  /// Display style for the page selector
+  /// The display style for the page selector.
+  ///
+  /// - [PageSelectorStyle.buttons]: Shows page numbers as clickable buttons
+  /// - [PageSelectorStyle.dropdown]: Shows a dropdown menu for page selection
+  /// - [PageSelectorStyle.compact]: Shows current/total pages with prev/next buttons
+  ///
+  /// Defaults to [PageSelectorStyle.buttons].
   final PageSelectorStyle style;
 
-  /// Maximum number of page buttons to show
+  /// Maximum number of page buttons to show in buttons style.
+  ///
+  /// When the total number of pages exceeds this value, the widget
+  /// will show ellipsis (...) to indicate hidden pages. The widget
+  /// intelligently shows pages around the current page.
+  ///
+  /// Defaults to 7. This value is only used for [PageSelectorStyle.buttons].
   final int maxVisiblePages;
 
-  /// Whether to show first/last page buttons
+  /// Whether to show first/last page buttons.
+  ///
+  /// When true, buttons to jump to the first and last page will be
+  /// displayed (when applicable). These buttons only appear when the
+  /// current page is far enough from the edges.
+  ///
+  /// Defaults to true.
   final bool showFirstLast;
 
-  /// Whether to show previous/next buttons
+  /// Whether to show previous/next navigation buttons.
+  ///
+  /// When true, buttons to navigate to the previous and next page
+  /// will be displayed. These buttons are automatically disabled
+  /// when at the first or last page.
+  ///
+  /// Defaults to true.
   final bool showPreviousNext;
 
-  /// Padding around the selector
+  /// Padding around the selector container.
+  ///
+  /// If null, uses default padding: `EdgeInsets.symmetric(horizontal: 16, vertical: 12)`.
   final EdgeInsetsGeometry? padding;
 
-  /// Background color of the container
+  /// Background color of the container.
+  ///
+  /// If null, uses the theme's surface color from the current context.
   final Color? backgroundColor;
 
-  /// Border radius of the container
+  /// Border radius of the container.
+  ///
+  /// If null, uses default border radius: `BorderRadius.all(Radius.circular(12))`.
   final BorderRadius? borderRadius;
 
   @override
@@ -385,14 +464,49 @@ class PageSelector extends StatelessWidget {
   }
 }
 
-/// Display styles for page selector
+/// Display styles for the page selector widget.
+///
+/// This enum defines the different visual styles available for displaying
+/// page selection controls. Each style provides a different user experience
+/// optimized for different use cases.
 enum PageSelectorStyle {
-  /// Button style - shows page numbers as clickable buttons
+  /// Button style - shows page numbers as clickable buttons.
+  ///
+  /// Displays page numbers as individual clickable buttons with the current
+  /// page highlighted. Uses ellipsis (...) to indicate hidden pages when
+  /// the total number of pages exceeds the maximum visible pages setting.
+  ///
+  /// Best for: Desktop and tablet interfaces where space is available.
+  ///
+  /// **Example:**
+  /// ```
+  /// [<] [1] [2] [3] ... [20] [>]
+  /// ```
   buttons,
 
-  /// Dropdown style - shows a dropdown menu for page selection
+  /// Dropdown style - shows a dropdown menu for page selection.
+  ///
+  /// Displays a dropdown menu containing all available pages, with previous/next
+  /// buttons for navigation. Shows "Page X of Y" format.
+  ///
+  /// Best for: Mobile interfaces or when you want to save horizontal space.
+  ///
+  /// **Example:**
+  /// ```
+  /// [<] Page [5 ▼] of 20 [>]
+  /// ```
   dropdown,
 
-  /// Compact style - shows current/total pages with prev/next buttons
+  /// Compact style - shows current/total pages with prev/next buttons.
+  ///
+  /// Displays a minimal format showing "X / Y" with only previous/next
+  /// navigation buttons. Takes up the least amount of space.
+  ///
+  /// Best for: Mobile interfaces or when space is very limited.
+  ///
+  /// **Example:**
+  /// ```
+  /// [<] 5 / 20 [>]
+  /// ```
   compact,
 }
