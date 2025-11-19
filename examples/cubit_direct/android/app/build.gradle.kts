@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.example_cubit_direct"
+    namespace = "com.example.cubit_direct"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.example_search_basic"
+    namespace = "com.example.search_basic"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
