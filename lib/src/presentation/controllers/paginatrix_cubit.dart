@@ -443,14 +443,14 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
   ///
   /// **Exponential Backoff:**
   /// Implements exponential backoff to prevent hammering the server:
-  /// - Wait time = `initialBackoff * 2^retryCount`
+  /// - Wait time = `initialBackoff * exponentialBackoffBase * (2^retryCount)`
   /// - Max retries from [PaginationOptions.maxRetries]
   /// - Resets after [PaginationOptions.retryResetTimeout]
   ///
   /// **Example:**
-  /// - 1st retry: waits 500ms (initialBackoff * 2^0)
-  /// - 2nd retry: waits 1000ms (initialBackoff * 2^1)
-  /// - 3rd retry: waits 2000ms (initialBackoff * 2^2)
+  /// - 1st retry: waits 1000ms (500ms * 2 * 2^0)
+  /// - 2nd retry: waits 2000ms (500ms * 2 * 2^1)
+  /// - 3rd retry: waits 4000ms (500ms * 2 * 2^2)
   ///
   /// **Note:** If max retries are exceeded, this method will log a warning
   /// and return without attempting a retry. Wait for the reset timeout before retrying again.
