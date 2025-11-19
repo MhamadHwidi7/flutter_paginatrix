@@ -173,7 +173,7 @@ part 'query_criteria.freezed.dart';
 ///
 /// The old methods are still available as aliases but are deprecated.
 @freezed
-class QueryCriteria with _$QueryCriteria {
+abstract class QueryCriteria with _$QueryCriteria {
   const factory QueryCriteria({
     /// Search term for text-based searching
     @Default('') String searchTerm,

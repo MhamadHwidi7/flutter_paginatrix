@@ -5,7 +5,7 @@ part 'request_context.freezed.dart';
 
 /// Context for pagination requests
 @freezed
-class RequestContext with _$RequestContext {
+abstract class RequestContext with _$RequestContext {
   const factory RequestContext({
     /// Unique request ID for tracking
     required String requestId,

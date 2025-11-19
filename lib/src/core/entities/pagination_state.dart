@@ -9,7 +9,7 @@ part 'pagination_state.freezed.dart';
 
 /// Represents the complete state of pagination
 @freezed
-class PaginationState<T> with _$PaginationState<T> {
+abstract class PaginationState<T> with _$PaginationState<T> {
   const factory PaginationState({
     /// Current pagination status
     required PaginationStatus status,

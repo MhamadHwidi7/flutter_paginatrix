@@ -5,7 +5,7 @@ part 'page_meta.g.dart';
 
 /// Represents pagination metadata
 @freezed
-class PageMeta with _$PageMeta {
+abstract class PageMeta with _$PageMeta {
   const factory PageMeta({
     /// Current page number (1-based)
     int? page,

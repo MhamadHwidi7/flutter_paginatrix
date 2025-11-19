@@ -4,7 +4,7 @@ part 'pagination_error.freezed.dart';
 
 /// Represents pagination errors
 @freezed
-class PaginationError with _$PaginationError {
+abstract class PaginationError with _$PaginationError {
   /// Network error (connection, timeout, etc.)
   const factory PaginationError.network({
     required String message,
