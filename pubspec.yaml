@@ -27,10 +27,10 @@ dependencies:
   flutter_bloc: ^9.1.1
   
   # Skeleton loading effect
-  skeletonizer: ^2.1.0
+  skeletonizer: ^2.1.0+1
   
   # Toast notifications
-  fluttertoast: ^8.2.4
+  fluttertoast: ^9.0.0
 
 dev_dependencies:
   flutter_test:
