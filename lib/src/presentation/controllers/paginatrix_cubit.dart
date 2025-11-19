@@ -792,6 +792,37 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     _reloadFirstPageWithCurrentQuery();
   }
 
+  /// Removes a specific filter and immediately reloads the first page.
+  ///
+  /// This method removes only the specified filter from the query criteria
+  /// while preserving other filters, search term, and sorting.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// controller.removeFilter('status');
+  /// ```
+  ///
+  /// **Behavior:**
+  /// - Removes the specified filter from `state.query.filters`
+  /// - Preserves other filters, search term, and sorting
+  /// - Immediately reloads first page
+  void removeFilter(String key) {
+    if (isClosed) return;
+
+    // Validate key
+    if (key.isEmpty || key.trim().isEmpty) {
+      throw ArgumentError('Filter key cannot be empty');
+    }
+
+    // Remove filter while preserving other criteria
+    final currentQuery = state.query ?? const QueryCriteria();
+    final updatedQuery = currentQuery.removeFilter(key);
+    _safeEmit(state.copyWith(query: updatedQuery));
+
+    // Immediately reload with updated filters
+    _reloadFirstPageWithCurrentQuery();
+  }
+
   /// Clears all filters and reloads the first page.
   ///
   /// This method removes all filters from the query criteria while preserving
@@ -866,6 +897,32 @@ class PaginatrixCubit<T> extends Cubit<PaginationState<T>> {
     _safeEmit(state.copyWith(query: updatedQuery));
 
     // Immediately reload with new sorting
+    _reloadFirstPageWithCurrentQuery();
+  }
+
+  /// Clears sorting and immediately reloads the first page.
+  ///
+  /// This method removes sorting from the query criteria while preserving
+  /// search term and filters, then reloads the first page.
+  ///
+  /// **Usage:**
+  /// ```dart
+  /// controller.clearSorting();
+  /// ```
+  ///
+  /// **Behavior:**
+  /// - Clears sorting from `state.query` (sets sortBy to null, sortDesc to false)
+  /// - Preserves search term and filters
+  /// - Immediately reloads first page
+  void clearSorting() {
+    if (isClosed) return;
+
+    // Clear sorting while preserving search and filters
+    final currentQuery = state.query ?? const QueryCriteria();
+    final updatedQuery = currentQuery.clearSorting();
+    _safeEmit(state.copyWith(query: updatedQuery));
+
+    // Immediately reload with cleared sorting
     _reloadFirstPageWithCurrentQuery();
   }
 
