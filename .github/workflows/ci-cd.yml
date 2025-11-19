@@ -37,13 +37,13 @@ jobs:
           done
 
       - name: Run code generation
-        run: flutter packages pub run build_runner build --delete-conflicting-outputs
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Format code
         run: dart format --set-exit-if-changed .
 
       - name: Analyze code
-        run: flutter analyze --no-fatal-infos
+        run: dart analyze
 
       - name: Run tests
         run: flutter test --coverage
@@ -73,16 +73,16 @@ jobs:
         run: flutter pub get
 
       - name: Run code generation
-        run: flutter packages pub run build_runner build --delete-conflicting-outputs
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Format code
         run: dart format --set-exit-if-changed .
 
       - name: Analyze code (strict)
-        run: flutter analyze --fatal-infos
+        run: dart analyze --fatal-infos
 
       - name: Run tests
-        run: flutter test
+        run: dart test
 
       - name: Validate version
         run: |
@@ -103,12 +103,12 @@ jobs:
           fi
 
       - name: Dry-run publish
-        run: flutter pub publish --dry-run
+        run: dart pub publish --dry-run
 
       - name: Publish to pub.dev
-        run: flutter pub publish --force
+        run: dart pub publish --force
         env:
-          PUB_CREDENTIALS: ${{ secrets.PUB_CREDENTIALS }}
+          PUB_TOKEN: ${{ secrets.PUB_DEV_TOKEN }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
