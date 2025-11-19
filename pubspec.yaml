@@ -53,6 +53,7 @@ flutter:
   uses-material-design: true
 
 # Enable code generation
-dependency_overrides:
-  # Ensure compatibility
-  meta: ^1.11.0
+# Note: dependency_overrides removed - not needed for publishing
+# If you need it for local development, add it back
+# dependency_overrides:
+#   meta: ^1.11.0
