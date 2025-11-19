@@ -1,7 +1,9 @@
 # Exclude documentation from published package
+doc/
 docs/
 
 # Exclude example apps (they're for reference, not part of the package)
+example/
 examples/
 
 # Exclude test files (not needed in published package)
