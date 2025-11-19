@@ -41,7 +41,7 @@ class PaginationDefaults {
 
 /// Main configuration for pagination
 @freezed
-class PaginationOptions with _$PaginationOptions {
+abstract class PaginationOptions with _$PaginationOptions {
   const factory PaginationOptions({
     /// Default page size
     @Default(PaginationDefaults.defaultPageSize) int defaultPageSize,

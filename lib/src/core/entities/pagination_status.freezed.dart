@@ -126,8 +126,6 @@ extension PaginationStatusPatterns on PaginationStatus {
         return error(_that);
       case _AppendError():
         return appendError(_that);
-      case _:
-        throw StateError('Unexpected subclass');
     }
   }
 
@@ -266,8 +264,6 @@ extension PaginationStatusPatterns on PaginationStatus {
         return error();
       case _AppendError():
         return appendError();
-      case _:
-        throw StateError('Unexpected subclass');
     }
   }
 

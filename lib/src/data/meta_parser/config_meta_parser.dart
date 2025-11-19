@@ -10,7 +10,7 @@ part 'config_meta_parser.g.dart';
 
 /// Configuration for meta parsing
 @freezed
-class MetaConfig with _$MetaConfig {
+abstract class MetaConfig with _$MetaConfig {
   const factory MetaConfig({
     /// Path to items array (e.g., 'data.items', 'results')
     required String itemsPath,
