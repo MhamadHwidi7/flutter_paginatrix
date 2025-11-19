@@ -7,11 +7,13 @@ extension PaginationStateExtension<T> on PaginationState<T> {
   bool get hasData => items.isNotEmpty;
 
   /// Whether the state is loading
-  bool get isLoading => status.whenOrNull(
+  bool get isLoading =>
+      status.whenOrNull(
         loading: () => true,
         refreshing: () => true,
         appending: () => true,
-      ) ?? false;
+      ) ??
+      false;
 
   /// Whether the state has an error
   bool get hasError => error != null;
@@ -26,19 +28,25 @@ extension PaginationStateExtension<T> on PaginationState<T> {
   bool get isStable => !isLoading;
 
   /// Whether the state is in an error state
-  bool get isError => status.whenOrNull(
+  bool get isError =>
+      status.whenOrNull(
         error: () => true,
-      ) ?? false;
+      ) ??
+      false;
 
   /// Whether the state is empty
-  bool get isEmpty => status.whenOrNull(
+  bool get isEmpty =>
+      status.whenOrNull(
         empty: () => true,
-      ) ?? false;
+      ) ??
+      false;
 
   /// Whether the state is successful
-  bool get isSuccess => status.whenOrNull(
+  bool get isSuccess =>
+      status.whenOrNull(
         success: () => true,
-      ) ?? false;
+      ) ??
+      false;
 
   /// Gets the current query criteria, or empty criteria if null
   QueryCriteria get currentQuery => query ?? QueryCriteria.empty();
@@ -58,8 +66,9 @@ extension PaginationStateExtension<T> on PaginationState<T> {
   /// **Returns:** `true` if footer should be displayed, `false` otherwise
   bool get shouldShowFooter {
     final isAppending = status.whenOrNull(
-      appending: () => true,
-    ) ?? false;
+          appending: () => true,
+        ) ??
+        false;
     final hasMore = canLoadMore;
     final itemCount = items.length;
 
@@ -80,7 +89,9 @@ extension PaginationStateExtension<T> on PaginationState<T> {
   ///
   /// **Best Practice:** Provides a convenient way to check appending status
   /// without using pattern matching in widgets.
-  bool get isAppending => status.whenOrNull(
+  bool get isAppending =>
+      status.whenOrNull(
         appending: () => true,
-      ) ?? false;
+      ) ??
+      false;
 }
