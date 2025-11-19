@@ -106,7 +106,9 @@ analyzer:
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
+    - "example/**"
     - "examples/**"
+    - "doc/**"
   strong-mode:
     implicit-casts: false
     implicit-dynamic: false
