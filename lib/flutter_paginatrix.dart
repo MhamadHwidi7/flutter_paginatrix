@@ -75,7 +75,7 @@ export 'src/presentation/widgets/append_loader.dart';
 export 'src/presentation/widgets/modern_loaders.dart';
 export 'src/presentation/widgets/page_selector.dart';
 export 'src/presentation/widgets/paginatrix_empty_view.dart';
-export 'src/presentation/widgets/paginatrix_empty_views.dart';
+export 'src/presentation/widgets/paginatrix_predefined_empty_views.dart';
 export 'src/presentation/widgets/paginatrix_error_view.dart';
 export 'src/presentation/widgets/paginatrix_append_error_view.dart';
 export 'src/presentation/widgets/pagination_skeletonizer.dart';
