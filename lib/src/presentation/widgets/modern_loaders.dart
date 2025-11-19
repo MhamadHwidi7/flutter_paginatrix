@@ -4,7 +4,27 @@ import 'package:flutter_paginatrix/src/presentation/widgets/pagination_skeletoni
 import 'package:flutter_paginatrix/src/core/mixins/theme_access_mixin.dart';
 
 /// Modern bouncing dots loader
+///
+/// A widget that displays an animated bouncing dots loading indicator.
+/// The dots bounce in sequence to create a smooth loading animation.
+///
+/// **Example:**
+/// ```dart
+/// BouncingDotsLoader(
+///   color: Colors.blue,
+///   size: 8.0,
+///   message: 'Loading...',
+///   padding: EdgeInsets.all(16),
+/// )
+/// ```
 class BouncingDotsLoader extends StatefulWidget {
+  /// Creates a bouncing dots loader widget.
+  ///
+  /// [color] - The color of the bouncing dots. If null, uses the theme's primary color.
+  /// [size] - The size of each dot. Defaults to 8.0.
+  /// [duration] - The duration of one complete animation cycle. Defaults to 600ms.
+  /// [message] - Optional message to display below the loader.
+  /// [padding] - Padding around the loader and message.
   const BouncingDotsLoader({
     super.key,
     this.color,
@@ -14,10 +34,29 @@ class BouncingDotsLoader extends StatefulWidget {
     this.padding,
   });
 
+  /// The color of the bouncing dots.
+  ///
+  /// If null, uses the theme's primary color from the current context.
   final Color? color;
+
+  /// The size of each bouncing dot.
+  ///
+  /// Defaults to 8.0 pixels.
   final double size;
+
+  /// The duration of one complete animation cycle.
+  ///
+  /// Defaults to 600 milliseconds.
   final Duration duration;
+
+  /// Optional message to display below the loader.
+  ///
+  /// If provided, the message will be displayed below the bouncing dots.
   final String? message;
+
+  /// Padding around the loader and message.
+  ///
+  /// If null, uses default padding from the theme.
   final EdgeInsetsGeometry? padding;
 
   @override
@@ -115,7 +154,28 @@ class _BouncingDotsLoaderState extends State<BouncingDotsLoader>
 }
 
 /// Modern wave loader
+///
+/// A widget that displays an animated wave loading indicator.
+/// Multiple vertical bars animate in a wave-like pattern to create
+/// a smooth, rhythmic loading animation.
+///
+/// **Example:**
+/// ```dart
+/// WaveLoader(
+///   color: Colors.blue,
+///   size: 40.0,
+///   message: 'Loading...',
+///   padding: EdgeInsets.all(16),
+/// )
+/// ```
 class WaveLoader extends StatefulWidget {
+  /// Creates a wave loader widget.
+  ///
+  /// [color] - The color of the wave bars. If null, uses the theme's primary color.
+  /// [size] - The maximum height of the wave bars. Defaults to 40.0.
+  /// [duration] - The duration of one complete animation cycle. Defaults to 1200ms.
+  /// [message] - Optional message to display below the loader.
+  /// [padding] - Padding around the loader and message.
   const WaveLoader({
     super.key,
     this.color,
@@ -125,10 +185,29 @@ class WaveLoader extends StatefulWidget {
     this.padding,
   });
 
+  /// The color of the wave bars.
+  ///
+  /// If null, uses the theme's primary color from the current context.
   final Color? color;
+
+  /// The maximum height of the wave bars.
+  ///
+  /// Defaults to 40.0 pixels. The bars will animate between 40% and 100% of this height.
   final double size;
+
+  /// The duration of one complete animation cycle.
+  ///
+  /// Defaults to 1200 milliseconds.
   final Duration duration;
+
+  /// Optional message to display below the loader.
+  ///
+  /// If provided, the message will be displayed below the wave animation.
   final String? message;
+
+  /// Padding around the loader and message.
+  ///
+  /// If null, uses default padding from the theme.
   final EdgeInsetsGeometry? padding;
 
   @override
@@ -224,7 +303,27 @@ class _WaveLoaderState extends State<WaveLoader> with TickerProviderStateMixin {
 }
 
 /// Modern rotating squares loader
+///
+/// A widget that displays a rotating square loading indicator with gradient effects.
+/// The square rotates continuously, creating a smooth, modern loading animation.
+///
+/// **Example:**
+/// ```dart
+/// RotatingSquaresLoader(
+///   color: Colors.blue,
+///   size: 30.0,
+///   message: 'Loading...',
+///   padding: EdgeInsets.all(16),
+/// )
+/// ```
 class RotatingSquaresLoader extends StatefulWidget {
+  /// Creates a rotating squares loader widget.
+  ///
+  /// [color] - The color of the rotating square. If null, uses the theme's primary color.
+  /// [size] - The size of the square. Defaults to 30.0.
+  /// [duration] - The duration of one complete rotation. Defaults to 1000ms.
+  /// [message] - Optional message to display below the loader.
+  /// [padding] - Padding around the loader and message.
   const RotatingSquaresLoader({
     super.key,
     this.color,
@@ -234,10 +333,30 @@ class RotatingSquaresLoader extends StatefulWidget {
     this.padding,
   });
 
+  /// The color of the rotating square.
+  ///
+  /// If null, uses the theme's primary color from the current context.
+  /// The square uses a gradient effect based on this color.
   final Color? color;
+
+  /// The size of the rotating square.
+  ///
+  /// Defaults to 30.0 pixels.
   final double size;
+
+  /// The duration of one complete rotation.
+  ///
+  /// Defaults to 1000 milliseconds (1 second per rotation).
   final Duration duration;
+
+  /// Optional message to display below the loader.
+  ///
+  /// If provided, the message will be displayed below the rotating square.
   final String? message;
+
+  /// Padding around the loader and message.
+  ///
+  /// If null, uses default padding from the theme.
   final EdgeInsetsGeometry? padding;
 
   @override
@@ -342,7 +461,27 @@ class _RotatingSquaresLoaderState extends State<RotatingSquaresLoader>
 }
 
 /// Modern pulse loader with gradient
+///
+/// A widget that displays a pulsing circular loading indicator with gradient and shadow effects.
+/// The circle pulses in and out, creating a smooth, breathing animation effect.
+///
+/// **Example:**
+/// ```dart
+/// PulseLoader(
+///   color: Colors.blue,
+///   size: 50.0,
+///   message: 'Loading...',
+///   padding: EdgeInsets.all(16),
+/// )
+/// ```
 class PulseLoader extends StatefulWidget {
+  /// Creates a pulse loader widget.
+  ///
+  /// [color] - The color of the pulsing circle. If null, uses the theme's primary color.
+  /// [size] - The size of the circle. Defaults to 50.0.
+  /// [duration] - The duration of one complete pulse cycle. Defaults to 1500ms.
+  /// [message] - Optional message to display below the loader.
+  /// [padding] - Padding around the loader and message.
   const PulseLoader({
     super.key,
     this.color,
@@ -352,10 +491,30 @@ class PulseLoader extends StatefulWidget {
     this.padding,
   });
 
+  /// The color of the pulsing circle.
+  ///
+  /// If null, uses the theme's primary color from the current context.
+  /// The circle uses a radial gradient and shadow effects based on this color.
   final Color? color;
+
+  /// The size of the pulsing circle.
+  ///
+  /// Defaults to 50.0 pixels. The circle will scale between 80% and 120% of this size.
   final double size;
+
+  /// The duration of one complete pulse cycle.
+  ///
+  /// Defaults to 1500 milliseconds. This includes both the expansion and contraction phases.
   final Duration duration;
+
+  /// Optional message to display below the loader.
+  ///
+  /// If provided, the message will be displayed below the pulsing circle.
   final String? message;
+
+  /// Padding around the loader and message.
+  ///
+  /// If null, uses default padding from the theme.
   final EdgeInsetsGeometry? padding;
 
   @override
@@ -477,9 +636,27 @@ class _PulseLoaderState extends State<PulseLoader>
 
 /// Modern skeleton loader using Skeletonizer
 ///
-/// This loader uses the skeletonizer package to create a skeleton loading effect.
-/// It's more efficient and provides a better user experience than shimmer.
+/// A widget that displays a skeleton loading effect using the skeletonizer package.
+/// This creates placeholder content that mimics the structure of the actual content,
+/// providing a better user experience than traditional spinners.
+///
+/// This loader is more efficient and provides a better user experience than shimmer effects.
+///
+/// **Example:**
+/// ```dart
+/// SkeletonLoader(
+///   itemCount: 3,
+///   message: 'Loading content...',
+///   padding: EdgeInsets.all(16),
+/// )
+/// ```
 class SkeletonLoader extends StatelessWidget {
+  /// Creates a skeleton loader widget.
+  ///
+  /// [color] - The color of the skeleton effect. If null, uses the theme's surface variant color.
+  /// [message] - Optional message to display below the skeleton.
+  /// [padding] - Padding around the skeleton and message.
+  /// [itemCount] - The number of skeleton items to display. Defaults to 3.
   const SkeletonLoader({
     super.key,
     this.color,
@@ -488,9 +665,24 @@ class SkeletonLoader extends StatelessWidget {
     this.itemCount = 3,
   });
 
+  /// The color of the skeleton effect.
+  ///
+  /// If null, uses the theme's surface variant color from the current context.
   final Color? color;
+
+  /// Optional message to display below the skeleton.
+  ///
+  /// If provided, the message will be displayed below the skeleton items.
   final String? message;
+
+  /// Padding around the skeleton and message.
+  ///
+  /// If null, uses default padding from the theme.
   final EdgeInsetsGeometry? padding;
+
+  /// The number of skeleton items to display.
+  ///
+  /// Defaults to 3. Each item represents a placeholder for content that will be loaded.
   final int itemCount;
 
   @override
