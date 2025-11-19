@@ -18,13 +18,13 @@ A production-ready, type-safe pagination library that works with **any backend A
 - 🔄 **Multiple Pagination Strategies** - Page-based, offset-based, and cursor-based
 - 🎨 **Beautiful UI Components** - Sliver-based ListView and GridView with skeleton loaders
 - 🔒 **Type-Safe** - Full generics support with compile-time safety
-- 🧩 **Dependency Injection** - Built-in simple DI container, or use `get_it`/`provider`/`riverpod`
+- 🧩 **Dependency Injection** - Use any DI solution (`get_it`, `provider`, `riverpod`) or create instances directly
 
 ### Performance & Reliability
 - ⚡ **Performance Optimized** - LRU caching for metadata, debouncing, efficient Sliver rendering
 - 🛡️ **Race Condition Protection** - Generation guards prevent stale responses from corrupting state
 - 🚫 **Request Cancellation** - Automatic cleanup of in-flight requests with operation coordination
-- 🔁 **Automatic Retry** - Exponential backoff retry (500ms → 1s → 2s → 4s) with configurable limits
+- 🔁 **Automatic Retry** - Exponential backoff retry (1s → 2s → 4s → 8s) with configurable limits
 - ⏱️ **Smart Debouncing** - Search (400ms) and refresh (300ms) debouncing to prevent API spam
 - 💾 **Metadata Caching** - LRU cache prevents redundant parsing of pagination metadata
 
@@ -47,7 +47,7 @@ Unlike typical infinite scroll solutions, Flutter Paginatrix provides:
 - **Production-Ready** - Battle-tested with comprehensive error handling and race condition protection
 - **Flexible Meta Parsing** - Configurable parsers for any API response structure
 - **Clean Architecture** - Well-organized codebase following SOLID principles
-- **Built-in DI** - Simple dependency injection container included (or use your preferred solution)
+- **No DI Required** - Use any DI solution (`get_it`, `provider`, `riverpod`) or create instances directly
 - **Performance First** - LRU caching, debouncing, efficient Sliver rendering, request cancellation
 - **Developer Friendly** - Type-safe, well-documented, extensive examples, comprehensive test suite
 
@@ -370,64 +370,9 @@ final controller = PaginatrixController<User>(
 
 ### Dependency Injection
 
-Flutter Paginatrix includes a simple built-in DI container (`PaginatrixDI`) for convenience, but you can also use your preferred DI solution like `get_it`, `provider`, or `riverpod`.
+**Important:** The core pagination classes (`PaginatrixController`, `PaginatrixCubit`, etc.) do **NOT** require any specific DI solution. They accept dependencies through constructors or parameters, allowing you to use any DI approach you prefer.
 
-#### Using Built-in DI (`PaginatrixDI`)
-
-```dart
-import 'package:flutter_paginatrix/flutter_paginatrix.dart';
-import 'package:dio/dio.dart';
-
-// Register dependencies (typically in main() or app initialization)
-void setupDependencies() {
-  PaginatrixDI.register<Dio>(Dio(BaseOptions(
-    baseUrl: 'https://api.example.com',
-    connectTimeout: const Duration(seconds: 30),
-  )));
-  
-  PaginatrixDI.register<MetaParser>(
-    ConfigMetaParser(MetaConfig.nestedMeta),
-  );
-}
-
-// Use in your code
-class UsersRepository {
-  Future<Map<String, dynamic>> loadUsers({
-    int? page,
-    int? perPage,
-    CancelToken? cancelToken,
-    QueryCriteria? query,
-  }) async {
-    final dio = PaginatrixDI.get<Dio>();
-    final searchTerm = query?.searchTerm;
-    final response = await dio.get('/users', queryParameters: {
-      'page': page,
-      'per_page': perPage,
-      if (searchTerm != null && searchTerm.isNotEmpty) 'q': searchTerm,
-    }, cancelToken: cancelToken);
-    return response.data;
-  }
-}
-
-// Create controller
-final controller = PaginatrixController<User>(
-  loader: UsersRepository().loadUsers,
-  itemDecoder: (json) => User.fromJson(json),
-  metaParser: PaginatrixDI.get<MetaParser>(),
-);
-
-// Clean up in tests
-tearDown(() {
-  PaginatrixDI.reset();
-});
-```
-
-**PaginatrixDI API:**
-- `PaginatrixDI.register<T>(instance)` - Register a dependency
-- `PaginatrixDI.get<T>()` - Retrieve a dependency
-- `PaginatrixDI.isRegistered<T>()` - Check if registered
-- `PaginatrixDI.reset()` - Clear all registrations (useful in tests)
-- `PaginatrixDI.registeredCount` - Get number of registered instances
+You can use your preferred DI solution like `get_it`, `provider`, or `riverpod`, or simply create instances directly.
 
 #### Using `get_it` Package
 
@@ -490,9 +435,9 @@ final metaParser = Provider.of<MetaParser>(context);
 ```
 
 **When to use which:**
-- **PaginatrixDI** - Simple projects, quick setup, minimal dependencies
 - **get_it** - Complex apps, need singleton/lazy/factory patterns, async initialization
 - **provider/riverpod** - Flutter-first, reactive state management, widget tree integration
+- **Direct instantiation** - Simple projects, no DI needed
 
 ### Advanced Performance Features
 
@@ -529,11 +474,11 @@ Automatic retry with exponential backoff:
 
 ```dart
 // Retry attempts with increasing delays:
-// 1st retry: 500ms delay
-// 2nd retry: 1000ms delay (500ms * 2^1)
-// 3rd retry: 2000ms delay (500ms * 2^2)
-// 4th retry: 4000ms delay (500ms * 2^3)
-// 5th retry: 8000ms delay (500ms * 2^4)
+// 1st retry: 1000ms delay (500ms * 2 * 2^0)
+// 2nd retry: 2000ms delay (500ms * 2 * 2^1)
+// 3rd retry: 4000ms delay (500ms * 2 * 2^2)
+// 4th retry: 8000ms delay (500ms * 2 * 2^3)
+// 5th retry: 16000ms delay (500ms * 2 * 2^4)
 // Max retries: 5 (configurable)
 
 await controller.retry(); // Automatically retries with backoff
@@ -996,9 +941,10 @@ final dio2 = Dio(); // Different instance!
 
 **✅ Correct:**
 ```dart
-// Use DI for shared dependencies
-PaginatrixDI.register<Dio>(Dio());
-final dio = PaginatrixDI.get<Dio>(); // Same instance everywhere
+// Use DI for shared dependencies (example with get_it)
+final getIt = GetIt.instance;
+getIt.registerSingleton<Dio>(Dio());
+final dio = getIt<Dio>(); // Same instance everywhere
 ```
 
 ### 9. Performance Optimization
