@@ -84,6 +84,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.1] - 2025-11-20
+
+### Fixed
+- Fixed static analysis issues (redundant argument values, dynamic calls)
+- Fixed missing `abstract` keyword in Freezed classes (`PageMeta`, `PaginationError`, `PaginationState`, `QueryCriteria`, `RequestContext`, `PaginationOptions`, `MetaConfig`)
+- Fixed `maybeWhen` usage in `PaginationStateExtension` - replaced with `whenOrNull` for Dart 3.x compatibility
+- Fixed CI/CD workflow path for example dependencies
+
+### Changed
+- Updated dependencies to latest compatible versions:
+  - `freezed_annotation: ^2.4.1` → `^3.1.0`
+  - `freezed: ^2.4.6` → `^3.2.3`
+  - `flutter_lints: ^3.0.1` → `^6.0.0`
+  - `build_runner: ^2.4.7` → `^2.7.1`
+  - `json_serializable: ^6.7.1` → `^6.11.1`
+  - `dartdoc: ^7.0.0` → `^8.3.4`
+- Refactored `showFlutterToast` to `showToast` using `fluttertoast` package directly
+- Added `fluttertoast: ^8.2.4` as a direct dependency
+
+### Added
+- Added root-level `example/` directory for pub.dev recognition
+- Added comprehensive documentation for `AppendLoader` class and properties
+- Added Table of Contents to README
+- Added new badges (Pub Points, Popularity, Likes, Platform) to README
+- Added Contributing section to README
+
+### Improved
+- Improved README completeness and structure
+- Improved code formatting and static analysis compliance
+- Improved documentation coverage (72.2% → higher)
+
+---
+
 ## [Unreleased]
 
 ### Planned
@@ -94,5 +127,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[1.0.1]: https://github.com/MhamadHwidi7/flutter_paginatrix/releases/tag/v1.0.1
 [1.0.0]: https://github.com/MhamadHwidi7/flutter_paginatrix/releases/tag/v1.0.0
 

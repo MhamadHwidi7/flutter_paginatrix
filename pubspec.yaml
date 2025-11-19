@@ -1,6 +1,6 @@
 name: flutter_paginatrix
 description: A simple, backend-agnostic pagination engine with UI widgets for Flutter
-version: 1.0.0
+version: 1.0.1
 homepage: https://github.com/MhamadHwidi7/flutter_paginatrix
 repository: https://github.com/MhamadHwidi7/flutter_paginatrix
 issue_tracker: https://github.com/MhamadHwidi7/flutter_paginatrix/issues
