@@ -6,8 +6,7 @@ part of 'page_meta.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$PageMetaImpl _$$PageMetaImplFromJson(Map<String, dynamic> json) =>
-    _$PageMetaImpl(
+_PageMeta _$PageMetaFromJson(Map<String, dynamic> json) => _PageMeta(
       page: (json['page'] as num?)?.toInt(),
       perPage: (json['perPage'] as num?)?.toInt(),
       total: (json['total'] as num?)?.toInt(),
@@ -19,8 +18,7 @@ _$PageMetaImpl _$$PageMetaImplFromJson(Map<String, dynamic> json) =>
       limit: (json['limit'] as num?)?.toInt(),
     );
 
-Map<String, dynamic> _$$PageMetaImplToJson(_$PageMetaImpl instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$PageMetaToJson(_PageMeta instance) => <String, dynamic>{
       'page': instance.page,
       'perPage': instance.perPage,
       'total': instance.total,

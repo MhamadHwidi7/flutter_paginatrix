@@ -6,38 +6,46 @@ part of 'pagination_options.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$PaginationOptionsImpl _$$PaginationOptionsImplFromJson(
-        Map<String, dynamic> json) =>
-    _$PaginationOptionsImpl(
-      defaultPageSize: (json['defaultPageSize'] as num?)?.toInt() ?? 20,
-      maxPageSize: (json['maxPageSize'] as num?)?.toInt() ?? 100,
+_PaginationOptions _$PaginationOptionsFromJson(Map<String, dynamic> json) =>
+    _PaginationOptions(
+      defaultPageSize: (json['defaultPageSize'] as num?)?.toInt() ??
+          PaginationDefaults.defaultPageSize,
+      maxPageSize: (json['maxPageSize'] as num?)?.toInt() ??
+          PaginationDefaults.maxPageSize,
       requestTimeout: json['requestTimeout'] == null
-          ? const Duration(seconds: 30)
+          ? const Duration(
+              seconds: PaginationDefaults.defaultRequestTimeoutSeconds)
           : Duration(microseconds: (json['requestTimeout'] as num).toInt()),
       enableDebugLogging: json['enableDebugLogging'] as bool? ?? false,
       defaultPrefetchThreshold:
-          (json['defaultPrefetchThreshold'] as num?)?.toInt() ?? 3,
+          (json['defaultPrefetchThreshold'] as num?)?.toInt() ??
+              PaginationDefaults.defaultPrefetchThreshold,
       defaultPrefetchThresholdPixels:
-          (json['defaultPrefetchThresholdPixels'] as num?)?.toDouble() ?? 300.0,
-      maxRetries: (json['maxRetries'] as num?)?.toInt() ?? 5,
+          (json['defaultPrefetchThresholdPixels'] as num?)?.toDouble() ??
+              PaginationDefaults.defaultPrefetchThresholdPixels,
+      maxRetries: (json['maxRetries'] as num?)?.toInt() ??
+          PaginationDefaults.maxRetries,
       initialBackoff: json['initialBackoff'] == null
-          ? const Duration(milliseconds: 500)
+          ? const Duration(
+              milliseconds: PaginationDefaults.defaultInitialBackoffMs)
           : Duration(microseconds: (json['initialBackoff'] as num).toInt()),
       retryResetTimeout: json['retryResetTimeout'] == null
-          ? const Duration(seconds: 60)
+          ? const Duration(
+              seconds: PaginationDefaults.defaultRetryResetTimeoutSeconds)
           : Duration(microseconds: (json['retryResetTimeout'] as num).toInt()),
       refreshDebounceDuration: json['refreshDebounceDuration'] == null
-          ? const Duration(milliseconds: 300)
+          ? const Duration(
+              milliseconds: PaginationDefaults.defaultRefreshDebounceMs)
           : Duration(
               microseconds: (json['refreshDebounceDuration'] as num).toInt()),
       searchDebounceDuration: json['searchDebounceDuration'] == null
-          ? const Duration(milliseconds: 400)
+          ? const Duration(
+              milliseconds: PaginationDefaults.defaultSearchDebounceMs)
           : Duration(
               microseconds: (json['searchDebounceDuration'] as num).toInt()),
     );
 
-Map<String, dynamic> _$$PaginationOptionsImplToJson(
-        _$PaginationOptionsImpl instance) =>
+Map<String, dynamic> _$PaginationOptionsToJson(_PaginationOptions instance) =>
     <String, dynamic>{
       'defaultPageSize': instance.defaultPageSize,
       'maxPageSize': instance.maxPageSize,

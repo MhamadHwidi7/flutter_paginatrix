@@ -1,5 +1,5 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,116 +9,82 @@ part of 'request_context.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
 mixin _$RequestContext {
   /// Unique request ID for tracking
-  String get requestId => throw _privateConstructorUsedError;
+  String get requestId;
 
   /// Generation number to prevent stale responses
-  int get generation => throw _privateConstructorUsedError;
+  int get generation;
 
   /// Cancel token for request cancellation
-  CancelToken get cancelToken => throw _privateConstructorUsedError;
+  CancelToken get cancelToken;
 
   /// Request timestamp
-  DateTime get timestamp => throw _privateConstructorUsedError;
+  DateTime get timestamp;
 
   /// Whether this is a refresh request
-  bool get isRefresh => throw _privateConstructorUsedError;
+  bool get isRefresh;
 
   /// Whether this is an append request
-  bool get isAppend => throw _privateConstructorUsedError;
+  bool get isAppend;
 
   /// Additional metadata
-  Map<String, dynamic> get metadata => throw _privateConstructorUsedError;
+  Map<String, dynamic> get metadata;
 
-  @JsonKey(ignore: true)
-  $RequestContextCopyWith<RequestContext> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $RequestContextCopyWith<$Res> {
-  factory $RequestContextCopyWith(
-          RequestContext value, $Res Function(RequestContext) then) =
-      _$RequestContextCopyWithImpl<$Res, RequestContext>;
-  @useResult
-  $Res call(
-      {String requestId,
-      int generation,
-      CancelToken cancelToken,
-      DateTime timestamp,
-      bool isRefresh,
-      bool isAppend,
-      Map<String, dynamic> metadata});
-}
-
-/// @nodoc
-class _$RequestContextCopyWithImpl<$Res, $Val extends RequestContext>
-    implements $RequestContextCopyWith<$Res> {
-  _$RequestContextCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
+  /// Create a copy of RequestContext
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
+  $RequestContextCopyWith<RequestContext> get copyWith =>
+      _$RequestContextCopyWithImpl<RequestContext>(
+          this as RequestContext, _$identity);
+
   @override
-  $Res call({
-    Object? requestId = null,
-    Object? generation = null,
-    Object? cancelToken = null,
-    Object? timestamp = null,
-    Object? isRefresh = null,
-    Object? isAppend = null,
-    Object? metadata = null,
-  }) {
-    return _then(_value.copyWith(
-      requestId: null == requestId
-          ? _value.requestId
-          : requestId // ignore: cast_nullable_to_non_nullable
-              as String,
-      generation: null == generation
-          ? _value.generation
-          : generation // ignore: cast_nullable_to_non_nullable
-              as int,
-      cancelToken: null == cancelToken
-          ? _value.cancelToken
-          : cancelToken // ignore: cast_nullable_to_non_nullable
-              as CancelToken,
-      timestamp: null == timestamp
-          ? _value.timestamp
-          : timestamp // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      isRefresh: null == isRefresh
-          ? _value.isRefresh
-          : isRefresh // ignore: cast_nullable_to_non_nullable
-              as bool,
-      isAppend: null == isAppend
-          ? _value.isAppend
-          : isAppend // ignore: cast_nullable_to_non_nullable
-              as bool,
-      metadata: null == metadata
-          ? _value.metadata
-          : metadata // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>,
-    ) as $Val);
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is RequestContext &&
+            (identical(other.requestId, requestId) ||
+                other.requestId == requestId) &&
+            (identical(other.generation, generation) ||
+                other.generation == generation) &&
+            (identical(other.cancelToken, cancelToken) ||
+                other.cancelToken == cancelToken) &&
+            (identical(other.timestamp, timestamp) ||
+                other.timestamp == timestamp) &&
+            (identical(other.isRefresh, isRefresh) ||
+                other.isRefresh == isRefresh) &&
+            (identical(other.isAppend, isAppend) ||
+                other.isAppend == isAppend) &&
+            const DeepCollectionEquality().equals(other.metadata, metadata));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      requestId,
+      generation,
+      cancelToken,
+      timestamp,
+      isRefresh,
+      isAppend,
+      const DeepCollectionEquality().hash(metadata));
+
+  @override
+  String toString() {
+    return 'RequestContext(requestId: $requestId, generation: $generation, cancelToken: $cancelToken, timestamp: $timestamp, isRefresh: $isRefresh, isAppend: $isAppend, metadata: $metadata)';
   }
 }
 
 /// @nodoc
-abstract class _$$RequestContextImplCopyWith<$Res>
-    implements $RequestContextCopyWith<$Res> {
-  factory _$$RequestContextImplCopyWith(_$RequestContextImpl value,
-          $Res Function(_$RequestContextImpl) then) =
-      __$$RequestContextImplCopyWithImpl<$Res>;
-  @override
+abstract mixin class $RequestContextCopyWith<$Res> {
+  factory $RequestContextCopyWith(
+          RequestContext value, $Res Function(RequestContext) _then) =
+      _$RequestContextCopyWithImpl;
   @useResult
   $Res call(
       {String requestId,
@@ -131,13 +97,15 @@ abstract class _$$RequestContextImplCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$RequestContextImplCopyWithImpl<$Res>
-    extends _$RequestContextCopyWithImpl<$Res, _$RequestContextImpl>
-    implements _$$RequestContextImplCopyWith<$Res> {
-  __$$RequestContextImplCopyWithImpl(
-      _$RequestContextImpl _value, $Res Function(_$RequestContextImpl) _then)
-      : super(_value, _then);
+class _$RequestContextCopyWithImpl<$Res>
+    implements $RequestContextCopyWith<$Res> {
+  _$RequestContextCopyWithImpl(this._self, this._then);
 
+  final RequestContext _self;
+  final $Res Function(RequestContext) _then;
+
+  /// Create a copy of RequestContext
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -149,43 +117,227 @@ class __$$RequestContextImplCopyWithImpl<$Res>
     Object? isAppend = null,
     Object? metadata = null,
   }) {
-    return _then(_$RequestContextImpl(
+    return _then(_self.copyWith(
       requestId: null == requestId
-          ? _value.requestId
+          ? _self.requestId
           : requestId // ignore: cast_nullable_to_non_nullable
               as String,
       generation: null == generation
-          ? _value.generation
+          ? _self.generation
           : generation // ignore: cast_nullable_to_non_nullable
               as int,
       cancelToken: null == cancelToken
-          ? _value.cancelToken
+          ? _self.cancelToken
           : cancelToken // ignore: cast_nullable_to_non_nullable
               as CancelToken,
       timestamp: null == timestamp
-          ? _value.timestamp
+          ? _self.timestamp
           : timestamp // ignore: cast_nullable_to_non_nullable
               as DateTime,
       isRefresh: null == isRefresh
-          ? _value.isRefresh
+          ? _self.isRefresh
           : isRefresh // ignore: cast_nullable_to_non_nullable
               as bool,
       isAppend: null == isAppend
-          ? _value.isAppend
+          ? _self.isAppend
           : isAppend // ignore: cast_nullable_to_non_nullable
               as bool,
       metadata: null == metadata
-          ? _value._metadata
+          ? _self.metadata
           : metadata // ignore: cast_nullable_to_non_nullable
               as Map<String, dynamic>,
     ));
   }
 }
 
+/// Adds pattern-matching-related methods to [RequestContext].
+extension RequestContextPatterns on RequestContext {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_RequestContext value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _RequestContext() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_RequestContext value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _RequestContext():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_RequestContext value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _RequestContext() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(
+            String requestId,
+            int generation,
+            CancelToken cancelToken,
+            DateTime timestamp,
+            bool isRefresh,
+            bool isAppend,
+            Map<String, dynamic> metadata)?
+        $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _RequestContext() when $default != null:
+        return $default(_that.requestId, _that.generation, _that.cancelToken,
+            _that.timestamp, _that.isRefresh, _that.isAppend, _that.metadata);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(
+            String requestId,
+            int generation,
+            CancelToken cancelToken,
+            DateTime timestamp,
+            bool isRefresh,
+            bool isAppend,
+            Map<String, dynamic> metadata)
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _RequestContext():
+        return $default(_that.requestId, _that.generation, _that.cancelToken,
+            _that.timestamp, _that.isRefresh, _that.isAppend, _that.metadata);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(
+            String requestId,
+            int generation,
+            CancelToken cancelToken,
+            DateTime timestamp,
+            bool isRefresh,
+            bool isAppend,
+            Map<String, dynamic> metadata)?
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _RequestContext() when $default != null:
+        return $default(_that.requestId, _that.generation, _that.cancelToken,
+            _that.timestamp, _that.isRefresh, _that.isAppend, _that.metadata);
+      case _:
+        return null;
+    }
+  }
+}
+
 /// @nodoc
 
-class _$RequestContextImpl implements _RequestContext {
-  const _$RequestContextImpl(
+class _RequestContext implements RequestContext {
+  const _RequestContext(
       {required this.requestId,
       required this.generation,
       required this.cancelToken,
@@ -233,16 +385,19 @@ class _$RequestContextImpl implements _RequestContext {
     return EqualUnmodifiableMapView(_metadata);
   }
 
+  /// Create a copy of RequestContext
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  String toString() {
-    return 'RequestContext(requestId: $requestId, generation: $generation, cancelToken: $cancelToken, timestamp: $timestamp, isRefresh: $isRefresh, isAppend: $isAppend, metadata: $metadata)';
-  }
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$RequestContextCopyWith<_RequestContext> get copyWith =>
+      __$RequestContextCopyWithImpl<_RequestContext>(this, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$RequestContextImpl &&
+            other is _RequestContext &&
             (identical(other.requestId, requestId) ||
                 other.requestId == requestId) &&
             (identical(other.generation, generation) ||
@@ -269,54 +424,82 @@ class _$RequestContextImpl implements _RequestContext {
       isAppend,
       const DeepCollectionEquality().hash(_metadata));
 
-  @JsonKey(ignore: true)
+  @override
+  String toString() {
+    return 'RequestContext(requestId: $requestId, generation: $generation, cancelToken: $cancelToken, timestamp: $timestamp, isRefresh: $isRefresh, isAppend: $isAppend, metadata: $metadata)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$RequestContextCopyWith<$Res>
+    implements $RequestContextCopyWith<$Res> {
+  factory _$RequestContextCopyWith(
+          _RequestContext value, $Res Function(_RequestContext) _then) =
+      __$RequestContextCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {String requestId,
+      int generation,
+      CancelToken cancelToken,
+      DateTime timestamp,
+      bool isRefresh,
+      bool isAppend,
+      Map<String, dynamic> metadata});
+}
+
+/// @nodoc
+class __$RequestContextCopyWithImpl<$Res>
+    implements _$RequestContextCopyWith<$Res> {
+  __$RequestContextCopyWithImpl(this._self, this._then);
+
+  final _RequestContext _self;
+  final $Res Function(_RequestContext) _then;
+
+  /// Create a copy of RequestContext
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  _$$RequestContextImplCopyWith<_$RequestContextImpl> get copyWith =>
-      __$$RequestContextImplCopyWithImpl<_$RequestContextImpl>(
-          this, _$identity);
+  $Res call({
+    Object? requestId = null,
+    Object? generation = null,
+    Object? cancelToken = null,
+    Object? timestamp = null,
+    Object? isRefresh = null,
+    Object? isAppend = null,
+    Object? metadata = null,
+  }) {
+    return _then(_RequestContext(
+      requestId: null == requestId
+          ? _self.requestId
+          : requestId // ignore: cast_nullable_to_non_nullable
+              as String,
+      generation: null == generation
+          ? _self.generation
+          : generation // ignore: cast_nullable_to_non_nullable
+              as int,
+      cancelToken: null == cancelToken
+          ? _self.cancelToken
+          : cancelToken // ignore: cast_nullable_to_non_nullable
+              as CancelToken,
+      timestamp: null == timestamp
+          ? _self.timestamp
+          : timestamp // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      isRefresh: null == isRefresh
+          ? _self.isRefresh
+          : isRefresh // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isAppend: null == isAppend
+          ? _self.isAppend
+          : isAppend // ignore: cast_nullable_to_non_nullable
+              as bool,
+      metadata: null == metadata
+          ? _self._metadata
+          : metadata // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>,
+    ));
+  }
 }
 
-abstract class _RequestContext implements RequestContext {
-  const factory _RequestContext(
-      {required final String requestId,
-      required final int generation,
-      required final CancelToken cancelToken,
-      required final DateTime timestamp,
-      final bool isRefresh,
-      final bool isAppend,
-      final Map<String, dynamic> metadata}) = _$RequestContextImpl;
-
-  @override
-
-  /// Unique request ID for tracking
-  String get requestId;
-  @override
-
-  /// Generation number to prevent stale responses
-  int get generation;
-  @override
-
-  /// Cancel token for request cancellation
-  CancelToken get cancelToken;
-  @override
-
-  /// Request timestamp
-  DateTime get timestamp;
-  @override
-
-  /// Whether this is a refresh request
-  bool get isRefresh;
-  @override
-
-  /// Whether this is an append request
-  bool get isAppend;
-  @override
-
-  /// Additional metadata
-  Map<String, dynamic> get metadata;
-  @override
-  @JsonKey(ignore: true)
-  _$$RequestContextImplCopyWith<_$RequestContextImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
+// dart format on

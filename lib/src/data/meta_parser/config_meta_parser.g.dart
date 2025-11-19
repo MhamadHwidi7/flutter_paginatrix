@@ -6,8 +6,7 @@ part of 'config_meta_parser.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$MetaConfigImpl _$$MetaConfigImplFromJson(Map<String, dynamic> json) =>
-    _$MetaConfigImpl(
+_MetaConfig _$MetaConfigFromJson(Map<String, dynamic> json) => _MetaConfig(
       itemsPath: json['itemsPath'] as String,
       pagePath: json['pagePath'] as String?,
       perPagePath: json['perPagePath'] as String?,
@@ -20,7 +19,7 @@ _$MetaConfigImpl _$$MetaConfigImplFromJson(Map<String, dynamic> json) =>
       limitPath: json['limitPath'] as String?,
     );
 
-Map<String, dynamic> _$$MetaConfigImplToJson(_$MetaConfigImpl instance) =>
+Map<String, dynamic> _$MetaConfigToJson(_MetaConfig instance) =>
     <String, dynamic>{
       'itemsPath': instance.itemsPath,
       'pagePath': instance.pagePath,

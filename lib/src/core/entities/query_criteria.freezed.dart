@@ -1,5 +1,5 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,15 +9,13 @@ part of 'query_criteria.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
 mixin _$QueryCriteria {
   /// Search term for text-based searching
-  String get searchTerm => throw _privateConstructorUsedError;
+  String get searchTerm;
 
   /// Map of filter key-value pairs
   ///
@@ -52,81 +50,53 @@ mixin _$QueryCriteria {
   ///
   /// **Note:** For type-safe filter values, consider using `FilterValue`
   /// sealed class. You can still use dynamic values for flexibility.
-  Map<String, dynamic> get filters => throw _privateConstructorUsedError;
+  Map<String, dynamic> get filters;
 
   /// Field name to sort by (null means no sorting)
   ///
   /// **Note:** Empty strings are treated as null (no sorting).
   /// Use null explicitly to indicate no sorting.
-  String? get sortBy => throw _privateConstructorUsedError;
+  String? get sortBy;
 
   /// Whether to sort in descending order (false = ascending)
-  bool get sortDesc => throw _privateConstructorUsedError;
+  bool get sortDesc;
 
-  @JsonKey(ignore: true)
-  $QueryCriteriaCopyWith<QueryCriteria> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $QueryCriteriaCopyWith<$Res> {
-  factory $QueryCriteriaCopyWith(
-          QueryCriteria value, $Res Function(QueryCriteria) then) =
-      _$QueryCriteriaCopyWithImpl<$Res, QueryCriteria>;
-  @useResult
-  $Res call(
-      {String searchTerm,
-      Map<String, dynamic> filters,
-      String? sortBy,
-      bool sortDesc});
-}
-
-/// @nodoc
-class _$QueryCriteriaCopyWithImpl<$Res, $Val extends QueryCriteria>
-    implements $QueryCriteriaCopyWith<$Res> {
-  _$QueryCriteriaCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
+  /// Create a copy of QueryCriteria
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
+  $QueryCriteriaCopyWith<QueryCriteria> get copyWith =>
+      _$QueryCriteriaCopyWithImpl<QueryCriteria>(
+          this as QueryCriteria, _$identity);
+
   @override
-  $Res call({
-    Object? searchTerm = null,
-    Object? filters = null,
-    Object? sortBy = freezed,
-    Object? sortDesc = null,
-  }) {
-    return _then(_value.copyWith(
-      searchTerm: null == searchTerm
-          ? _value.searchTerm
-          : searchTerm // ignore: cast_nullable_to_non_nullable
-              as String,
-      filters: null == filters
-          ? _value.filters
-          : filters // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>,
-      sortBy: freezed == sortBy
-          ? _value.sortBy
-          : sortBy // ignore: cast_nullable_to_non_nullable
-              as String?,
-      sortDesc: null == sortDesc
-          ? _value.sortDesc
-          : sortDesc // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ) as $Val);
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is QueryCriteria &&
+            (identical(other.searchTerm, searchTerm) ||
+                other.searchTerm == searchTerm) &&
+            const DeepCollectionEquality().equals(other.filters, filters) &&
+            (identical(other.sortBy, sortBy) || other.sortBy == sortBy) &&
+            (identical(other.sortDesc, sortDesc) ||
+                other.sortDesc == sortDesc));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, searchTerm,
+      const DeepCollectionEquality().hash(filters), sortBy, sortDesc);
+
+  @override
+  String toString() {
+    return 'QueryCriteria(searchTerm: $searchTerm, filters: $filters, sortBy: $sortBy, sortDesc: $sortDesc)';
   }
 }
 
 /// @nodoc
-abstract class _$$QueryCriteriaImplCopyWith<$Res>
-    implements $QueryCriteriaCopyWith<$Res> {
-  factory _$$QueryCriteriaImplCopyWith(
-          _$QueryCriteriaImpl value, $Res Function(_$QueryCriteriaImpl) then) =
-      __$$QueryCriteriaImplCopyWithImpl<$Res>;
-  @override
+abstract mixin class $QueryCriteriaCopyWith<$Res> {
+  factory $QueryCriteriaCopyWith(
+          QueryCriteria value, $Res Function(QueryCriteria) _then) =
+      _$QueryCriteriaCopyWithImpl;
   @useResult
   $Res call(
       {String searchTerm,
@@ -136,13 +106,15 @@ abstract class _$$QueryCriteriaImplCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$QueryCriteriaImplCopyWithImpl<$Res>
-    extends _$QueryCriteriaCopyWithImpl<$Res, _$QueryCriteriaImpl>
-    implements _$$QueryCriteriaImplCopyWith<$Res> {
-  __$$QueryCriteriaImplCopyWithImpl(
-      _$QueryCriteriaImpl _value, $Res Function(_$QueryCriteriaImpl) _then)
-      : super(_value, _then);
+class _$QueryCriteriaCopyWithImpl<$Res>
+    implements $QueryCriteriaCopyWith<$Res> {
+  _$QueryCriteriaCopyWithImpl(this._self, this._then);
 
+  final QueryCriteria _self;
+  final $Res Function(QueryCriteria) _then;
+
+  /// Create a copy of QueryCriteria
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -151,31 +123,197 @@ class __$$QueryCriteriaImplCopyWithImpl<$Res>
     Object? sortBy = freezed,
     Object? sortDesc = null,
   }) {
-    return _then(_$QueryCriteriaImpl(
+    return _then(_self.copyWith(
       searchTerm: null == searchTerm
-          ? _value.searchTerm
+          ? _self.searchTerm
           : searchTerm // ignore: cast_nullable_to_non_nullable
               as String,
       filters: null == filters
-          ? _value._filters
+          ? _self.filters
           : filters // ignore: cast_nullable_to_non_nullable
               as Map<String, dynamic>,
       sortBy: freezed == sortBy
-          ? _value.sortBy
+          ? _self.sortBy
           : sortBy // ignore: cast_nullable_to_non_nullable
               as String?,
       sortDesc: null == sortDesc
-          ? _value.sortDesc
+          ? _self.sortDesc
           : sortDesc // ignore: cast_nullable_to_non_nullable
               as bool,
     ));
   }
 }
 
+/// Adds pattern-matching-related methods to [QueryCriteria].
+extension QueryCriteriaPatterns on QueryCriteria {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_QueryCriteria value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _QueryCriteria() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_QueryCriteria value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _QueryCriteria():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_QueryCriteria value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _QueryCriteria() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(String searchTerm, Map<String, dynamic> filters,
+            String? sortBy, bool sortDesc)?
+        $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _QueryCriteria() when $default != null:
+        return $default(
+            _that.searchTerm, _that.filters, _that.sortBy, _that.sortDesc);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(String searchTerm, Map<String, dynamic> filters,
+            String? sortBy, bool sortDesc)
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _QueryCriteria():
+        return $default(
+            _that.searchTerm, _that.filters, _that.sortBy, _that.sortDesc);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(String searchTerm, Map<String, dynamic> filters,
+            String? sortBy, bool sortDesc)?
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _QueryCriteria() when $default != null:
+        return $default(
+            _that.searchTerm, _that.filters, _that.sortBy, _that.sortDesc);
+      case _:
+        return null;
+    }
+  }
+}
+
 /// @nodoc
 
-class _$QueryCriteriaImpl extends _QueryCriteria {
-  const _$QueryCriteriaImpl(
+class _QueryCriteria extends QueryCriteria {
+  const _QueryCriteria(
       {this.searchTerm = '',
       final Map<String, dynamic> filters = const {},
       this.sortBy,
@@ -276,16 +414,19 @@ class _$QueryCriteriaImpl extends _QueryCriteria {
   @JsonKey()
   final bool sortDesc;
 
+  /// Create a copy of QueryCriteria
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  String toString() {
-    return 'QueryCriteria(searchTerm: $searchTerm, filters: $filters, sortBy: $sortBy, sortDesc: $sortDesc)';
-  }
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$QueryCriteriaCopyWith<_QueryCriteria> get copyWith =>
+      __$QueryCriteriaCopyWithImpl<_QueryCriteria>(this, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$QueryCriteriaImpl &&
+            other is _QueryCriteria &&
             (identical(other.searchTerm, searchTerm) ||
                 other.searchTerm == searchTerm) &&
             const DeepCollectionEquality().equals(other._filters, _filters) &&
@@ -298,74 +439,64 @@ class _$QueryCriteriaImpl extends _QueryCriteria {
   int get hashCode => Object.hash(runtimeType, searchTerm,
       const DeepCollectionEquality().hash(_filters), sortBy, sortDesc);
 
-  @JsonKey(ignore: true)
+  @override
+  String toString() {
+    return 'QueryCriteria(searchTerm: $searchTerm, filters: $filters, sortBy: $sortBy, sortDesc: $sortDesc)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$QueryCriteriaCopyWith<$Res>
+    implements $QueryCriteriaCopyWith<$Res> {
+  factory _$QueryCriteriaCopyWith(
+          _QueryCriteria value, $Res Function(_QueryCriteria) _then) =
+      __$QueryCriteriaCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {String searchTerm,
+      Map<String, dynamic> filters,
+      String? sortBy,
+      bool sortDesc});
+}
+
+/// @nodoc
+class __$QueryCriteriaCopyWithImpl<$Res>
+    implements _$QueryCriteriaCopyWith<$Res> {
+  __$QueryCriteriaCopyWithImpl(this._self, this._then);
+
+  final _QueryCriteria _self;
+  final $Res Function(_QueryCriteria) _then;
+
+  /// Create a copy of QueryCriteria
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  _$$QueryCriteriaImplCopyWith<_$QueryCriteriaImpl> get copyWith =>
-      __$$QueryCriteriaImplCopyWithImpl<_$QueryCriteriaImpl>(this, _$identity);
+  $Res call({
+    Object? searchTerm = null,
+    Object? filters = null,
+    Object? sortBy = freezed,
+    Object? sortDesc = null,
+  }) {
+    return _then(_QueryCriteria(
+      searchTerm: null == searchTerm
+          ? _self.searchTerm
+          : searchTerm // ignore: cast_nullable_to_non_nullable
+              as String,
+      filters: null == filters
+          ? _self._filters
+          : filters // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>,
+      sortBy: freezed == sortBy
+          ? _self.sortBy
+          : sortBy // ignore: cast_nullable_to_non_nullable
+              as String?,
+      sortDesc: null == sortDesc
+          ? _self.sortDesc
+          : sortDesc // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
 }
 
-abstract class _QueryCriteria extends QueryCriteria {
-  const factory _QueryCriteria(
-      {final String searchTerm,
-      final Map<String, dynamic> filters,
-      final String? sortBy,
-      final bool sortDesc}) = _$QueryCriteriaImpl;
-  const _QueryCriteria._() : super._();
-
-  @override
-
-  /// Search term for text-based searching
-  String get searchTerm;
-  @override
-
-  /// Map of filter key-value pairs
-  ///
-  /// Keys represent filter names, values represent filter values.
-  /// Supports various value types: String, int, bool, double, List, etc.
-  ///
-  /// **Examples:**
-  /// ```dart
-  /// // String filter
-  /// filters: {'status': 'active'}
-  ///
-  /// // Integer filter
-  /// filters: {'age': 25}
-  ///
-  /// // Boolean filter
-  /// filters: {'enabled': true}
-  ///
-  /// // Double filter
-  /// filters: {'price': 99.99}
-  ///
-  /// // List filter
-  /// filters: {'tags': ['tag1', 'tag2']}
-  ///
-  /// // Multiple filters
-  /// filters: {
-  ///   'status': 'active',
-  ///   'category': 'electronics',
-  ///   'minPrice': 10.0,
-  ///   'maxPrice': 100.0,
-  /// }
-  /// ```
-  ///
-  /// **Note:** For type-safe filter values, consider using `FilterValue`
-  /// sealed class. You can still use dynamic values for flexibility.
-  Map<String, dynamic> get filters;
-  @override
-
-  /// Field name to sort by (null means no sorting)
-  ///
-  /// **Note:** Empty strings are treated as null (no sorting).
-  /// Use null explicitly to indicate no sorting.
-  String? get sortBy;
-  @override
-
-  /// Whether to sort in descending order (false = ascending)
-  bool get sortDesc;
-  @override
-  @JsonKey(ignore: true)
-  _$$QueryCriteriaImplCopyWith<_$QueryCriteriaImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
+// dart format on
