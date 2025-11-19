@@ -6,7 +6,26 @@ import 'package:flutter_paginatrix/src/presentation/widgets/modern_loaders.dart'
 import 'package:flutter_paginatrix/src/core/mixins/theme_access_mixin.dart';
 
 /// Inline loader for append operations
+///
+/// Displays a loading indicator when appending more items to a paginated list.
+/// Supports multiple loader types and custom loaders.
+///
+/// **Example:**
+/// ```dart
+/// AppendLoader(
+///   message: 'Loading more...',
+///   loaderType: LoaderType.bouncingDots,
+/// )
+/// ```
 class AppendLoader extends StatefulWidget {
+  /// Creates an append loader widget
+  ///
+  /// [message] - Optional message to display below the loader
+  /// [customLoader] - Custom widget to use as loader (overrides loaderType)
+  /// [padding] - Padding around the loader
+  /// [color] - Color of the loader (uses theme primary if not provided)
+  /// [size] - Size of the loader
+  /// [loaderType] - Type of loader animation to display
   const AppendLoader({
     super.key,
     this.message,
@@ -16,11 +35,23 @@ class AppendLoader extends StatefulWidget {
     this.size,
     this.loaderType = LoaderType.bouncingDots,
   });
+
+  /// Optional message to display below the loader
   final String? message;
+
+  /// Custom widget to use as loader (overrides loaderType if provided)
   final Widget? customLoader;
+
+  /// Padding around the loader
   final EdgeInsetsGeometry? padding;
+
+  /// Color of the loader (uses theme primary color if not provided)
   final Color? color;
+
+  /// Size of the loader
   final double? size;
+
+  /// Type of loader animation to display
   final LoaderType loaderType;
 
   @override

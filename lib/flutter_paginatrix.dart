@@ -18,6 +18,7 @@
 /// - **Backend-agnostic**: Supports page/perPage, offset/limit, and cursor/tokens pagination
 /// - **Simple API**: Easy to use with minimal configuration
 /// - **UI Widgets**: Built-in list and grid views
+// ignore: unnecessary_library_name
 library flutter_paginatrix;
 
 // Core contracts

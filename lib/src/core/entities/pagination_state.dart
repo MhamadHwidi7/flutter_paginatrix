@@ -88,7 +88,6 @@ class PaginationState<T> with _$PaginationState<T> {
   }) {
     return PaginationState(
       status: const PaginationStatus.empty(),
-      items: const [],
       requestContext: requestContext,
       lastLoadedAt: DateTime.now(),
       query: query ?? const QueryCriteria(),

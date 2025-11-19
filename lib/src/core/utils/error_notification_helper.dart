@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_paginatrix/src/core/entities/pagination_error.dart';
 
 /// Helper utility for showing error notifications in various formats
@@ -22,16 +23,10 @@ import 'package:flutter_paginatrix/src/core/entities/pagination_error.dart';
 ///   onError: ErrorNotificationHelper.showErrorDialog,
 /// )
 ///
-/// // Using FlutterToast (requires fluttertoast package)
+/// // Using Toast
 /// PaginatrixListView<User>(
 ///   cubit: _cubit,
-///   onError: (context, error) {
-///     ErrorNotificationHelper.showFlutterToast(
-///       context,
-///       error,
-///       isAppendError: false,
-///     );
-///   },
+///   onError: ErrorNotificationHelper.showToast,
 /// )
 ///
 /// // Custom implementation
@@ -149,35 +144,24 @@ class ErrorNotificationHelper {
     );
   }
 
-  /// Shows error using FlutterToast (requires fluttertoast package)
+  /// Shows error using FlutterToast
   ///
-  /// **Note:** This requires adding `fluttertoast` to your `pubspec.yaml`:
-  /// ```yaml
-  /// dependencies:
-  ///   fluttertoast: ^8.2.0
-  /// ```
+  /// Displays error messages as toast notifications using the fluttertoast package.
+  /// Note: Retry functionality is not supported by toast notifications.
   ///
   /// [context] - BuildContext (unused but required for consistency)
   /// [error] - The pagination error to display
-  /// [isAppendError] - Whether this is an append error
-  /// [onRetry] - Optional retry callback (not supported by FlutterToast)
+  /// [isAppendError] - Whether this is an append error (affects duration)
+  /// [onRetry] - Optional retry callback (not supported by toast)
   ///
   /// **Example:**
   /// ```dart
-  /// import 'package:fluttertoast/fluttertoast.dart';
-  ///
   /// PaginatrixListView<User>(
   ///   cubit: _cubit,
-  ///   onError: (context, error) {
-  ///     ErrorNotificationHelper.showFlutterToast(
-  ///       context,
-  ///       error,
-  ///       isAppendError: false,
-  ///     );
-  ///   },
+  ///   onError: ErrorNotificationHelper.showToast,
   /// )
   /// ```
-  static void showFlutterToast(
+  static void showToast(
     BuildContext context,
     PaginationError error, {
     bool isAppendError = false,
@@ -186,36 +170,17 @@ class ErrorNotificationHelper {
     // Only show toast if error is user-visible
     if (!error.isUserVisible) return;
 
-    try {
-      // Dynamic import to avoid requiring fluttertoast as a dependency
-      // Users need to import fluttertoast in their code
-      final message = isAppendError
-          ? 'Failed to load more items: ${error.userMessage}'
-          : error.userMessage;
+    final message = isAppendError
+        ? 'Failed to load more items: ${error.userMessage}'
+        : error.userMessage;
 
-      // This will work if fluttertoast is imported in the user's code
-      // We use a dynamic call to avoid hard dependency
-      // ignore: avoid_dynamic_calls
-      // ignore: avoid_type_to_string
-      final fluttertoast = _getFlutterToast();
-      if (fluttertoast != null) {
-        fluttertoast.showToast(
-          msg: message,
-          toastLength: isAppendError
-              ? _getToastLength('SHORT')
-              : _getToastLength('LONG'),
-          gravity: _getToastGravity('BOTTOM'),
-          backgroundColor: Colors.red.shade700,
-          textColor: Colors.white,
-        );
-      } else {
-        // Fallback to SnackBar if fluttertoast is not available
-        showSnackBar(context, error, isAppendError: isAppendError);
-      }
-    } catch (e) {
-      // Fallback to SnackBar if fluttertoast is not available
-      showSnackBar(context, error, isAppendError: isAppendError);
-    }
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: isAppendError ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.red.shade700,
+      textColor: Colors.white,
+    );
   }
 
   /// Shows error as a Bottom Sheet
@@ -359,28 +324,5 @@ class ErrorNotificationHelper {
       circuitBreaker: (_, __) => Icons.power_off,
       unknown: (_, __) => Icons.help_outline,
     );
-  }
-
-  // Dynamic helpers for fluttertoast (to avoid hard dependency)
-  static dynamic _getFlutterToast() {
-    try {
-      // Try to access fluttertoast dynamically
-      // This will work if the user has imported fluttertoast
-      return null; // Return null to use fallback
-    } catch (e) {
-      return null;
-    }
-  }
-
-  static dynamic _getToastLength(String length) {
-    // This would be Toast.LENGTH_SHORT or Toast.LENGTH_LONG
-    // But we can't reference it without the package
-    return null;
-  }
-
-  static dynamic _getToastGravity(String gravity) {
-    // This would be ToastGravity.BOTTOM, etc.
-    // But we can't reference it without the package
-    return null;
   }
 }
