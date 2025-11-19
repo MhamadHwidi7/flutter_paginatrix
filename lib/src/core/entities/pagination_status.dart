@@ -4,7 +4,7 @@ part 'pagination_status.freezed.dart';
 
 /// Represents the current status of pagination
 @freezed
-class PaginationStatus with _$PaginationStatus {
+sealed class PaginationStatus with _$PaginationStatus {
   /// Initial state - no data loaded yet
   const factory PaginationStatus.initial() = _Initial;
 
