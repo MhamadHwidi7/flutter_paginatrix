@@ -644,25 +644,41 @@ Types of loaders for pagination UI:
 
 ## 📁 Example Projects
 
-The package includes comprehensive examples demonstrating various use cases:
+The package includes a main example and additional examples demonstrating various use cases:
 
-| Example | Description |
-|---------|-------------|
-| **`list_view`** | Basic ListView pagination |
-| **`grid_view`** | GridView pagination |
-| **`bloc_pattern`** | BLoC pattern integration |
-| **`cubit_direct`** | Direct `PaginatrixCubit` usage |
-| **`search_basic`** | Basic search with debouncing |
-| **`search_advanced`** | Advanced search with filters and sorting |
-| **`web_infinite_scroll`** | Web infinite scroll pagination |
-| **`web_page_selector`** | Web page selector pagination |
+### Main Example
 
-Run any example:
+The main example is located at `example/` and demonstrates basic ListView pagination:
 
 ```bash
-cd example/list_view
+cd example
+flutter pub get
 flutter run
 ```
+
+### Additional Examples
+
+Additional examples are located in `example/examples/`:
+
+| Example | Description | Path |
+|---------|-------------|------|
+| **`grid_view`** | GridView pagination | `example/examples/grid_view` |
+| **`bloc_pattern`** | BLoC pattern integration | `example/examples/bloc_pattern` |
+| **`cubit_direct`** | Direct `PaginatrixCubit` usage | `example/examples/cubit_direct` |
+| **`search_basic`** | Basic search with debouncing | `example/examples/search_basic` |
+| **`search_advanced`** | Advanced search with filters and sorting | `example/examples/search_advanced` |
+| **`web_infinite_scroll`** | Web infinite scroll pagination | `example/examples/web_infinite_scroll` |
+| **`web_page_selector`** | Web page selector pagination | `example/examples/web_page_selector` |
+
+Run any additional example:
+
+```bash
+cd example/examples/grid_view  # Replace with your desired example
+flutter pub get
+flutter run
+```
+
+For detailed documentation on all examples, see [example/README.md](./example/README.md).
 
 ---
 
