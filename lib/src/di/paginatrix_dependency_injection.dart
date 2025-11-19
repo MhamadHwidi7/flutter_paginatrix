@@ -1,29 +1,12 @@
-/// Paginatrix simple dependency injection container
+/// Internal service locator for dependency injection.
 ///
-/// A minimal DI solution for registering and retrieving dependencies
-/// in your pagination implementation. This is optional and most users
-/// can simply create instances directly.
+/// **This is an internal utility and is not part of the public API.**
+/// It is not exported from the main library and should not be used by
+/// consumers of the package.
 ///
-/// ## Usage
-///
-/// ```dart
-/// // Register dependencies
-/// PaginatrixDI.register<Dio>(Dio());
-/// PaginatrixDI.register<MetaParser>(
-///   ConfigMetaParser(MetaConfig.nestedMeta)
-/// );
-///
-/// // Retrieve dependencies
-/// final dio = PaginatrixDI.get<Dio>();
-/// final parser = PaginatrixDI.get<MetaParser>();
-///
-/// // Clean up (useful in tests)
-/// PaginatrixDI.reset();
-/// ```
-///
-/// ## Note
-/// This is a simple service locator pattern. For more complex DI needs,
-/// consider using dedicated packages like get_it, provider, or riverpod.
+/// This class is available for internal use within the package if needed,
+/// but the core pagination classes do not depend on it. All public APIs
+/// accept dependencies through constructors or parameters.
 class PaginatrixDI {
   static final Map<Type, dynamic> _instances = {};
 

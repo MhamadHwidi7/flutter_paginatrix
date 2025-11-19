@@ -64,8 +64,7 @@ export 'src/core/validation/paginatrix_validation_error_codes.dart';
 // Data layer - Meta parsers
 export 'src/data/meta_parser/config_meta_parser.dart';
 export 'src/data/meta_parser/custom_meta_parser.dart';
-// Dependency injection
-export 'src/di/paginatrix_dependency_injection.dart';
+// Note: PaginatrixDI is intentionally not exported - it's an internal utility
 // Presentation layer - Controllers
 export 'src/presentation/controllers/paginatrix_cubit.dart';
 // Paginatrix typedefs (must be exported after controllers)
