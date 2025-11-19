@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +23,8 @@ class ProductsPage extends StatefulWidget {
 
 class _ProductsPageState extends State<ProductsPage> {
   late final PaginatrixController<Product> _controller;
+  late final TextEditingController _searchController;
+  StreamSubscription<PaginationState<Product>>? _stateSubscription;
   final _dio = Dio(BaseOptions(baseUrl: 'https://dummyjson.com'));
 
   @override
@@ -36,6 +40,20 @@ class _ProductsPageState extends State<ProductsPage> {
         defaultPageSize: 20,
       ),
     );
+
+    // Initialize search controller with current search term
+    _searchController = TextEditingController(
+      text: _controller.state.currentQuery.searchTerm,
+    );
+
+    // Listen to controller state changes to sync TextField
+    _stateSubscription = _controller.stream.listen((state) {
+      final currentSearchTerm = state.currentQuery.searchTerm;
+      if (_searchController.text != currentSearchTerm) {
+        _searchController.text = currentSearchTerm;
+      }
+    });
+
     _controller.loadFirstPage();
   }
 
@@ -113,6 +131,7 @@ class _ProductsPageState extends State<ProductsPage> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
+              controller: _searchController,
               decoration: const InputDecoration(
                 hintText: 'Search products...',
                 labelText: 'Search',
@@ -157,6 +176,8 @@ class _ProductsPageState extends State<ProductsPage> {
 
   @override
   void dispose() {
+    _stateSubscription?.cancel();
+    _searchController.dispose();
     _controller.close();
     super.dispose();
   }
