@@ -3,10 +3,8 @@
 > **A backend-agnostic pagination engine for Flutter**
 
 [![pub points](https://img.shields.io/pub/points/flutter_paginatrix)](https://pub.dev/packages/flutter_paginatrix/score)
-[![popularity](https://img.shields.io/pub/popularity/flutter_paginatrix)](https://pub.dev/packages/flutter_paginatrix/score)
-[![likes](https://img.shields.io/pub/likes/flutter_paginatrix)](https://pub.dev/packages/flutter_paginatrix/score)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Desktop-lightgrey)](https://flutter.dev)
+[![CI/CD](https://github.com/MhamadHwidi7/flutter_paginatrix/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/MhamadHwidi7/flutter_paginatrix/actions/workflows/ci-cd.yml)
 
 A production-ready, type-safe pagination library that works with any backend API. Built with clean architecture, comprehensive error handling, and beautiful UI components.
 
@@ -76,8 +74,10 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_paginatrix: ^1.0.0
+  flutter_paginatrix: ^latest_version  # Replace with actual version from pub.dev
 ```
+
+> **Note:** Replace `^latest_version` with the actual version number from [pub.dev](https://pub.dev/packages/flutter_paginatrix).
 
 Then run:
 
@@ -141,7 +141,7 @@ PaginatrixListView<User>(
 @override
 void initState() {
   super.initState();
-  controller.loadFirstPage(); // Don't forget!
+  controller.loadFirstPage(); // Required
 }
 
 @override
@@ -151,7 +151,7 @@ void dispose() {
 }
 ```
 
-The widget automatically handles loading states, errors, empty states, pagination on scroll, pull-to-refresh, and append loading indicators.
+The widget automatically handles loading states, errors, empty states, pagination on scroll, pull-to-refresh, and append loading indicators without additional configuration.
 
 ---
 
@@ -210,6 +210,7 @@ class _UsersPageState extends State<UsersPage> {
     _controller.close();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -643,7 +644,7 @@ Types of loaders for pagination UI:
 
 ## 📁 Example Projects
 
-The package includes comprehensive examples:
+The package includes comprehensive examples demonstrating various use cases:
 
 | Example | Description |
 |---------|-------------|
@@ -673,7 +674,7 @@ flutter run
 
 ```dart
 final controller = PaginatrixController<User>(...);
-// Controller not disposed - memory leak!
+// Controller not disposed - potential memory leak
 ```
 
 **✅ Correct:**
@@ -695,7 +696,7 @@ void dispose() {
 void initState() {
   super.initState();
   _controller = PaginatrixController<User>(...);
-  // Missing loadFirstPage() - no data will load!
+  // Missing loadFirstPage() - data won't load
 }
 ```
 
@@ -706,7 +707,7 @@ void initState() {
 void initState() {
   super.initState();
   _controller = PaginatrixController<User>(...);
-  _controller.loadFirstPage(); // Don't forget!
+  _controller.loadFirstPage(); // Required
 }
 ```
 
@@ -752,6 +753,8 @@ PaginatrixListView<User>(
 
 ### 5. Search vs Filter Behavior
 
+Understanding the difference between search and filters:
+
 - **Search** (`updateSearchTerm`) - Debounced (400ms default), triggers reload after delay
 - **Filters** (`updateFilter`, `updateFilters`) - Immediate, triggers reload right away
 
@@ -762,7 +765,7 @@ PaginatrixListView<User>(
 ```dart
 // Creating new instances everywhere
 final dio1 = Dio();
-final dio2 = Dio(); // Different instance!
+final dio2 = Dio(); // Separate instance
 ```
 
 **✅ Correct:**
@@ -771,14 +774,14 @@ final dio2 = Dio(); // Different instance!
 // Use DI for shared dependencies (example with get_it)
 final getIt = GetIt.instance;
 getIt.registerSingleton<Dio>(Dio());
-final dio = getIt<Dio>(); // Same instance everywhere
+final dio = getIt<Dio>(); // Shared instance
 ```
 
 ---
 
 ## 🧪 Testing
 
-The package includes comprehensive test coverage. Example test:
+The package includes comprehensive test coverage. Here's an example test:
 
 ```dart
 import 'package:flutter_test/flutter_test.dart';
@@ -810,13 +813,13 @@ void main() {
 }
 ```
 
-See the `test/` directory for more examples including integration tests and performance tests.
+See the `test/` directory for additional examples including integration tests and performance tests.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome. Please feel free to submit a Pull Request.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -853,7 +856,7 @@ Copyright (c) 2025 Mhamad Hwidi
 
 ### Support the Project
 
-If you find this package useful, please consider:
+If you find this package useful, please consider the following:
 
 - ⭐ **Starring the repository** - Help others discover this package
 - 🐛 **Reporting bugs** - Help improve the package
@@ -862,4 +865,4 @@ If you find this package useful, please consider:
 
 ---
 
-**Made with ❤️ for the Flutter community**
+Made with ❤️ for the Flutter community
