@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_paginatrix:
-    path: ../../
+    path: ../../../
 
 dev_dependencies:
   flutter_test:

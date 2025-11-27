@@ -13,7 +13,7 @@ dependencies:
 
   # Pagination package
   flutter_paginatrix:
-    path: ../../
+    path: ../../../
 
   # HTTP client
   dio: ^5.4.0
