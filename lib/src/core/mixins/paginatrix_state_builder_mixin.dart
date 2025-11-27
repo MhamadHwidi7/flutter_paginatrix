@@ -64,9 +64,19 @@ mixin PaginatrixStateBuilderMixin<T> on StatelessWidget {
   // Footer message
   String? get endOfListMessage;
 
-  // Abstract method that must be implemented by each widget
-  // (ListView and GridView have different implementations)
-  Widget buildScrollableContent(BuildContext context, PaginationState<T> state);
+  // Abstract getters/methods for specific implementations
+  Widget Function(BuildContext context, int index)? get skeletonizerBuilder;
+  int? get prefetchThreshold;
+
+  /// Builds the main sliver for the content (SliverList or SliverGrid)
+  Widget buildMainSliver(BuildContext context, PaginationState<T> state);
+
+  /// Builds the loading sliver when using a custom skeletonizer builder
+  Widget buildLoadingSliver(
+      BuildContext context, Widget Function(BuildContext, int) builder);
+
+  /// Builds the default skeletonizer when no custom builder is provided
+  Widget buildDefaultSkeletonizer(BuildContext context);
 
   /// Build method that wraps content with BlocBuilder and BlocListener
   /// This eliminates duplication between ListView and GridView
@@ -159,10 +169,20 @@ mixin PaginatrixStateBuilderMixin<T> on StatelessWidget {
     return buildLoadingState(context);
   }
 
-  /// Builds loading state - must be implemented by subclass
-  /// (ListView and GridView have different shimmer implementations)
+  /// Builds loading state using abstract methods
   @protected
-  Widget buildLoadingState(BuildContext context);
+  Widget buildLoadingState(BuildContext context) {
+    final builder = skeletonizerBuilder;
+    if (builder != null) {
+      return createCustomScrollView(
+        slivers: [
+          buildLoadingSliver(context, builder),
+        ],
+      );
+    }
+
+    return buildDefaultSkeletonizer(context);
+  }
 
   /// Builds success state - shows data with refresh capability
   @protected
@@ -194,6 +214,37 @@ mixin PaginatrixStateBuilderMixin<T> on StatelessWidget {
         onPullToRefresh?.call();
       },
       child: buildScrollableContent(context, state),
+    );
+  }
+
+  /// Builds the main scrollable content
+  @protected
+  Widget buildScrollableContent(
+      BuildContext context, PaginationState<T> state) {
+    final hasMore = state.canLoadMore;
+    final isAppending = state.isAppending;
+    final hasAppendError = state.hasAppendError;
+
+    return createScrollListener(
+      prefetchThreshold: prefetchThreshold,
+      reverse: reverse,
+      child: createCustomScrollView(
+        slivers: [
+          buildMainSliver(context, state),
+          // Use declarative state property instead of business logic
+          // Footer display logic is now in PaginationStateExtension.shouldShowFooter
+          if (state.shouldShowFooter)
+            SliverToBoxAdapter(
+              child: buildFooterItem(
+                context,
+                hasMore: hasMore,
+                isAppending: isAppending,
+                hasAppendError: hasAppendError,
+                state: state,
+              ),
+            ),
+        ],
+      ),
     );
   }
 

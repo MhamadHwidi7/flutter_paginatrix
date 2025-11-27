@@ -128,6 +128,7 @@ class PaginatrixGridView<T> extends StatelessWidget
   /// Number of items from the end to trigger loading the next page.
   ///
   /// Defaults to the value from [PaginationOptions.defaultPrefetchThreshold].
+  @override
   final int? prefetchThreshold;
 
   /// Padding around the grid.
@@ -159,6 +160,7 @@ class PaginatrixGridView<T> extends StatelessWidget
   /// Custom skeleton loader builder for initial loading state.
   ///
   /// If provided, this will be used instead of the default skeletonizer.
+  @override
   final Widget Function(BuildContext context, int index)? skeletonizerBuilder;
 
   // Mixin-required callbacks
@@ -295,25 +297,8 @@ class PaginatrixGridView<T> extends StatelessWidget
   @override
   final double? cacheExtent;
 
-  // build() method is now in the mixin
-
   @override
-  Widget buildLoadingState(BuildContext context) {
-    final builder = skeletonizerBuilder;
-    if (builder != null) {
-      return createCustomScrollView(
-        slivers: [
-          SliverGrid(
-            delegate: createSliverDelegate(
-              builder: builder,
-              childCount: PaginatrixSkeletonConstants.defaultItemCount,
-            ),
-            gridDelegate: gridDelegate,
-          ),
-        ],
-      );
-    }
-
+  Widget buildDefaultSkeletonizer(BuildContext context) {
     return PaginatrixGridSkeletonizer(
       padding: padding,
       physics: physics,
@@ -325,46 +310,34 @@ class PaginatrixGridView<T> extends StatelessWidget
   }
 
   @override
-  Widget buildScrollableContent(
-      BuildContext context, PaginationState<T> state) {
+  Widget buildLoadingSliver(
+      BuildContext context, Widget Function(BuildContext, int) builder) {
+    return SliverGrid(
+      delegate: createSliverDelegate(
+        builder: builder,
+        childCount: PaginatrixSkeletonConstants.defaultItemCount,
+      ),
+      gridDelegate: gridDelegate,
+    );
+  }
+
+  @override
+  Widget buildMainSliver(BuildContext context, PaginationState<T> state) {
     final items = state.items;
     final itemCount = items.length;
-    final hasMore = state.canLoadMore;
-    final isAppending = state.isAppending;
-    final hasAppendError = state.hasAppendError;
 
-    return createScrollListener(
-      prefetchThreshold: prefetchThreshold,
-      reverse: reverse,
-      child: createCustomScrollView(
-        slivers: [
-          SliverGrid(
-            delegate: createSliverDelegate(
-              builder: (context, index) {
-                if (index < itemCount) {
-                  return buildItem(
-                      context, items[index], index, itemBuilder, keyBuilder);
-                }
-                return const SizedBox.shrink();
-              },
-              childCount: itemCount,
-            ),
-            gridDelegate: gridDelegate,
-          ),
-          // Use declarative state property instead of business logic
-          // Footer display logic is now in PaginationStateExtension.shouldShowFooter
-          if (state.shouldShowFooter)
-            SliverToBoxAdapter(
-              child: buildFooterItem(
-                context,
-                hasMore: hasMore,
-                isAppending: isAppending,
-                hasAppendError: hasAppendError,
-                state: state,
-              ),
-            ),
-        ],
+    return SliverGrid(
+      delegate: createSliverDelegate(
+        builder: (context, index) {
+          if (index < itemCount) {
+            return buildItem(
+                context, items[index], index, itemBuilder, keyBuilder);
+          }
+          return const SizedBox.shrink();
+        },
+        childCount: itemCount,
       ),
+      gridDelegate: gridDelegate,
     );
   }
 }

@@ -1,6 +1,6 @@
 name: flutter_paginatrix
 description: A simple, backend-agnostic pagination engine with UI widgets for Flutter
-version: 1.0.2
+version: 1.0.3
 homepage: https://github.com/MhamadHwidi7/flutter_paginatrix
 repository: https://github.com/MhamadHwidi7/flutter_paginatrix
 issue_tracker: https://github.com/MhamadHwidi7/flutter_paginatrix/issues
@@ -18,7 +18,7 @@ dependencies:
   equatable: ^2.0.7
   
   # HTTP client
-  dio: ^5.4.0
+  dio: ^5.9.0
   
   # JSON serialization
   json_annotation: ^4.9.0
@@ -27,7 +27,7 @@ dependencies:
   flutter_bloc: ^9.1.1
   
   # Skeleton loading effect
-  skeletonizer: ^2.1.0+1
+  skeletonizer: ^2.1.1
   
   # Toast notifications
   fluttertoast: ^9.0.0

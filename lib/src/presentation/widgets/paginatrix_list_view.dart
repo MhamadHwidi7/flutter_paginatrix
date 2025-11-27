@@ -116,6 +116,7 @@ class PaginatrixListView<T> extends StatelessWidget
   /// Number of items from the end to trigger loading the next page.
   ///
   /// Defaults to the value from [PaginationOptions.defaultPrefetchThreshold].
+  @override
   final int? prefetchThreshold;
 
   /// Padding around the list.
@@ -152,6 +153,7 @@ class PaginatrixListView<T> extends StatelessWidget
   /// Custom skeleton loader builder for initial loading state.
   ///
   /// If provided, this will be used instead of the default skeletonizer.
+  @override
   final Widget Function(BuildContext context, int index)? skeletonizerBuilder;
 
   // Mixin-required callbacks
@@ -307,21 +309,7 @@ class PaginatrixListView<T> extends StatelessWidget
   // build() method is now in the mixin
 
   @override
-  Widget buildLoadingState(BuildContext context) {
-    final builder = skeletonizerBuilder;
-    if (builder != null) {
-      return createCustomScrollView(
-        slivers: [
-          SliverList(
-            delegate: createSliverDelegate(
-              builder: builder,
-              childCount: PaginatrixSkeletonConstants.defaultItemCount,
-            ),
-          ),
-        ],
-      );
-    }
-
+  Widget buildDefaultSkeletonizer(BuildContext context) {
     // Use PaginatrixSkeletonizer which handles its own CustomScrollView
     return PaginatrixSkeletonizer(
       padding: padding,
@@ -333,58 +321,45 @@ class PaginatrixListView<T> extends StatelessWidget
   }
 
   @override
-  Widget buildScrollableContent(
-      BuildContext context, PaginationState<T> state) {
+  Widget buildLoadingSliver(
+      BuildContext context, Widget Function(BuildContext, int) builder) {
+    return SliverList(
+      delegate: createSliverDelegate(
+        builder: builder,
+        childCount: PaginatrixSkeletonConstants.defaultItemCount,
+      ),
+    );
+  }
+
+  @override
+  Widget buildMainSliver(BuildContext context, PaginationState<T> state) {
     final items = state.items;
     final itemCount = items.length;
-    final hasMore = state.canLoadMore;
-    final isAppending = state.isAppending;
-    final hasAppendError = state.hasAppendError;
     final hasSeparator = separatorBuilder != null;
 
-    return createScrollListener(
-      prefetchThreshold: prefetchThreshold,
-      reverse: reverse,
-      child: createCustomScrollView(
-        slivers: [
-          SliverList(
-            delegate: createSliverDelegate(
-              builder: (context, index) {
-                if (hasSeparator && index > 0) {
-                  // Return separator before item (except first item)
-                  final separator = separatorBuilder;
-                  if (separator == null) {
-                    return buildItem(
-                        context, items[index], index, itemBuilder, keyBuilder);
-                  }
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      separator(context, index - 1),
-                      buildItem(context, items[index], index, itemBuilder,
-                          keyBuilder),
-                    ],
-                  );
-                }
-                return buildItem(
-                    context, items[index], index, itemBuilder, keyBuilder);
-              },
-              childCount: itemCount,
-            ),
-          ),
-          // Use declarative state property instead of business logic
-          // Footer display logic is now in PaginationStateExtension.shouldShowFooter
-          if (state.shouldShowFooter)
-            SliverToBoxAdapter(
-              child: buildFooterItem(
-                context,
-                hasMore: hasMore,
-                isAppending: isAppending,
-                hasAppendError: hasAppendError,
-                state: state,
-              ),
-            ),
-        ],
+    return SliverList(
+      delegate: createSliverDelegate(
+        builder: (context, index) {
+          if (hasSeparator && index > 0) {
+            // Return separator before item (except first item)
+            final separator = separatorBuilder;
+            if (separator == null) {
+              return buildItem(
+                  context, items[index], index, itemBuilder, keyBuilder);
+            }
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                separator(context, index - 1),
+                buildItem(
+                    context, items[index], index, itemBuilder, keyBuilder),
+              ],
+            );
+          }
+          return buildItem(
+              context, items[index], index, itemBuilder, keyBuilder);
+        },
+        childCount: itemCount,
       ),
     );
   }
